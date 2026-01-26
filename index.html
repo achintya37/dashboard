@@ -3,102 +3,45 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Academy Pro (Search & Call)</title>
+    <title>Academy Manager (Live Sync)</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     
     <style>
-        :root {
-            --primary: #2c3e50;
-            --accent: #3498db;
-            --success: #27ae60;
-            --danger: #c0392b;
-            --call: #0984e3; /* Color for call button */
-            --bg: #ecf0f1;
-            --white: #ffffff;
-        }
-
+        :root { --primary: #2c3e50; --accent: #2980b9; --success: #27ae60; --danger: #c0392b; --bg: #f5f6fa; }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Roboto', sans-serif; }
-        body { background-color: var(--bg); color: #333; padding: 20px; }
-        .container { max-width: 1250px; margin: 0 auto; }
-
+        body { background: var(--bg); padding: 20px; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        
         /* Header */
-        header {
-            background: var(--primary); color: white; padding: 20px;
-            border-radius: 10px; text-align: center; margin-bottom: 20px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        }
-
-        /* Stats */
-        .stats-grid {
-            display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px; margin-bottom: 25px;
-        }
-        .stat-card {
-            background: white; padding: 20px; border-radius: 8px;
-            border-left: 5px solid var(--accent);
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-        }
-        .stat-num { font-size: 1.5rem; font-weight: bold; color: var(--primary); }
-        .stat-label { font-size: 0.9rem; color: #7f8c8d; }
-
-        /* Search Bar & Forms */
-        .card {
-            background: white; padding: 25px; border-radius: 10px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.05); margin-bottom: 25px;
-        }
-        .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid #eee; padding-bottom: 10px; flex-wrap: wrap; gap: 10px; }
-        .card-title { font-size: 1.2rem; font-weight: bold; }
-
-        /* Search Input Style */
-        .search-box {
-            flex-grow: 1; max-width: 300px; position: relative;
-        }
-        .search-box input {
-            width: 100%; padding: 8px 12px; border: 2px solid #dfe6e9;
-            border-radius: 20px; outline: none; transition: 0.3s;
-        }
-        .search-box input:focus { border-color: var(--accent); }
-
-        .form-grid {
-            display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px;
-        }
-        .input-group label { display: block; font-size: 0.85rem; font-weight: bold; margin-bottom: 5px; }
-        .input-group input, .input-group select {
-            width: 100%; padding: 10px; border: 1px solid #bdc3c7; border-radius: 5px;
-        }
-
+        header { background: var(--primary); color: white; padding: 20px; text-align: center; border-radius: 8px; margin-bottom: 20px; }
+        
+        /* Cards & Forms */
+        .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 0.9rem; }
+        input, select { width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; }
+        
         /* Buttons */
-        .btn { padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; color: white; font-weight: bold; transition: 0.2s; }
-        .btn-add { background: var(--accent); width: 100%; margin-top: 20px; }
-        .btn-add:hover { background: #2980b9; }
-
-        .btn-sm { padding: 6px 10px; font-size: 0.85rem; margin-right: 4px; display: inline-flex; align-items: center; gap: 3px; text-decoration: none; border-radius: 4px; color: white; cursor: pointer; border: none; }
-        .btn-pay { background: var(--success); }
-        .btn-wa { background: #25D366; }
-        .btn-call { background: var(--call); } /* Blue Call Button */
-        .btn-del { background: var(--danger); }
+        .btn { padding: 10px 15px; border: none; cursor: pointer; color: white; border-radius: 4px; font-weight: bold; }
+        .btn-save { background: var(--accent); width: 100%; margin-top: 15px; }
+        .btn-pay { background: var(--success); padding: 5px 10px; font-size: 0.8rem; margin-right: 5px; }
+        .btn-call { background: #0984e3; padding: 5px 10px; font-size: 0.8rem; text-decoration: none; color: white; border-radius: 4px; margin-right: 5px; }
+        .btn-del { background: var(--danger); padding: 5px 10px; font-size: 0.8rem; }
 
         /* Table */
-        .table-wrap { overflow-x: auto; }
-        table { width: 100%; border-collapse: collapse; min-width: 900px; }
-        thead { background: #f8f9fa; border-bottom: 2px solid #dfe6e9; }
-        th { text-align: left; padding: 15px; font-size: 0.85rem; color: #636e72; }
-        td { padding: 15px; border-bottom: 1px solid #eee; vertical-align: top; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th { background: #eee; text-align: left; padding: 10px; font-size: 0.9rem; }
+        td { border-bottom: 1px solid #eee; padding: 10px; vertical-align: top; }
         
-        .total-fee-badge {
-            background: #e8f6f3; color: #16a085; padding: 4px 8px; 
-            border-radius: 4px; font-weight: bold; font-size: 0.9rem; display: inline-block; margin-bottom: 5px;
-        }
-        .breakdown { font-size: 0.8rem; color: #7f8c8d; line-height: 1.4; }
+        /* Search */
+        .search-box input { padding: 10px; border: 2px solid var(--accent); margin-bottom: 10px; border-radius: 20px; }
+
+        /* Loader */
+        .loader { display: none; margin-left: 10px; }
 
         /* Modal */
-        .modal {
-            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.5); z-index: 999; justify-content: center; align-items: center;
-        }
-        .modal-content { background: white; width: 90%; max-width: 450px; padding: 25px; border-radius: 10px; position: relative; }
-        .close { position: absolute; right: 20px; top: 15px; font-size: 20px; cursor: pointer; }
-
+        .modal { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); align-items:center; justify-content:center; }
+        .modal-content { background:white; padding:20px; width:90%; max-width:400px; border-radius:8px; }
     </style>
 </head>
 <body>
@@ -106,370 +49,242 @@
 <div class="container">
     <header>
         <h1>Student Fee Portal</h1>
-        <p>Search • Call • WhatsApp • Auto Calculations</p>
+        <p>✅ Connected to Google Sheet</p>
     </header>
 
-    <div class="stats-grid">
-        <div class="stat-card">
-            <div class="stat-num" id="statCount">0</div>
-            <div class="stat-label">Total Students</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-num" style="color:var(--success)" id="statCollected">0</div>
-            <div class="stat-label">Total Collected</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-num" style="color:var(--danger)" id="statDue">0</div>
-            <div class="stat-label">Total Outstanding</div>
-        </div>
-    </div>
-
     <div class="card">
-        <div class="card-header">
-            <div class="card-title">Add New Student</div>
-        </div>
+        <h3>Add New Student</h3>
         <form id="studentForm">
             <div class="form-grid">
-                <div class="input-group">
-                    <label>Student Name</label>
-                    <input type="text" id="name" required placeholder="John Doe">
-                </div>
-                <div class="input-group">
-                    <label>Batch / Class</label>
-                    <input type="text" id="batch" required placeholder="Class 10">
-                </div>
-                <div class="input-group">
-                    <label>Joining Date</label>
-                    <input type="date" id="joinDate" required>
-                </div>
-                <div class="input-group">
-                    <label>Phone (WhatsApp)</label>
-                    <input type="number" id="phone" required placeholder="91XXXXXXXX">
-                </div>
-
-                <div class="input-group">
-                    <label>Admission/Reg. Fee</label>
-                    <input type="number" id="admFee" value="0" required>
-                </div>
-                <div class="input-group">
-                    <label>Monthly Fee</label>
-                    <input type="number" id="monthlyFee" value="0" required>
-                </div>
-                <div class="input-group">
-                    <label>Course Duration (Months)</label>
-                    <input type="number" id="duration" value="12" required>
-                </div>
-
-                <div class="input-group">
-                    <label>Number of Exams</label>
-                    <input type="number" id="examCount" value="0" required>
-                </div>
-                <div class="input-group">
-                    <label>Fee Per Exam</label>
-                    <input type="number" id="examFeePer" value="0" required>
-                </div>
+                <div><label>Name</label><input type="text" id="name" required></div>
+                <div><label>Batch</label><input type="text" id="batch" required></div>
+                <div><label>Phone</label><input type="number" id="phone" required></div>
+                <div><label>Join Date</label><input type="date" id="joinDate" required></div>
+                
+                <div><label>Admission Fee</label><input type="number" id="admFee" value="0"></div>
+                <div><label>Monthly Fee</label><input type="number" id="monthlyFee" value="0"></div>
+                <div><label>Total Exams</label><input type="number" id="examCount" value="0"></div>
+                <div><label>Fee Per Exam</label><input type="number" id="examFeePer" value="0"></div>
+                <div><label>Duration (Months)</label><input type="number" id="duration" value="12"></div>
             </div>
-            <button type="submit" class="btn btn-add">Save Student</button>
+            <button type="submit" class="btn btn-save" id="saveBtn">Save Data <span id="loader">⏳</span></button>
         </form>
     </div>
 
     <div class="card">
-        <div class="card-header">
-            <div class="card-title">Student List</div>
-            <div class="search-box">
-                <input type="text" id="searchInput" placeholder="🔍 Search Name or Phone..." onkeyup="filterTable()">
-            </div>
-        </div>
-        <div class="table-wrap">
-            <table id="studentTable">
+        <h3>Student List</h3>
+        <input type="text" id="search" placeholder="🔍 Search Name or Phone..." onkeyup="renderTable()" style="width:100%; padding:10px; margin-bottom:10px; border:1px solid #ccc;">
+        
+        <div style="overflow-x:auto;">
+            <table id="table">
                 <thead>
                     <tr>
                         <th>Profile</th>
-                        <th>Total Course Value</th>
-                        <th>Paid Amount</th>
-                        <th>Due Breakdown</th>
-                        <th>Actions</th>
+                        <th>Total Fee</th>
+                        <th>Paid</th>
+                        <th>Status/Due</th>
+                        <th>Action</th>
                     </tr>
                 </thead>
-                <tbody id="tableBody">
-                    </tbody>
+                <tbody id="tbody"></tbody>
             </table>
         </div>
     </div>
 </div>
 
-<div id="paymentModal" class="modal">
+<div id="modal" class="modal">
     <div class="modal-content">
-        <span class="close" onclick="closeModal()">&times;</span>
-        <h3>Receive Payment</h3>
+        <h3>Take Payment</h3>
         <br>
-        <form id="paymentForm">
-            <input type="hidden" id="payId">
-            
-            <div class="input-group">
-                <label>Payment Type</label>
-                <select id="payType">
-                    <option value="Monthly Fee">Monthly Fee</option>
-                    <option value="Admission Fee">Admission Fee</option>
-                    <option value="Exam Fee">Exam Fee</option>
-                </select>
-            </div>
-            <br>
-            <div class="input-group">
-                <label>Amount</label>
-                <input type="number" id="payAmount" required>
-            </div>
-            <div id="suggestion" style="font-size:0.8rem; color:#888; margin-top:5px;"></div>
-            <br>
-            <button type="submit" class="btn btn-pay" style="width:100%">Confirm Payment</button>
-        </form>
+        <select id="payType" style="margin-bottom:10px;">
+            <option>Monthly Fee</option>
+            <option>Admission Fee</option>
+            <option>Exam Fee</option>
+        </select>
+        <input type="number" id="payAmount" placeholder="Amount">
+        <br><br>
+        <button onclick="submitPayment()" class="btn btn-save" style="margin-top:0; background:green;">Confirm</button>
+        <button onclick="document.getElementById('modal').style.display='none'" class="btn btn-del" style="margin-top:10px; width:100%;">Cancel</button>
     </div>
 </div>
 
 <script>
-    // --- 1. SETUP & STORAGE ---
-    const STORAGE_KEY = 'academy_pro_v6'; 
-    let students = [];
+    // ==========================================
+    // আপনার লিঙ্কটি এখানে সেট করা হয়েছে
+    // ==========================================
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyLOuJMPAfWf49AWp1BfXSwZYnQLtEfbX4a9ygivuPuTfRvXE49M-8nonJakBx06Zq-/exec"; 
+    // ==========================================
 
-    window.onload = function() {
+    let students = JSON.parse(localStorage.getItem('students_db_final')) || [];
+    let currentId = null;
+
+    // Load Data
+    window.onload = () => {
         document.getElementById('joinDate').valueAsDate = new Date();
-        loadData();
+        document.getElementById('loader').style.display = 'none';
+        renderTable();
     };
 
-    function loadData() {
-        try {
-            const data = localStorage.getItem(STORAGE_KEY);
-            if (data) {
-                students = JSON.parse(data);
-                renderTable(students); // Initially render all
-            }
-        } catch (e) {
-            console.error("Error loading data", e);
-        }
-    }
-
-    function saveData() {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(students));
-        // Re-render with current search term to keep view consistent
-        filterTable(); 
-    }
-
-    // --- 2. CALCULATIONS ---
-    function getFinancials(s) {
-        const monthlyFee = Number(s.monthlyFee) || 0;
-        const duration = Number(s.duration) || 0;
-        const admFee = Number(s.admFee) || 0;
-        const examCount = Number(s.examCount) || 0;
-        const examFeePer = Number(s.examFeePer) || 0;
-        
-        const totalTuitionFee = monthlyFee * duration;
-        const totalExamFee = examCount * examFeePer;
-        const grandTotalFee = admFee + totalTuitionFee + totalExamFee;
-
-        const paidAdm = s.payments.filter(p => p.type === 'Admission Fee').reduce((a, b) => a + b.amount, 0);
-        const paidExam = s.payments.filter(p => p.type === 'Exam Fee').reduce((a, b) => a + b.amount, 0);
-        const paidTuition = s.payments.filter(p => p.type === 'Monthly Fee').reduce((a, b) => a + b.amount, 0);
-        const totalPaid = paidAdm + paidExam + paidTuition;
-
-        const joinDate = new Date(s.joinDate);
-        const today = new Date();
-        
-        let monthsPassed = (today.getFullYear() - joinDate.getFullYear()) * 12;
-        monthsPassed -= joinDate.getMonth();
-        monthsPassed += today.getMonth();
-        let monthsDueCount = monthsPassed + 1; 
-        
-        if (monthsDueCount > duration) monthsDueCount = duration;
-        if (monthsDueCount < 0) monthsDueCount = 0;
-
-        const currentTuitionExpected = monthsDueCount * monthlyFee;
-        
-        let dueAdm = admFee - paidAdm;
-        let dueExam = totalExamFee - paidExam;
-        let dueTuition = currentTuitionExpected - paidTuition;
-
-        if (dueAdm < 0) dueAdm = 0;
-        if (dueExam < 0) dueExam = 0;
-        if (dueTuition < 0) dueTuition = 0;
-
-        const currentTotalDue = dueAdm + dueExam + dueTuition;
-
-        return {
-            grandTotalFee, totalPaid, currentTotalDue,
-            dueAdm, dueExam, dueTuition,
-            monthsDueCount, duration, monthlyFee, admFee, totalExamFee
-        };
-    }
-
-    // --- 3. ADD STUDENT ---
-    document.getElementById('studentForm').addEventListener('submit', function(e) {
+    // Save Student
+    document.getElementById('studentForm').addEventListener('submit', (e) => {
         e.preventDefault();
+        
+        const btn = document.getElementById('saveBtn');
+        const loader = document.getElementById('loader');
+        
+        // Disable button
+        btn.disabled = true;
+        loader.style.display = 'inline';
+        btn.innerHTML = "Saving to Google Sheet...";
 
-        const newStudent = {
+        const s = {
             id: Date.now(),
             name: document.getElementById('name').value,
             batch: document.getElementById('batch').value,
-            joinDate: document.getElementById('joinDate').value,
             phone: document.getElementById('phone').value,
-            admFee: document.getElementById('admFee').value,
-            monthlyFee: document.getElementById('monthlyFee').value,
-            duration: document.getElementById('duration').value,
-            examCount: document.getElementById('examCount').value,
-            examFeePer: document.getElementById('examFeePer').value,
+            joinDate: document.getElementById('joinDate').value,
+            admFee: Number(document.getElementById('admFee').value),
+            monthlyFee: Number(document.getElementById('monthlyFee').value),
+            examCount: Number(document.getElementById('examCount').value),
+            examFeePer: Number(document.getElementById('examFeePer').value),
+            duration: Number(document.getElementById('duration').value),
             payments: []
         };
 
-        students.push(newStudent);
-        saveData();
-        e.target.reset();
-        document.getElementById('joinDate').valueAsDate = new Date();
-        alert("Student Saved Successfully!");
+        // Send to Google Sheet
+        fetch(SCRIPT_URL, {
+            method: "POST",
+            body: JSON.stringify(s)
+        })
+        .then(res => res.text())
+        .then(data => {
+            console.log("Success:", data);
+            
+            // Save Locally
+            students.push(s);
+            localStorage.setItem('students_db_final', JSON.stringify(students));
+            
+            // Reset UI
+            e.target.reset();
+            document.getElementById('joinDate').valueAsDate = new Date();
+            renderTable();
+            alert("✅ Data Saved to Google Sheet Successfully!");
+        })
+        .catch(err => {
+            console.error("Error:", err);
+            alert("⚠️ Saved locally, but Sheet update failed.");
+            students.push(s);
+            localStorage.setItem('students_db_final', JSON.stringify(students));
+            renderTable();
+        })
+        .finally(() => {
+            btn.disabled = false;
+            loader.style.display = 'none';
+            btn.innerHTML = "Save Data";
+        });
     });
 
-    // --- 4. SEARCH FUNCTION ---
-    function filterTable() {
-        const query = document.getElementById('searchInput').value.toLowerCase();
+    // Calculations
+    function getDue(s) {
+        const totalExamFee = s.examCount * s.examFeePer;
+        const totalTuition = s.monthlyFee * s.duration;
+        const grandTotal = s.admFee + totalTuition + totalExamFee;
+
+        const paidAdm = s.payments.filter(p=>p.type=='Admission Fee').reduce((a,b)=>a+b.amount,0);
+        const paidExam = s.payments.filter(p=>p.type=='Exam Fee').reduce((a,b)=>a+b.amount,0);
+        const paidMon = s.payments.filter(p=>p.type=='Monthly Fee').reduce((a,b)=>a+b.amount,0);
+        const totalPaid = paidAdm + paidExam + paidMon;
+
+        // Due Logic
+        const joinDate = new Date(s.joinDate);
+        const today = new Date();
+        let months = (today.getFullYear() - joinDate.getFullYear()) * 12;
+        months -= joinDate.getMonth();
+        months += today.getMonth() + 1;
+        if(months > s.duration) months = s.duration;
         
-        // Filter students array based on name OR phone
-        const filteredStudents = students.filter(s => 
-            s.name.toLowerCase().includes(query) || 
-            s.phone.includes(query)
-        );
+        let dueMon = (months * s.monthlyFee) - paidMon;
+        let dueAdm = s.admFee - paidAdm;
+        let dueExam = totalExamFee - paidExam;
         
-        renderTable(filteredStudents);
+        if(dueMon < 0) dueMon = 0; if(dueAdm < 0) dueAdm = 0; if(dueExam < 0) dueExam = 0;
+        
+        return { grandTotal, totalPaid, dueMon, dueAdm, dueExam, totalDue: dueMon+dueAdm+dueExam };
     }
 
-    // --- 5. RENDER TABLE ---
-    function renderTable(dataToRender) {
-        const tbody = document.getElementById('tableBody');
-        tbody.innerHTML = ''; 
+    // Render Table
+    function renderTable() {
+        const tbody = document.getElementById('tbody');
+        const search = document.getElementById('search').value.toLowerCase();
+        tbody.innerHTML = '';
 
-        let totalCollected = 0;
-        let totalDue = 0;
+        const filtered = students.filter(s => s.name.toLowerCase().includes(search) || s.phone.includes(search));
 
-        // Calculate stats based on FULL list, not filtered list
-        students.forEach(s => {
-             const f = getFinancials(s);
-             totalCollected += f.totalPaid;
-             totalDue += f.currentTotalDue;
-        });
-
-        // Update Stats UI
-        document.getElementById('statCount').innerText = students.length;
-        document.getElementById('statCollected').innerText = totalCollected;
-        document.getElementById('statDue').innerText = totalDue;
-
-        // Render Rows (Filtered)
-        if (dataToRender.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:20px;">No students found matching your search.</td></tr>';
-            return;
-        }
-
-        dataToRender.forEach(s => {
-            const fin = getFinancials(s);
+        filtered.slice().reverse().forEach(s => {
+            const cal = getDue(s);
             
-            const tr = document.createElement('tr');
-            
-            let breakdownHtml = '';
-            if(fin.currentTotalDue <= 0) {
-                breakdownHtml = '<span style="color:green; font-weight:bold">✅ Fully Paid</span>';
-            } else {
-                if(fin.dueAdm > 0) breakdownHtml += `<div>• Reg: ${fin.dueAdm}</div>`;
-                if(fin.dueExam > 0) breakdownHtml += `<div>• Exam: ${fin.dueExam}</div>`;
-                if(fin.dueTuition > 0) breakdownHtml += `<div>• Monthly: ${fin.dueTuition}</div>`;
-                breakdownHtml += `<div style="font-weight:bold; color:#c0392b; margin-top:5px;">Due: ${fin.currentTotalDue}</div>`;
+            let status = '';
+            if(cal.totalDue <= 0) status = '<span style="color:green; font-weight:bold">Paid</span>';
+            else {
+                if(cal.dueAdm > 0) status += `<div>Reg: ${cal.dueAdm}</div>`;
+                if(cal.dueExam > 0) status += `<div>Exm: ${cal.dueExam}</div>`;
+                if(cal.dueMon > 0) status += `<div>Mo: ${cal.dueMon}</div>`;
+                status += `<div style="color:red; font-weight:bold">Due: ${cal.totalDue}</div>`;
             }
 
-            // Call Link Logic
-            const callLink = `tel:${s.phone}`;
-
+            const tr = document.createElement('tr');
             tr.innerHTML = `
+                <td><b>${s.name}</b><br><small>${s.batch}</small><br><small>${s.phone}</small></td>
+                <td>${cal.grandTotal}</td>
+                <td style="color:green; font-weight:bold">${cal.totalPaid}</td>
+                <td style="font-size:0.85rem">${status}</td>
                 <td>
-                    <div style="font-weight:bold">${s.name}</div>
-                    <div style="font-size:0.8rem; color:#666">${s.batch}</div>
-                    <div style="font-size:0.8rem">📞 ${s.phone}</div>
-                </td>
-                <td>
-                    <div class="total-fee-badge">Total: ${fin.grandTotalFee}</div>
-                    <div class="breakdown">
-                        Reg: ${fin.admFee} | Exam: ${fin.totalExamFee}<br>
-                        Tuition: ${fin.monthlyFee} x ${fin.duration}m
-                    </div>
-                </td>
-                <td style="font-weight:bold; color:#27ae60; font-size:1.1rem;">
-                    ${fin.totalPaid}
-                </td>
-                <td class="breakdown">
-                    ${breakdownHtml}
-                </td>
-                <td>
-                    <div style="display:flex; gap:5px; flex-wrap:wrap;">
-                        <button class="btn-sm btn-pay" onclick="openPayment(${s.id})">💵 Pay</button>
-                        <a href="${callLink}" class="btn-sm btn-call">📞 Call</a>
-                        ${fin.currentTotalDue > 0 ? `<button class="btn-sm btn-wa" onclick="sendWhatsApp(${s.id})">💬 Msg</button>` : ''}
-                        <button class="btn-sm btn-del" onclick="deleteStudent(${s.id})">❌</button>
-                    </div>
+                    <button class="btn btn-pay" onclick="openPay(${s.id})">Pay</button>
+                    <a href="tel:${s.phone}" class="btn btn-call">Call</a>
+                    <button class="btn btn-del" onclick="del(${s.id})">Del</button>
+                    ${cal.totalDue > 0 ? `<button class="btn btn-pay" style="background:#25D366; margin-top:5px" onclick="wa(${s.id})">Msg</button>` : ''}
                 </td>
             `;
             tbody.appendChild(tr);
         });
     }
 
-    // --- 6. MODAL & PAYMENTS ---
-    let currentId = null;
-    const modal = document.getElementById('paymentModal');
-
-    function openPayment(id) {
-        currentId = id;
-        modal.style.display = 'flex';
-        document.getElementById('payAmount').value = '';
-        document.getElementById('suggestion').innerText = '';
-    }
-
-    function closeModal() {
-        modal.style.display = 'none';
-        currentId = null;
-    }
-
-    document.getElementById('paymentForm').addEventListener('submit', function(e) {
-        e.preventDefault();
-        if(!currentId) return;
-
-        const student = students.find(s => s.id === currentId);
-        const amount = Number(document.getElementById('payAmount').value);
+    // Payment Logic
+    function openPay(id) { currentId = id; document.getElementById('modal').style.display='flex'; }
+    
+    function submitPayment() {
+        const amt = Number(document.getElementById('payAmount').value);
         const type = document.getElementById('payType').value;
-
-        if(amount > 0) {
-            student.payments.push({
-                date: new Date().toISOString(),
-                amount: amount,
-                type: type
-            });
-            saveData(); // This will also re-render filtered table
-            closeModal();
+        if(amt > 0) {
+            const s = students.find(x=>x.id==currentId);
+            s.payments.push({date: new Date(), amount: amt, type: type});
+            localStorage.setItem('students_db_final', JSON.stringify(students));
+            document.getElementById('modal').style.display='none';
+            document.getElementById('payAmount').value = '';
+            renderTable();
             
             // Receipt
-            const fin = getFinancials(student);
-            const msg = `PAYMENT RECEIPT\nName: ${student.name}\nPaid: ${amount} (${type})\nRemaining Due: ${fin.currentTotalDue}\nTotal Paid: ${fin.totalPaid}`;
-            window.open(`https://wa.me/${student.phone}?text=${encodeURIComponent(msg)}`, '_blank');
+            const cal = getDue(s);
+            const msg = `Receipt: ${s.name}\nPaid: ${amt} (${type})\nDue: ${cal.totalDue}`;
+            window.open(`https://wa.me/${s.phone}?text=${encodeURIComponent(msg)}`, '_blank');
         }
-    });
+    }
 
-    // --- 7. ACTIONS ---
-    function sendWhatsApp(id) {
-        const s = students.find(st => st.id === id);
-        const fin = getFinancials(s);
-        const msg = `Dear ${s.name},\nYour total course fee is ${fin.grandTotalFee}.\nCurrently Pending: ${fin.currentTotalDue}\nPlease clear your dues.\nThank you.`;
+    function wa(id) {
+        const s = students.find(x=>x.id==id);
+        const cal = getDue(s);
+        const msg = `Dear ${s.name}, Your total due is ${cal.totalDue}. Please pay.`;
         window.open(`https://wa.me/${s.phone}?text=${encodeURIComponent(msg)}`, '_blank');
     }
 
-    function deleteStudent(id) {
-        if(confirm("Delete this student permanently?")) {
-            students = students.filter(s => s.id !== id);
-            saveData();
+    function del(id) {
+        if(confirm('Delete?')) {
+            students = students.filter(x=>x.id!=id);
+            localStorage.setItem('students_db_final', JSON.stringify(students));
+            renderTable();
         }
     }
-
 </script>
+
 </body>
 </html>
