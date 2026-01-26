@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Academy Manager (Super Safe Mode)</title>
+    <title>Academy Manager (Live Sync)</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     
     <style>
@@ -39,7 +39,7 @@
 <div class="container">
     <header>
         <h1>Student Fee Portal</h1>
-        <p>✅ Safe Mode: No Data Loss</p>
+        <p>✅ Google Sheet Connected</p>
     </header>
 
     <div class="card">
@@ -100,13 +100,12 @@
 
 <script>
     // ==========================================
-    // আপনার ডিপ্লয়মেন্ট লিঙ্ক
+    // আপনার দেওয়া লিঙ্কটি এখানে সেট করা হয়েছে
     // ==========================================
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyLOuJMPAfWf49AWp1BfXSwZYnQLtEfbX4a9ygivuPuTfRvXE49M-8nonJakBx06Zq-/exec"; 
     // ==========================================
 
-    // ডাটাবেস কি নাম পরিবর্তন করা হয়েছে যাতে ফ্রেশ ডাটা লোড হয়
-    let students = JSON.parse(localStorage.getItem('academy_data_safe_v1')) || [];
+    let students = JSON.parse(localStorage.getItem('academy_final_v10')) || [];
     let currentId = null;
 
     window.onload = () => {
@@ -115,14 +114,14 @@
         renderTable();
     };
 
-    // --- SAVE LOGIC (IMPROVED) ---
+    // --- SAVE LOGIC ---
     document.getElementById('studentForm').addEventListener('submit', (e) => {
-        e.preventDefault(); // রিফ্রেশ বন্ধ করা হলো
+        e.preventDefault();
 
         const btn = document.getElementById('saveBtn');
         const loader = document.getElementById('loader');
         
-        // 1. ডাটা কালেক্ট করা
+        // 1. ডাটা তৈরি করা
         const s = {
             id: Date.now(),
             name: document.getElementById('name').value,
@@ -137,34 +136,31 @@
             payments: []
         };
 
-        // 2. সবার আগে লোকাল স্টোরেজে সেভ (যাতে ডাটা না হারায়)
+        // 2. আগে লোকাল স্টোরেজে সেভ (Safety First)
         students.push(s);
-        saveLocally();
+        localStorage.setItem('academy_final_v10', JSON.stringify(students));
         
-        // UI আপডেট করা (তাত্ক্ষণিক)
+        // UI আপডেট
         e.target.reset();
         document.getElementById('joinDate').valueAsDate = new Date();
         renderTable();
-        alert("✅ Data Saved Locally! Sending to Cloud...");
+        alert("✅ Data Saved Locally! Sending to Google Sheet in background...");
 
-        // 3. ব্যাকগ্রাউন্ডে গুগল শিটে পাঠানো (NO-CORS Mode)
+        // 3. ব্যাকগ্রাউন্ডে গুগল শিটে পাঠানো
         btn.disabled = true;
         loader.style.display = 'inline';
 
         fetch(SCRIPT_URL, {
             method: "POST",
-            mode: "no-cors", // এটি খুবই গুরুত্বপূর্ণ
-            headers: {
-                "Content-Type": "text/plain;charset=utf-8",
-            },
+            mode: "no-cors", // ডাটা পাঠানো নিশ্চিত করে
+            headers: { "Content-Type": "text/plain" },
             body: JSON.stringify(s)
         })
         .then(() => {
-            console.log("Sent to Google Sheet (Background)");
+            console.log("Sent to Google Sheet");
         })
         .catch(err => {
             console.error("Cloud Error:", err);
-            // ডাটা হারাবে না কারণ আমরা আগেই লোকাল সেভ করেছি
         })
         .finally(() => {
             btn.disabled = false;
@@ -172,11 +168,7 @@
         });
     });
 
-    function saveLocally() {
-        localStorage.setItem('academy_data_safe_v1', JSON.stringify(students));
-    }
-
-    // --- CALCULATIONS & TABLE ---
+    // --- CALCULATIONS ---
     function getDue(s) {
         const totalExamFee = s.examCount * s.examFeePer;
         const totalTuition = s.monthlyFee * s.duration;
@@ -238,7 +230,6 @@
         });
     }
 
-    // --- PAYMENT & ACTIONS ---
     function openPay(id) { currentId = id; document.getElementById('modal').style.display='flex'; }
     
     function submitPayment() {
@@ -247,7 +238,7 @@
         if(amt > 0) {
             const s = students.find(x=>x.id==currentId);
             s.payments.push({date: new Date(), amount: amt, type: type});
-            saveLocally();
+            localStorage.setItem('academy_final_v10', JSON.stringify(students));
             document.getElementById('modal').style.display='none';
             document.getElementById('payAmount').value = '';
             renderTable();
@@ -268,7 +259,7 @@
     function del(id) {
         if(confirm('Delete?')) {
             students = students.filter(x=>x.id!=id);
-            saveLocally();
+            localStorage.setItem('academy_final_v10', JSON.stringify(students));
             renderTable();
         }
     }
