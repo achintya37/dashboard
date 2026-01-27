@@ -412,7 +412,7 @@
     }
 
     // --- 7. DASHBOARD & CHART ---
-    function updateDashboard() {
+        function updateDashboard() {
         try {
             let totalDue = 0, totalCollected = 0;
             let dueAdm = 0, dueMon = 0, dueExam = 0;
@@ -425,4 +425,92 @@
                 
                 dueAdm += Math.max(0, f.breakdown.admDue);
                 dueMon += Math.max(0, f.breakdown.monDue);
-                d
+                dueExam += Math.max(0, f.breakdown.examDue);
+
+                (s.payments || []).forEach(p => {
+                    const d = new Date(p.date);
+                    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+                    if(!monthlyData[key]) monthlyData[key] = 0;
+                    monthlyData[key] += p.amount;
+                });
+            });
+
+            document.getElementById('d_students').innerText = students.length;
+            document.getElementById('d_collected').innerText = '₹' + totalCollected;
+            document.getElementById('d_due').innerText = '₹' + totalDue;
+            document.getElementById('d_due_adm').innerText = '₹' + dueAdm;
+            document.getElementById('d_due_mon').innerText = '₹' + dueMon;
+            document.getElementById('d_due_exam').innerText = '₹' + dueExam;
+
+            // Chart Logic (Safe Check)
+            const ctx = document.getElementById('financeChart');
+            if (ctx && typeof Chart !== 'undefined') {
+                const context = ctx.getContext('2d');
+                if(financeChart) financeChart.destroy();
+
+                const sortedKeys = Object.keys(monthlyData).sort();
+                const labels = sortedKeys.map(k => {
+                    const [y, m] = k.split('-');
+                    return new Date(y, m-1).toLocaleString('default', { month: 'short', year: '2-digit' });
+                });
+                const data = sortedKeys.map(k => monthlyData[k]);
+
+                const gradient = context.createLinearGradient(0,0,0,400);
+                gradient.addColorStop(0, '#0ea5e9'); gradient.addColorStop(1, '#0284c7');
+
+                financeChart = new Chart(context, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [{ label: 'Collection', data: data, backgroundColor: gradient, borderRadius: 6 }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false } },
+                        scales: { y: { beginAtZero: true }, x: { grid: { display: false } } }
+                    }
+                });
+            }
+        } catch (err) {
+            console.log("Chart Error (Ignored):", err);
+        }
+    }
+
+    // --- 8. ACTIONS ---
+    function openPay(id) { currentId = id; document.getElementById('modal').style.display='flex'; }
+    
+    function submitPay() {
+        const amt = Number(document.getElementById('payAmount').value);
+        const type = document.getElementById('payType').value;
+        if(amt > 0 && currentId) {
+            const s = students.find(x => x.id === currentId);
+            s.payments.push({ date: new Date().toISOString(), amount: amt, type: type });
+            saveData();
+            document.getElementById('modal').style.display='none';
+            document.getElementById('payAmount').value = '';
+
+            // Professional Bill
+            const f = getFinance(s);
+            const dateStr = new Date().toLocaleDateString('en-IN');
+            const msg = `🧾 *OFFICIAL RECEIPT*\n------------------\n🎓 *TIKARKHANJI JNYCTSD*\n------------------\nName: ${s.name}\nBatch: ${s.batch}\nDate: ${dateStr}\n\n💰 *Paid: ₹${amt}*\n📌 Type: ${type}\n\n📉 *Remaining Due: ₹${f.due}*\n------------------\nThank you!`;
+            window.open(`https://wa.me/${s.phone}?text=${encodeURIComponent(msg)}`, '_blank');
+        }
+    }
+
+    function sendReminder(id) {
+        const s = students.find(x => x.id === id);
+        const f = getFinance(s);
+        let breakdownTxt = "";
+        if(f.breakdown.admDue > 0) breakdownTxt += `• Admission: ₹${f.breakdown.admDue}\n`;
+        if(f.breakdown.monDue > 0) breakdownTxt += `• Monthly: ₹${f.breakdown.monDue}\n`;
+        if(f.breakdown.examDue > 0) breakdownTxt += `• Exam Fee: ₹${f.breakdown.examDue}\n`;
+
+        const msg = `⚠️ *PAYMENT REMINDER*\nDear ${s.name},\nPending fees at TIKARKHANJI JNYCTSD:\n\n${breakdownTxt}------------------\n📉 *TOTAL DUE: ₹${f.due}*\n------------------\nPlease pay soon.`;
+        window.open(`https://wa.me/${s.phone}?text=${encodeURIComponent(msg)}`, '_blank');
+    }
+
+    function del(id) { if(confirm("Delete Student?")) { students = students.filter(x=>x.id!==id); saveData(); } }
+</script>
+</body>
+</html>
