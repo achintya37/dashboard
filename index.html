@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>TIKARKHANJI JNYCTSD - Admin</title>
+    <title>TIKARKHANJI JNYCTSD - Admin Pro</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
@@ -44,12 +44,12 @@
         .stat-val { font-size: 1.8rem; font-weight: 700; color: var(--text); margin-top: 5px; }
         .stat-label { font-size: 0.85rem; font-weight: 600; color: #6b7280; text-transform: uppercase; }
 
-        /* Cards & Inputs */
+        /* Content & Form */
         .content-card { background: white; padding: 25px; border-radius: 16px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); margin-bottom: 25px; }
         .input-box, select { width: 100%; padding: 12px 15px; border: 2px solid #e5e7eb; border-radius: 10px; margin-bottom: 15px; outline: none; background: #fff; font-size: 0.95rem; }
         .btn { width: 100%; padding: 14px; border: none; border-radius: 10px; font-weight: 600; color: white; cursor: pointer; background: var(--primary); font-size: 1rem; }
         
-        /* Table & Toggles */
+        /* Table & Actions */
         table { width: 100%; border-collapse: collapse; min-width: 700px; }
         th { background: #f9fafb; padding: 15px; text-align: left; font-size: 0.8rem; font-weight: 700; color: #6b7280; border-bottom: 2px solid #e5e7eb; }
         td { padding: 15px; border-bottom: 1px solid #f3f4f6; font-size: 0.95rem; vertical-align: middle; }
@@ -58,10 +58,11 @@
         .toggle-btn { padding: 8px 15px; border-radius: 20px; border: 1px solid #e5e7eb; background: white; cursor: pointer; font-size: 0.85rem; font-weight: 600; color: #6b7280; }
         .toggle-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
 
-        /* Action Buttons */
         .action-btn { width: 34px; height: 34px; border-radius: 8px; border: none; color: white; cursor: pointer; margin-right: 5px; display: inline-flex; align-items: center; justify-content: center; }
         .btn-pay { background: var(--success); }
+        .btn-wa { background: #25D366; }
         .btn-drop { background: #64748b; }
+        .btn-restore { background: #2563eb; }
         .btn-del { background: #fee2e2; color: var(--danger); } 
         .btn-del:hover { background: var(--danger); color: white; }
 
@@ -88,7 +89,7 @@
             <button class="google-btn" onclick="googleLogin()">
                 <i class="fab fa-google"></i> Login with Google
             </button>
-            <div id="loader" style="display:none; margin-top:10px; color:#6b7280;">Authenticating...</div>
+            <div id="loader" style="display:none; margin-top:10px; color:#6b7280; font-size:0.8rem;">Connecting to Database...</div>
             <p id="login-status" style="margin-top: 15px; color: red; font-size: 0.8rem;"></p>
         </div>
     </div>
@@ -178,7 +179,6 @@
 
         <div id="students" class="section">
             <h2 style="margin-bottom:20px">📋 Student Management</h2>
-            
             <div class="content-card">
                 <div class="view-toggle">
                     <button class="toggle-btn active" id="btn-view-active" onclick="switchStudentView('active')">Active Students</button>
@@ -186,7 +186,6 @@
                 </div>
 
                 <input type="text" id="search" placeholder="🔍 Search..." onkeyup="renderTable()" class="input-box">
-                
                 <div style="overflow-x:auto">
                     <table id="table">
                         <thead>
@@ -240,7 +239,6 @@
                 </div>
             </div>
         </div>
-
     </div>
 
     <div id="modal" class="modal">
@@ -258,17 +256,18 @@
     </div>
 
 <script>
-    // 🔥🔥 STEP 1: Paste Your Firebase Config Here 🔥🔥
+    // 🔥🔥 FIXED CONFIG (From Your Screenshot) 🔥🔥
     const firebaseConfig = {
-        apiKey: "YOUR_API_KEY_HERE",
+        apiKey: "AIzaSyCUmRYc8WtQP3LW_85i5Czore9YjWw0yLU",
         authDomain: "tikarkhanjijnyctsd.firebaseapp.com",
         databaseURL: "https://tikarkhanjijnyctsd-default-rtdb.firebaseio.com",
         projectId: "tikarkhanjijnyctsd",
-        storageBucket: "tikarkhanjijnyctsd.appspot.com",
+        storageBucket: "tikarkhanjijnyctsd.firebasestorage.app",
         messagingSenderId: "513267646081",
         appId: "1:513267646081:web:1b60262e26e5e6dcef9780"
     };
 
+    // Initialize
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     const db = firebase.database();
@@ -280,15 +279,15 @@
     let currentId = null;
     let studentViewMode = 'active';
 
-    // --- AUTH ---
+    // --- AUTHENTICATION ---
     function googleLogin() {
         document.getElementById('loader').style.display = 'block';
         const provider = new firebase.auth.GoogleAuthProvider();
         auth.signInWithPopup(provider).catch(err => {
             document.getElementById('loader').style.display = 'none';
             document.getElementById('login-status').innerText = err.message;
-            if(err.code === 'auth/unauthorized-domain') {
-                alert("🔴 AUTH ERROR: Please add this domain to Firebase Console > Authentication > Settings > Authorized Domains.");
+            if(err.code === 'auth/api-key-not-valid') {
+                alert("CRITICAL ERROR: API Key Invalid. Please use the code provided in this response.");
             }
         });
     }
@@ -370,7 +369,7 @@
         db.ref('students').push(s);
         e.target.reset();
         setDefaults();
-        alert("Student Added!");
+        alert("Student Added Successfully!");
         navigate('students');
     });
 
@@ -383,7 +382,7 @@
     }
 
     function markDropout(id) {
-        if(confirm("Confirm Drop-Out?\nStudent will be moved to Dropout List.")) {
+        if(confirm("Mark as Dropout?\nStudent will be moved to Dropout List.")) {
             db.ref('students/' + id).update({ status: 'dropout' });
         }
     }
@@ -395,7 +394,7 @@
     }
 
     function deleteStudent(id) {
-        if(confirm("⚠️ DELETE PERMANENTLY?\nThis action cannot be undone!")) {
+        if(confirm("⚠️ PERMANENTLY DELETE?\nThis cannot be undone!")) {
             db.ref('students/' + id).remove();
         }
     }
@@ -454,7 +453,7 @@
         return { paid, currentDue, totalProjected };
     }
 
-    // --- RENDER TABLE ---
+    // --- RENDER TABLE (With Professional Messages) ---
     function renderTable() {
         const tbody = document.getElementById('tbody');
         const search = document.getElementById('search').value.toLowerCase();
@@ -474,23 +473,27 @@
             const textC = s.type==='senior' ? '#7c3aed' : '#0284c7';
 
             let buttons = '';
+            
+            // PROFESSIONAL WHATSAPP REMINDER
+            const reminderMsg = `⚠️ *FEE REMINDER*\n--------------------------------\n🎓 *TIKARKHANJI JNYCTSD*\n--------------------------------\n👤 Student: *${s.name}*\n📂 Batch: ${s.batch}\n\n📉 *Pending Due: ₹${f.currentDue}*\n\nYour fees are overdue. Please clear them to avoid late charges.\n--------------------------------\n🙏 Thank You`;
+
             if(studentViewMode === 'active') {
                 buttons = `
-                    <button class="action-btn btn-pay" onclick="openPay('${s.id}')"><i class="fas fa-plus"></i></button>
-                    <a href="https://wa.me/${s.phone}?text=${encodeURIComponent(`*FEE REMINDER*\nDear ${s.name},\nYour pending due is ₹${f.currentDue}.\nPlease pay soon.`)}" target="_blank" class="action-btn" style="background:#25D366"><i class="fab fa-whatsapp"></i></a>
-                    <button class="action-btn btn-drop" onclick="markDropout('${s.id}')"><i class="fas fa-user-slash"></i></button>
-                    <button class="action-btn btn-del" onclick="deleteStudent('${s.id}')"><i class="fas fa-trash"></i></button>
+                    <button class="action-btn btn-pay" onclick="openPay('${s.id}')" title="Pay"><i class="fas fa-plus"></i></button>
+                    <a href="https://wa.me/${s.phone}?text=${encodeURIComponent(reminderMsg)}" target="_blank" class="action-btn btn-wa" title="Send Reminder"><i class="fab fa-whatsapp"></i></a>
+                    <button class="action-btn btn-drop" onclick="markDropout('${s.id}')" title="Dropout"><i class="fas fa-user-slash"></i></button>
+                    <button class="action-btn btn-del" onclick="deleteStudent('${s.id}')" title="Delete"><i class="fas fa-trash"></i></button>
                 `;
             } else {
                 buttons = `
-                    <button class="action-btn" style="background:#2563eb" onclick="restoreStudent('${s.id}')"><i class="fas fa-undo"></i></button>
-                    <button class="action-btn btn-del" onclick="deleteStudent('${s.id}')"><i class="fas fa-trash"></i></button>
+                    <button class="action-btn btn-restore" onclick="restoreStudent('${s.id}')" title="Restore"><i class="fas fa-undo"></i></button>
+                    <button class="action-btn btn-del" onclick="deleteStudent('${s.id}')" title="Permanent Delete"><i class="fas fa-trash"></i></button>
                 `;
             }
 
             tbody.innerHTML += `
                 <tr>
-                    <td><b>${s.name}</b> <span class="badge" style="background:${color}; color:${textC}">${badge}</span><br><small style="color:#6b7280">${s.batch}</small></td>
+                    <td><b>${s.name}</b> <span style="background:${color}; color:${textC}; padding:2px 6px; border-radius:4px; font-size:0.75rem;">${badge}</span><br><small style="color:#6b7280">${s.batch}</small></td>
                     <td>
                         <div style="font-weight:700; color:${f.currentDue > 0 ? 'var(--danger)' : 'var(--success)'}">
                             ${f.currentDue > 0 ? 'Due: ₹'+f.currentDue : 'Paid'}
@@ -535,7 +538,7 @@
         pEl.style.color = profit >= 0 ? 'var(--success)' : 'var(--danger)';
     }
 
-    // --- PAYMENTS ---
+    // --- PAYMENTS (With Professional Receipt) ---
     function openPay(id) { currentId = id; document.getElementById('modal').style.display='flex'; }
     function submitPay() {
         const amt = Number(document.getElementById('payAmount').value);
@@ -547,10 +550,11 @@
             document.getElementById('modal').style.display='none';
             document.getElementById('payAmount').value='';
             
-            // PROFESSIONAL RECEIPT
+            // PROFESSIONAL RECEIPT MESSAGE
             const dateStr = new Date().toLocaleDateString('en-IN');
-            const msg = `🧾 *PAYMENT RECEIPT*\n--------------------------------\n🎓 *TIKARKHANJI JNYCTSD*\n--------------------------------\n👤 Name: *${s.name}*\n📂 Batch: ${s.batch}\n📅 Date: ${dateStr}\n\n💰 *Received: ₹${amt}*\n📌 Type: ${type}\n\n✅ *Status: Paid*\n--------------------------------\nThank you for your payment! 🙏`;
-            window.open(`https://wa.me/${s.phone}?text=${encodeURIComponent(msg)}`, '_blank');
+            const receiptMsg = `🧾 *PAYMENT RECEIPT*\n--------------------------------\n🎓 *TIKARKHANJI JNYCTSD*\n--------------------------------\n👤 Name: *${s.name}*\n📂 Batch: ${s.batch}\n📅 Date: ${dateStr}\n\n💰 *Received: ₹${amt}*\n📌 Type: ${type}\n\n✅ *Status: Paid*\n--------------------------------\nThank you for your payment! 🙏`;
+            
+            window.open(`https://wa.me/${s.phone}?text=${encodeURIComponent(receiptMsg)}`, '_blank');
         }
     }
 
