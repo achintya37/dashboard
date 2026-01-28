@@ -30,8 +30,6 @@
         .brand h1 { font-size: 1.3rem; font-weight: 800; color: var(--primary-dark); line-height: 1.2; }
         .nav-item { padding: 14px; margin-bottom: 10px; border-radius: 10px; color: #475569; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 12px; }
         .nav-item.active { background: var(--primary); color: white; }
-        
-        /* Main Content with Scroll Fix */
         .main { flex: 1; padding: 30px; overflow-y: auto; height: 100vh; padding-bottom: 120px; display: none; }
         
         .section { display: none; }
@@ -64,12 +62,11 @@
         .modal { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:200; justify-content:center; align-items:center; }
         .modal-content { background: white; padding: 25px; border-radius: 20px; width: 90%; max-width: 380px; max-height: 80vh; overflow-y: auto; }
 
-        /* Mobile Fixes */
         @media (max-width: 768px) {
             .sidebar { position: fixed; bottom: 0; left: 0; width: 100%; height: 70px; flex-direction: row; justify-content: space-around; padding: 10px; border-top: 2px solid #bae6fd; z-index: 1000; background: white;}
             .brand { display: none; }
             .nav-item { flex-direction: column; gap: 4px; font-size: 0.7rem; padding: 8px; margin: 0; }
-            .main { padding: 20px; padding-bottom: 140px; } /* Increased Padding */
+            .main { padding: 20px; padding-bottom: 140px; } 
             .tracker-cols { grid-template-columns: 1fr; }
         }
     </style>
@@ -107,14 +104,14 @@
                 <div class="stat-card" style="border-color:#ef4444"><h3>Market Due</h3><h1 style="color:#ef4444" id="d_due">₹0</h1></div>
             </div>
             <div class="breakdown-grid">
-                <div class="mini-card"><h3 style="color:#0ea5e9" id="d_active_mon">0</h3><p>Monthly Students</p></div>
-                <div class="mini-card"><h3 style="color:#8b5cf6" id="d_active_fix">0</h3><p>Course Students</p></div>
+                <div class="mini-card"><h3 style="color:#0ea5e9" id="d_active_jun">0</h3><p>Junior Students</p></div>
+                <div class="mini-card"><h3 style="color:#8b5cf6" id="d_active_sen">0</h3><p>Senior Students</p></div>
             </div>
             <div class="chart-box"><canvas id="financeChart"></canvas></div>
         </div>
 
         <div id="monthTracker" class="section">
-            <h2 style="margin-bottom:20px">📅 Monthly Status</h2>
+            <h2 style="margin-bottom:20px">📅 Monthly Fee Tracker</h2>
             <div class="month-selector">
                 <label><b>Select Month:</b></label>
                 <input type="month" id="trackerMonth" class="input-box" style="margin-bottom:0; width:auto;" onchange="loadTrackerData()">
@@ -135,35 +132,45 @@
             <h2 style="margin-bottom:20px">👤 New Admission</h2>
             <div class="content-card">
                 <form id="admForm">
-                    <div style="background:#f0f9ff; padding:10px; border-radius:8px; margin-bottom:15px; border:1px solid #bae6fd;">
-                        <label style="font-weight:600">Category:</label>
-                        <select id="studentType" onchange="toggleFeeInputs()" class="input-box" style="margin-bottom:10px">
-                            <option value="monthly">Monthly Student (Class 9 & Below)</option>
-                            <option value="course">Fixed Course Student</option>
+                    <div style="background:#f0f9ff; padding:15px; border-radius:8px; margin-bottom:15px; border:1px solid #bae6fd;">
+                        <label style="font-weight:600">Select Student Type:</label>
+                        <select id="studentType" onchange="setDefaults()" class="input-box" style="margin-bottom:10px; font-weight:600; color:var(--primary-dark)">
+                            <option value="junior">Junior Student (Monthly)</option>
+                            <option value="senior">Senior Student (Course)</option>
                         </select>
                         <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
                             <input type="checkbox" id="isOldStudent" onchange="toggleOldStudent()" style="width:20px; height:20px;">
-                            Old Student? (No Adm Fee)
+                            Existing Student? (No Admission Fee)
                         </label>
                     </div>
 
-                    <input type="text" id="name" required class="input-box" placeholder="Student Name">
-                    <input type="text" id="batch" required class="input-box" placeholder="Batch Name">
-                    <input type="number" id="phone" required class="input-box" placeholder="Phone Number">
+                    <input type="text" id="name" required class="input-box" placeholder="Student Full Name">
+                    <input type="text" id="batch" required class="input-box" placeholder="Batch (e.g. Batch A)">
+                    <input type="number" id="phone" required class="input-box" placeholder="WhatsApp Number">
                     <label>Joining Date:</label>
                     <input type="date" id="joinDate" required class="input-box">
                     
-                    <div id="feeSection">
-                        <input type="number" id="admFee" value="500" class="input-box" placeholder="Admission Fee">
-                        <div id="monthlyInputs">
-                            <input type="number" id="monthlyFee" value="250" class="input-box" placeholder="Monthly Fee (e.g. 250)">
+                    <div id="feeSection" style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+                        <div style="grid-column: 1 / -1; font-weight:600; color:#64748b; margin-top:5px;">Fee Structure (Editable):</div>
+                        
+                        <div>
+                            <label style="font-size:0.8rem">Admission Fee</label>
+                            <input type="number" id="admFee" value="500" class="input-box">
                         </div>
-                        <div id="courseInputs" style="display:none;">
-                            <input type="number" id="courseFee" value="5000" class="input-box" placeholder="Total Course Fee">
+                        <div>
+                            <label style="font-size:0.8rem">Monthly Fee</label>
+                            <input type="number" id="monthlyFee" value="250" class="input-box">
                         </div>
-                        <input type="number" id="examFee" value="0" class="input-box" placeholder="Exam Fee (Optional)">
+                        <div>
+                            <label style="font-size:0.8rem">Exam Fee (Total)</label>
+                            <input type="number" id="examFee" value="0" class="input-box">
+                        </div>
+                        <div>
+                            <label style="font-size:0.8rem">Course Duration (Months)</label>
+                            <input type="number" id="duration" value="12" class="input-box">
+                        </div>
                     </div>
-                    <button type="submit" class="btn">Add Student</button>
+                    <button type="submit" class="btn">Confirm Admission</button>
                 </form>
             </div>
         </div>
@@ -171,30 +178,35 @@
         <div id="students" class="section">
             <h2 style="margin-bottom:20px">📋 Student List</h2>
             <div class="content-card">
-                <input type="text" id="search" placeholder="Search..." onkeyup="renderTable()" class="input-box">
-                <div style="overflow-x:auto"><table id="table"><thead><tr><th>Name/Type</th><th>Contact</th><th>Status</th><th>Action</th></tr></thead><tbody id="tbody"></tbody></table></div>
+                <input type="text" id="search" placeholder="Search by Name..." onkeyup="renderTable()" class="input-box">
+                <div style="overflow-x:auto"><table id="table"><thead><tr><th>Student</th><th>Contact</th><th>Status</th><th>Action</th></tr></thead><tbody id="tbody"></tbody></table></div>
             </div>
         </div>
     </div>
 
     <div id="modal" class="modal">
         <div class="modal-content">
-            <h3>💰 Receive Payment</h3><br>
-            <select id="payType" class="input-box"></select>
+            <h3>💰 Collect Payment</h3><br>
+            <select id="payType" class="input-box">
+                <option>Monthly Fee</option>
+                <option>Admission Fee</option>
+                <option>Exam Fee</option>
+            </select>
             <input type="number" id="payAmount" class="input-box" placeholder="Enter Amount">
-            <button onclick="submitPay()" class="btn">Confirm</button>
+            <button onclick="submitPay()" class="btn">Confirm & Send Receipt</button>
             <button onclick="document.getElementById('modal').style.display='none'" class="btn" style="background:#e2e8f0; color:#333">Cancel</button>
         </div>
     </div>
 
 <script>
-    // 🔥 FIXED CONFIG FROM YOUR SCREENSHOTS 🔥
+    // 🔥 YOUR FIREBASE CONFIG HERE 🔥
+    // (Replace with your actual config from the screenshot you provided earlier)
     const firebaseConfig = {
         apiKey: "AIzaSyCUmRYc8WtQP3LW_85i5Czore9YjWw0yLU",
         authDomain: "tikarkhanjijnyctsd.firebaseapp.com",
         databaseURL: "https://tikarkhanjijnyctsd-default-rtdb.firebaseio.com",
         projectId: "tikarkhanjijnyctsd",
-        storageBucket: "tikarkhanjijnyctsd.firebasestorage.app",
+        storageBucket: "tikarkhanjijnyctsd.appspot.com",
         messagingSenderId: "513267646081",
         appId: "1:513267646081:web:1b60262e26e5e6dcef9780"
     };
@@ -217,9 +229,6 @@
         auth.signInWithPopup(provider).catch(err => {
             document.getElementById('loader').style.display = 'none';
             document.getElementById('login-status').innerText = err.message;
-            if(err.code === 'auth/unauthorized-domain') {
-                alert("Error: Please add 'github.io' to Authorized Domains in Firebase Console.");
-            }
         });
     }
 
@@ -249,21 +258,20 @@
             const data = snapshot.val();
             students = data ? Object.keys(data).map(key => ({ id: key, ...data[key] })) : [];
             
-            // Repair Missing Data fields
+            // Repair Data for new structure
             students.forEach(s => {
                 if (!s.payments) s.payments = [];
-                s.type = s.type || 'monthly';
+                s.type = s.type || 'junior'; // Default old students to junior
                 s.isOld = s.isOld || false;
                 s.admFee = s.admFee || 0;
                 s.monthlyFee = s.monthlyFee || 0;
-                s.courseFee = s.courseFee || 0;
                 s.examFee = s.examFee || 0;
             });
 
             updateDashboard();
             renderTable();
             
-            // Load Tracker Current Month if empty
+            // Auto Load current month for tracker
             if(!document.getElementById('trackerMonth').value) {
                 const now = new Date();
                 const mStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
@@ -276,7 +284,7 @@
     function saveDataToFirebase(data) { db.ref('students').push(data); }
     function deleteFromFirebase(id) { if(confirm("Permanently Delete Student?")) db.ref('students/' + id).remove(); }
 
-    // --- TRACKER LOGIC ---
+    // --- MONTHLY TRACKER LOGIC ---
     function loadTrackerData() {
         const mInput = document.getElementById('trackerMonth').value;
         if(!mInput) return;
@@ -287,11 +295,9 @@
         unpaidList.innerHTML = ''; paidList.innerHTML = '';
         let uCount=0, pCount=0;
 
-        // Filter Monthly Students
-        const monthlyStudents = students.filter(s => s.type === 'monthly');
-
-        monthlyStudents.forEach(s => {
-            // Check Payment
+        // Track Everyone (Both Junior and Senior now pay monthly)
+        students.forEach(s => {
+            // Check Payment for selected month
             const hasPaid = s.payments.some(p => {
                 const d = new Date(p.date);
                 return p.type === 'Monthly Fee' && d.getFullYear() == year && (d.getMonth()+1) == month;
@@ -307,7 +313,7 @@
             } else {
                 const monthName = new Date(year, month-1).toLocaleString('default', { month: 'long' });
                 div.innerHTML = `
-                    <div><b>${s.name}</b><br><small>${s.batch}</small></div>
+                    <div><b>${s.name}</b> (${s.type})<br><small>${s.batch}</small></div>
                     <button class="action-btn" style="background:#f59e0b" onclick="sendSpecificReminder('${s.phone}','${s.name}','${monthName}')">
                         <i class="fas fa-bell"></i>
                     </button>`;
@@ -324,38 +330,56 @@
         window.open(`https://wa.me/${phone}?text=${text}`, '_blank');
     }
 
-    // --- ADMISSION FORM ---
-    function toggleFeeInputs() {
+    // --- ADMISSION FORM LOGIC (UPDATED FOR JUNIOR/SENIOR) ---
+    function setDefaults() {
         const type = document.getElementById('studentType').value;
-        document.getElementById('monthlyInputs').style.display = type === 'monthly' ? 'block' : 'none';
-        document.getElementById('courseInputs').style.display = type === 'course' ? 'block' : 'none';
-    }
-    function toggleOldStudent() {
         const isOld = document.getElementById('isOldStudent').checked;
-        document.getElementById('admFee').value = isOld ? 0 : 500;
-        document.getElementById('admFee').disabled = isOld;
+        
+        const admInput = document.getElementById('admFee');
+        const monInput = document.getElementById('monthlyFee');
+        const examInput = document.getElementById('examFee');
+        const durInput = document.getElementById('duration');
+
+        if(type === 'senior') {
+            // SENIOR DEFAULTS
+        admInput.value = isOld ? 0 : 400;
+            monInput.value = 300;
+            examInput.value = 500;
+            durInput.value = 12; // Can be edited to 6
+        } else {
+            // JUNIOR DEFAULTS
+            admInput.value = isOld ? 0 : 500;
+            monInput.value = 250;
+            examInput.value = 0;
+            durInput.value = 12;
+        }
+        admInput.disabled = isOld;
+    }
+
+    function toggleOldStudent() {
+        setDefaults(); // Re-apply defaults based on checkbox
     }
 
     document.getElementById('admForm').addEventListener('submit', (e) => {
         e.preventDefault();
-        const type = document.getElementById('studentType').value;
         const s = {
-            type: type,
+            type: document.getElementById('studentType').value,
             isOld: document.getElementById('isOldStudent').checked,
             name: document.getElementById('name').value,
             batch: document.getElementById('batch').value,
             phone: document.getElementById('phone').value,
             joinDate: document.getElementById('joinDate').value,
             admFee: Number(document.getElementById('admFee').value),
+            monthlyFee: Number(document.getElementById('monthlyFee').value),
+            duration: Number(document.getElementById('duration').value),
             examFee: Number(document.getElementById('examFee').value),
             payments: []
         };
-        if(type==='monthly') { s.monthlyFee = Number(document.getElementById('monthlyFee').value); s.courseFee = 0; }
-        else { s.monthlyFee = 0; s.courseFee = Number(document.getElementById('courseFee').value); }
         
         saveDataToFirebase(s);
         e.target.reset();
-        document.getElementById('studentType').value='monthly'; toggleFeeInputs();
+        document.getElementById('studentType').value='junior';
+        setDefaults();
         alert("Student Added!");
         navigate('students');
     });
@@ -366,23 +390,27 @@
         s.payments.forEach(p => {
             if(p.type==='Admission Fee') paidAdm+=p.amount;
             else if(p.type==='Exam Fee') paidExam+=p.amount;
-            else paidTut+=p.amount;
+            else paidTut+=p.amount; // Monthly Fee
         });
 
-        let totalDue=0, breakdown={};
-        if(s.type==='monthly') {
-            const start = new Date(s.joinDate);
-            const now = new Date();
-            let months = (now.getFullYear() - start.getFullYear()) * 12 + (now.getMonth() - start.getMonth()) + 1;
-            if(months < 1) months = 1;
-            const tutDue = (months * s.monthlyFee) - paidTut;
-            totalDue = (s.admFee-paidAdm) + (s.examFee-paidExam) + tutDue;
-            breakdown = { tut: tutDue };
-        } else {
-            const tutDue = s.courseFee - paidTut;
-            totalDue = (s.admFee-paidAdm) + (s.examFee-paidExam) + tutDue;
-            breakdown = { tut: tutDue };
-        }
+        // Calculate Total Months Passed
+        const start = new Date(s.joinDate);
+        const now = new Date();
+        let monthsPassed = (now.getFullYear() - start.getFullYear()) * 12 + (now.getMonth() - start.getMonth()) + 1;
+        if(monthsPassed < 1) monthsPassed = 1;
+        // Cap months passed at course duration
+        if(monthsPassed > s.duration) monthsPassed = s.duration;
+
+        const totalMonthlyDueSoFar = monthsPassed * s.monthlyFee;
+        const currentTutDue = totalMonthlyDueSoFar - paidTut;
+
+        // Total Project Due (For Course Completion)
+        // const totalProjectCost = s.admFee + s.examFee + (s.monthlyFee * s.duration);
+        
+        // Current Payable Due (Realtime)
+        const totalDue = (s.admFee - paidAdm) + (s.examFee - paidExam) + Math.max(0, currentTutDue);
+        
+        const breakdown = { tut: Math.max(0, currentTutDue), adm: s.admFee-paidAdm, exam: s.examFee-paidExam };
         return { totalDue, breakdown, paidTotal: paidAdm+paidTut+paidExam };
     }
 
@@ -394,12 +422,12 @@
         
         students.filter(s => s.name.toLowerCase().includes(search)).reverse().forEach(s => {
             const f = getFinance(s);
-            const badge = s.type==='monthly' 
-                ? `<span style="background:#e0f2fe; color:#0284c7; padding:2px 5px; border-radius:4px; font-size:0.7rem">Monthly</span>` 
-                : `<span style="background:#f3e8ff; color:#7c3aed; padding:2px 5px; border-radius:4px; font-size:0.7rem">Course</span>`;
+            const badge = s.type==='senior' 
+                ? `<span style="background:#f3e8ff; color:#7c3aed; padding:2px 5px; border-radius:4px; font-size:0.7rem">Senior</span>` 
+                : `<span style="background:#e0f2fe; color:#0284c7; padding:2px 5px; border-radius:4px; font-size:0.7rem">Junior</span>`;
             
-            const dueTxt = f.breakdown.tut > 0 ? `Due: ₹${f.breakdown.tut}` : `Paid`;
-            const color = f.breakdown.tut > 0 ? '#ef4444' : '#10b981';
+            const dueTxt = f.totalDue > 0 ? `Due: ₹${f.totalDue}` : `Paid`;
+            const color = f.totalDue > 0 ? '#ef4444' : '#10b981';
 
             tbody.innerHTML += `
                 <tr>
@@ -408,7 +436,7 @@
                         <a href="tel:${s.phone}" class="action-btn" style="background:#3b82f6"><i class="fas fa-phone"></i></a>
                         <a href="https://wa.me/${s.phone}" target="_blank" class="action-btn" style="background:#25D366"><i class="fab fa-whatsapp"></i></a>
                     </td>
-                    <td><small>Total: ₹${f.totalDue}</small><br><b style="color:${color}">${dueTxt}</b></td>
+                    <td><small>Adm+Exam+Mon</small><br><b style="color:${color}">${dueTxt}</b></td>
                     <td>
                         <button class="action-btn" style="background:#10b981" onclick="openPay('${s.id}')"><i class="fas fa-plus"></i></button>
                         <button class="action-btn" style="background:#ef4444" onclick="deleteFromFirebase('${s.id}')"><i class="fas fa-trash"></i></button>
@@ -421,8 +449,8 @@
     function openPay(id) {
         currentId = id; const s = students.find(x=>x.id===id);
         const sel = document.getElementById('payType'); sel.innerHTML='';
-        const mainOpt = s.type==='monthly' ? 'Monthly Fee' : 'Course Fee Installment';
-        sel.innerHTML = `<option>${mainOpt}</option><option>Admission Fee</option><option>Exam Fee</option>`;
+        // All students pay Monthly now
+        sel.innerHTML = `<option>Monthly Fee</option><option>Admission Fee</option><option>Exam Fee</option>`;
         document.getElementById('modal').style.display='flex';
     }
 
@@ -453,12 +481,12 @@
     }
 
     function updateDashboard() {
-        let tCol=0, tDue=0, mCount=0, cCount=0;
+        let tCol=0, tDue=0, jCount=0, sCount=0;
         const monthlyData = {};
         students.forEach(s => {
             const f = getFinance(s);
             tCol += f.paidTotal; tDue += f.totalDue;
-            if(s.type==='monthly') mCount++; else cCount++;
+            if(s.type==='junior') jCount++; else sCount++;
             (s.payments||[]).forEach(p => {
                 const k = `${new Date(p.date).getFullYear()}-${String(new Date(p.date).getMonth()+1).padStart(2,'0')}`;
                 monthlyData[k] = (monthlyData[k]||0) + p.amount;
@@ -467,8 +495,8 @@
         document.getElementById('d_students').innerText = students.length;
         document.getElementById('d_collected').innerText = '₹'+tCol;
         document.getElementById('d_due').innerText = '₹'+tDue;
-        document.getElementById('d_active_mon').innerText = mCount;
-        document.getElementById('d_active_fix').innerText = cCount;
+        document.getElementById('d_active_mon').innerText = jCount;
+        document.getElementById('d_active_fix').innerText = sCount;
 
         const ctx = document.getElementById('financeChart');
         if (ctx) {
