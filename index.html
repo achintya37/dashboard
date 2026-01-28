@@ -61,9 +61,15 @@
         }
 
         /* --- MAIN CONTENT --- */
-        .main { flex: 1; padding: 30px; overflow-y: auto; height: 100%; position: relative; }
+        .main { 
+            flex: 1; 
+            padding: 30px; 
+            overflow-y: auto; 
+            height: 100vh; 
+            position: relative;
+            padding-bottom: 100px; /* Extra padding for mobile scroll */
+        }
         
-        /* Sections */
         .section { display: none; opacity: 0; transition: opacity 0.3s ease; }
         .section.active { display: block; opacity: 1; animation: fadeIn 0.3s ease-in-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
@@ -76,44 +82,47 @@
         .stat-num { font-size: 1.8rem; font-weight: 700; color: var(--text); margin-top: 5px; }
         .stat-label { color: #64748b; font-size: 0.85rem; font-weight: 600; text-transform: uppercase; }
 
-        /* Breakdown Cards */
-        .breakdown-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-bottom: 30px; }
-        .mini-card { background: white; padding: 15px; border-radius: 10px; border: 1px solid #e2e8f0; text-align: center; }
-        .mini-val { font-size: 1.2rem; font-weight: 700; color: var(--danger); }
-        .mini-lbl { font-size: 0.75rem; color: #64748b; margin-top: 2px; }
+        .breakdown-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 10px; margin-bottom: 30px; }
+        .mini-card { background: white; padding: 10px; border-radius: 10px; border: 1px solid #e2e8f0; text-align: center; }
+        .mini-val { font-size: 1rem; font-weight: 700; color: var(--danger); }
+        .mini-lbl { font-size: 0.7rem; color: #64748b; margin-top: 2px; }
 
         /* Chart */
-        .chart-box { background: white; padding: 20px; border-radius: 16px; height: 400px; box-shadow: 0 4px 6px rgba(0,0,0,0.02); margin-bottom: 40px; border: 1px solid #f1f5f9; }
+        .chart-box { background: white; padding: 15px; border-radius: 16px; height: 350px; box-shadow: 0 4px 6px rgba(0,0,0,0.02); margin-bottom: 40px; border: 1px solid #f1f5f9; }
 
-        /* Inputs & Tables */
-        .content-card { background: white; padding: 25px; border-radius: 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.02); }
+        /* Forms & Tables */
+        .content-card { background: white; padding: 20px; border-radius: 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.02); margin-bottom: 20px; }
         .form-group { margin-bottom: 15px; }
         .form-group label { display: block; margin-bottom: 6px; font-weight: 600; color: #334155; font-size: 0.9rem; }
-        .input-box { width: 100%; padding: 12px; border: 2px solid #e2e8f0; border-radius: 8px; outline: none; background: #f8fafc; }
+        .input-box { width: 100%; padding: 12px; border: 2px solid #e2e8f0; border-radius: 8px; outline: none; background: #f8fafc; font-size: 1rem; }
         .input-box:focus { border-color: var(--primary); background: white; }
 
-        .btn { width: 100%; padding: 14px; border: none; border-radius: 10px; font-weight: 700; color: white; cursor: pointer; }
-        .btn-primary { background: var(--primary); } 
+        .btn { width: 100%; padding: 15px; border: none; border-radius: 10px; font-weight: 700; color: white; cursor: pointer; font-size: 1rem; margin-top: 10px;}
+        .btn-primary { background: var(--primary); box-shadow: 0 4px 10px rgba(14, 165, 233, 0.3); } 
 
         .table-wrap { overflow-x: auto; margin-top: 15px; }
         table { width: 100%; border-collapse: collapse; min-width: 600px; }
-        th { background: #f0f9ff; color: var(--primary-dark); padding: 15px; text-align: left; font-size: 0.8rem; font-weight: 700; border-bottom: 2px solid #bae6fd; }
-        td { padding: 14px; border-bottom: 1px solid #e2e8f0; color: #334155; }
+        th { background: #f0f9ff; color: var(--primary-dark); padding: 12px; text-align: left; font-size: 0.8rem; font-weight: 700; border-bottom: 2px solid #bae6fd; }
+        td { padding: 12px; border-bottom: 1px solid #e2e8f0; color: #334155; }
 
-        /* Buttons */
         .action-btn { width: 34px; height: 34px; border-radius: 50%; border: none; color: white; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; margin-right: 5px; }
         .btn-pay-now { background: var(--success); padding: 6px 15px; border-radius: 6px; color: white; font-size: 0.8rem; border: none; cursor: pointer; font-weight: 600; }
 
         /* Modal */
         .modal { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:200; justify-content:center; align-items:center; }
-        .modal-content { background: white; padding: 30px; border-radius: 20px; width: 380px; }
+        .modal-content { background: white; padding: 25px; border-radius: 20px; width: 90%; max-width: 380px; }
 
-        /* Mobile */
+        /* Mobile Optimization */
         @media (max-width: 768px) {
-            .sidebar { position: fixed; bottom: 0; width: 100%; height: 70px; flex-direction: row; justify-content: space-around; padding: 10px; border-top: 2px solid #bae6fd; border-right: none; background: white; }
+            .sidebar { 
+                position: fixed; bottom: 0; left: 0; width: 100%; height: 70px; 
+                flex-direction: row; justify-content: space-around; 
+                padding: 10px; border-top: 2px solid #bae6fd; border-right: none; 
+                background: white; z-index: 1000; 
+            }
             .brand { display: none; }
-            .nav-item { flex-direction: column; gap: 4px; font-size: 0.7rem; padding: 8px; border-radius: 8px; margin: 0; }
-            .main { padding: 20px; padding-bottom: 90px; }
+            .nav-item { flex-direction: column; gap: 4px; font-size: 0.7rem; padding: 8px; border-radius: 8px; margin: 0; border:none; }
+            .main { padding: 20px; padding-bottom: 120px; } /* Ensures scroll reaches bottom */
             .stats-grid { grid-template-columns: 1fr; }
         }
     </style>
@@ -125,6 +134,7 @@
             <h1>TIKARKHANJI<br>JNYCTSD</h1>
             <p>FEE MANAGEMENT SYSTEM</p>
         </div>
+        
         <div class="nav-item active" id="btn-dash" onclick="navigate('dashboard')">
             <i class="fas fa-chart-pie fa-lg"></i> <span>Dashboard</span>
         </div>
@@ -151,24 +161,24 @@
                     <div class="stat-num" style="color:#10b981" id="d_collected">₹0</div>
                 </div>
                 <div class="stat-card" style="border-color: #ef4444;">
-                    <div class="stat-label">Total Pending</div>
+                    <div class="stat-label">Total Due (Admin View)</div>
                     <div class="stat-num" style="color:#ef4444" id="d_due">₹0</div>
                 </div>
             </div>
 
-            <h4 style="margin-bottom:15px; color:#64748b; font-weight:600; text-transform:uppercase; font-size:0.85rem;">📌 Pending Dues Breakdown</h4>
+            <h4 style="margin-bottom:10px; color:#64748b; font-weight:600; font-size:0.85rem;">PENDING DUES BREAKDOWN</h4>
             <div class="breakdown-grid">
                 <div class="mini-card">
                     <div class="mini-val" id="d_due_adm">₹0</div>
-                    <div class="mini-lbl">Admission Due</div>
+                    <div class="mini-lbl">Admission</div>
                 </div>
                 <div class="mini-card">
                     <div class="mini-val" id="d_due_mon">₹0</div>
-                    <div class="mini-lbl">Monthly Due</div>
+                    <div class="mini-lbl">Monthly</div>
                 </div>
-                <div class="mini-card">
-                    <div class="mini-val" id="d_due_exam">₹0</div>
-                    <div class="mini-lbl">Exam Fee Due</div>
+                <div class="mini-card" style="background:#fff7ed; border-color:#fed7aa">
+                    <div class="mini-val" style="color:#ea580c" id="d_due_exam">₹0</div>
+                    <div class="mini-lbl">Exam Fee (Internal)</div>
                 </div>
             </div>
 
@@ -181,9 +191,9 @@
             <div class="header-title">👤 New Admission</div>
             <div class="content-card">
                 <form id="admForm">
-                    <div class="form-group"><label>Student Name</label><input type="text" id="name" required class="input-box"></div>
-                    <div class="form-group"><label>Batch</label><input type="text" id="batch" required class="input-box"></div>
-                    <div class="form-group"><label>Phone (WhatsApp)</label><input type="number" id="phone" required class="input-box"></div>
+                    <div class="form-group"><label>Student Name</label><input type="text" id="name" required class="input-box" placeholder="Student Full Name"></div>
+                    <div class="form-group"><label>Batch</label><input type="text" id="batch" required class="input-box" placeholder="e.g. Batch A"></div>
+                    <div class="form-group"><label>Phone (WhatsApp)</label><input type="number" id="phone" required class="input-box" placeholder="10 Digit Mobile"></div>
                     <div class="form-group"><label>Joining Date</label><input type="date" id="joinDate" required class="input-box"></div>
                     
                     <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px;">
@@ -192,7 +202,7 @@
                     </div>
                     <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px;">
                         <div class="form-group"><label>Duration</label><input type="number" id="duration" value="12" class="input-box"></div>
-                        <div class="form-group"><label>Exam Fee</label><input type="number" id="examFee" value="500" class="input-box"></div>
+                        <div class="form-group"><label>Exam Fee (Hidden in Msg)</label><input type="number" id="examFee" value="500" class="input-box"></div>
                     </div>
 
                     <button type="submit" class="btn btn-primary">Confirm Admission</button>
@@ -210,7 +220,7 @@
                             <tr>
                                 <th>Student</th>
                                 <th>Contact</th>
-                                <th>Status</th>
+                                <th>Admin View (Total Due)</th>
                                 <th>Action</th>
                             </tr>
                         </thead>
@@ -240,47 +250,49 @@
             <button onclick="document.getElementById('modal').style.display='none'" class="btn" style="background:#e2e8f0; color:#333; margin-top:10px;">Cancel</button>
         </div>
     </div>
-
-<script>
-    // --- 1. SAFE INITIALIZATION ---
+    <script>
+    // --- DATABASE ---
     let students = [];
     try {
-        students = JSON.parse(localStorage.getItem('tikarkhanji_pro_v3')) || [];
+        students = JSON.parse(localStorage.getItem('tikarkhanji_pro_v5')) || [];
     } catch (e) {
         students = [];
     }
-
-    // AUTO-REPAIR DATA (Fixes the "Button Not Working" issue caused by old data)
+    
+    // REPAIR DATA IF NEEDED
     students.forEach(s => {
         if (!s.payments) s.payments = [];
-        if (!s.admFee) s.admFee = 0;
-        if (!s.monthlyFee) s.monthlyFee = 0;
-        if (!s.examFee) s.examFee = 0;
+        if (s.admFee === undefined) s.admFee = 0;
+        if (s.monthlyFee === undefined) s.monthlyFee = 0;
+        if (s.examFee === undefined) s.examFee = 0;
     });
 
     let currentId = null;
     let financeChart = null;
 
-    // --- 2. NAVIGATION (Simplified & Robust) ---
+    // --- NAVIGATION ---
     window.navigate = function(targetId) {
-        // Update UI Classes first (Visual feedback)
         document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
         document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
 
         const targetSection = document.getElementById(targetId);
-        if(targetSection) targetSection.classList.add('active');
+        if(targetSection) {
+            targetSection.classList.add('active');
+            document.querySelector('.main').scrollTop = 0;
+        }
 
-        // Update Active Button
-        if(targetId === 'dashboard') document.getElementById('btn-dash').classList.add('active');
-        if(targetId === 'admission') document.getElementById('btn-adm').classList.add('active');
-        if(targetId === 'students') document.getElementById('btn-std').classList.add('active');
-
-        // Logic
-        if(targetId === 'dashboard') updateDashboard();
-        if(targetId === 'students') renderTable();
+        if(targetId === 'dashboard') {
+            document.getElementById('btn-dash').classList.add('active');
+            updateDashboard();
+        } else if(targetId === 'admission') {
+            document.getElementById('btn-adm').classList.add('active');
+        } else if(targetId === 'students') {
+            document.getElementById('btn-std').classList.add('active');
+            renderTable();
+        }
     }
 
-    // --- 3. ON LOAD ---
+    // --- INIT ---
     window.onload = () => {
         document.getElementById('joinDate').valueAsDate = new Date();
         renderTable();
@@ -288,83 +300,67 @@
     };
 
     function saveData() {
-        localStorage.setItem('tikarkhanji_pro_v3', JSON.stringify(students));
+        localStorage.setItem('tikarkhanji_pro_v5', JSON.stringify(students));
         updateDashboard();
         renderTable();
     }
 
-    // --- 4. ADMISSION LOGIC ---
+    // --- ADMISSION ---
     document.getElementById('admForm').addEventListener('submit', (e) => {
         e.preventDefault();
-        try {
-            const s = {
-                id: Date.now(),
-                name: document.getElementById('name').value,
-                batch: document.getElementById('batch').value,
-                phone: document.getElementById('phone').value,
-                joinDate: document.getElementById('joinDate').value,
-                admFee: Number(document.getElementById('admFee').value) || 0,
-                monthlyFee: Number(document.getElementById('monthlyFee').value) || 0,
-                duration: Number(document.getElementById('duration').value) || 12,
-                examFee: Number(document.getElementById('examFee').value) || 0,
-                payments: []
-            };
-            students.push(s);
-            saveData();
-            e.target.reset();
-            
-            // Restore defaults
-            document.getElementById('admFee').value = "400";
-            document.getElementById('monthlyFee').value = "300";
-            document.getElementById('examFee').value = "500";
-            document.getElementById('duration').value = "12";
-            document.getElementById('joinDate').valueAsDate = new Date();
-            
-            alert("Student Added!");
-            navigate('students');
-        } catch (err) {
-            alert("Error adding student. Please check inputs.");
-            console.error(err);
-        }
+        const s = {
+            id: Date.now(),
+            name: document.getElementById('name').value,
+            batch: document.getElementById('batch').value,
+            phone: document.getElementById('phone').value,
+            joinDate: document.getElementById('joinDate').value,
+            admFee: Number(document.getElementById('admFee').value) || 0,
+            monthlyFee: Number(document.getElementById('monthlyFee').value) || 0,
+            duration: Number(document.getElementById('duration').value) || 12,
+            examFee: Number(document.getElementById('examFee').value) || 0,
+            payments: []
+        };
+        students.push(s);
+        saveData();
+        e.target.reset();
+        
+        // Restore defaults
+        document.getElementById('admFee').value = "400";
+        document.getElementById('monthlyFee').value = "300";
+        document.getElementById('examFee').value = "500";
+        document.getElementById('duration').value = "12";
+        document.getElementById('joinDate').valueAsDate = new Date();
+        
+        alert("Student Added Successfully!");
+        navigate('students');
     });
 
-    // --- 5. CALCULATIONS ---
+    // --- FINANCE LOGIC ---
     function getFinance(s) {
-        // Safety checks for undefined values
-        const aFee = s.admFee || 0;
-        const mFee = s.monthlyFee || 0;
-        const dur = s.duration || 0;
-        const eFee = s.examFee || 0;
-        const pays = s.payments || [];
-
-        const totalAdm = aFee;
-        const totalMon = mFee * dur;
-        const totalExam = eFee;
-        const total = totalAdm + totalMon + totalExam;
-
+        const total = (s.admFee||0) + ((s.monthlyFee||0) * (s.duration||0)) + (s.examFee||0);
         let paidAdm = 0, paidMon = 0, paidExam = 0;
         
-        pays.forEach(p => {
+        (s.payments || []).forEach(p => {
             if(p.type === 'Admission Fee') paidAdm += p.amount;
             else if(p.type === 'Monthly Fee') paidMon += p.amount;
             else if(p.type === 'Exam Fee') paidExam += p.amount;
         });
 
         const paidTotal = paidAdm + paidMon + paidExam;
-
+        
         return {
             total,
             paid: paidTotal,
-            due: total - paidTotal,
+            due: total - paidTotal, // Total Due (Includes Exam)
             breakdown: {
-                admDue: totalAdm - paidAdm,
-                monDue: totalMon - paidMon,
-                examDue: totalExam - paidExam
+                admDue: (s.admFee||0) - paidAdm,
+                monDue: ((s.monthlyFee||0) * (s.duration||0)) - paidMon,
+                examDue: (s.examFee||0) - paidExam
             }
         };
     }
 
-    // --- 6. RENDER TABLE ---
+    // --- RENDER TABLE ---
     function renderTable() {
         const tbody = document.getElementById('tbody');
         const search = document.getElementById('search').value.toLowerCase();
@@ -376,13 +372,18 @@
             const f = getFinance(s);
             const tr = document.createElement('tr');
             
+            // Admin View Status (Includes Exam Fee)
             let status = f.due > 0 
-                ? `<span style="color:#ef4444; background:#fee2e2; padding:3px 8px; border-radius:4px; font-weight:700; font-size:0.8rem;">Due: ₹${f.due}</span>` 
-                : `<span style="color:#10b981; background:#dcfce7; padding:3px 8px; border-radius:4px; font-weight:700; font-size:0.8rem;">Paid Full</span>`;
+                ? `<span style="color:#ef4444; background:#fee2e2; padding:3px 8px; border-radius:4px; font-weight:700; font-size:0.75rem;">Total Due: ₹${f.due}</span>` 
+                : `<span style="color:#10b981; background:#dcfce7; padding:3px 8px; border-radius:4px; font-weight:700; font-size:0.75rem;">Paid Full</span>`;
+
+            // Calculate Student Visible Due (Exclude Exam Fee)
+            const studentVisibleDue = f.breakdown.admDue + f.breakdown.monDue;
 
             let noticeBtn = '';
+            // Only show button if there is ANY due (even exam due), but logic inside controls message
             if(f.due > 0) {
-                noticeBtn = `<button class="action-btn" style="background:#f59e0b" onclick="sendReminder(${s.id})"><i class="fas fa-bell"></i></button>`;
+                noticeBtn = `<button class="action-btn" style="background:#f59e0b" onclick="sendReminder(${s.id})" title="Send Reminder"><i class="fas fa-bell"></i></button>`;
             }
 
             tr.innerHTML = `
@@ -391,7 +392,7 @@
                     <div style="font-size:0.75rem; color:#64748b; background:#f1f5f9; display:inline-block; padding:2px 6px; border-radius:4px;">${s.batch}</div>
                 </td>
                 <td>
-                    <div style="font-weight:600">${s.phone}</div>
+                    <div style="font-weight:600; font-size:0.9rem">${s.phone}</div>
                     <div style="margin-top:5px;">
                         <a href="tel:${s.phone}" class="action-btn" style="background:#3b82f6"><i class="fas fa-phone"></i></a>
                         <a href="https://wa.me/${s.phone}" target="_blank" class="action-btn" style="background:#22c55e"><i class="fab fa-whatsapp"></i></a>
@@ -399,7 +400,7 @@
                     </div>
                 </td>
                 <td>
-                    <div style="color:#10b981; font-weight:700; font-size:0.9rem;">Paid: ₹${f.paid}</div>
+                    <div style="color:#10b981; font-weight:700; font-size:0.85rem;">Paid: ₹${f.paid}</div>
                     <div style="margin-top:4px;">${status}</div>
                 </td>
                 <td>
@@ -410,9 +411,8 @@
             tbody.appendChild(tr);
         });
     }
-
-    // --- 7. DASHBOARD & CHART ---
-        function updateDashboard() {
+    // --- DASHBOARD ---
+    function updateDashboard() {
         try {
             let totalDue = 0, totalCollected = 0;
             let dueAdm = 0, dueMon = 0, dueExam = 0;
@@ -421,7 +421,7 @@
             students.forEach(s => {
                 const f = getFinance(s);
                 totalCollected += f.paid;
-                totalDue += f.due;
+                totalDue += f.due; // Admin sees total due
                 
                 dueAdm += Math.max(0, f.breakdown.admDue);
                 dueMon += Math.max(0, f.breakdown.monDue);
@@ -442,42 +442,29 @@
             document.getElementById('d_due_mon').innerText = '₹' + dueMon;
             document.getElementById('d_due_exam').innerText = '₹' + dueExam;
 
-            // Chart Logic (Safe Check)
+            // Chart
             const ctx = document.getElementById('financeChart');
             if (ctx && typeof Chart !== 'undefined') {
                 const context = ctx.getContext('2d');
                 if(financeChart) financeChart.destroy();
-
                 const sortedKeys = Object.keys(monthlyData).sort();
                 const labels = sortedKeys.map(k => {
                     const [y, m] = k.split('-');
                     return new Date(y, m-1).toLocaleString('default', { month: 'short', year: '2-digit' });
                 });
                 const data = sortedKeys.map(k => monthlyData[k]);
-
                 const gradient = context.createLinearGradient(0,0,0,400);
                 gradient.addColorStop(0, '#0ea5e9'); gradient.addColorStop(1, '#0284c7');
-
                 financeChart = new Chart(context, {
                     type: 'bar',
-                    data: {
-                        labels: labels,
-                        datasets: [{ label: 'Collection', data: data, backgroundColor: gradient, borderRadius: 6 }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: { legend: { display: false } },
-                        scales: { y: { beginAtZero: true }, x: { grid: { display: false } } }
-                    }
+                    data: { labels: labels, datasets: [{ label: 'Collection', data: data, backgroundColor: gradient, borderRadius: 6 }] },
+                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true }, x: { grid: { display: false } } } }
                 });
             }
-        } catch (err) {
-            console.log("Chart Error (Ignored):", err);
-        }
+        } catch (err) {}
     }
 
-    // --- 8. ACTIONS ---
+    // --- ACTIONS & WHATSAPP GENERATION (EXAM FEE HIDDEN) ---
     function openPay(id) { currentId = id; document.getElementById('modal').style.display='flex'; }
     
     function submitPay() {
@@ -490,27 +477,75 @@
             document.getElementById('modal').style.display='none';
             document.getElementById('payAmount').value = '';
 
-            // Professional Bill
+            // RECEIPT CAN SHOW TOTAL DUE (Usually receipt shows updated balance)
             const f = getFinance(s);
             const dateStr = new Date().toLocaleDateString('en-IN');
-            const msg = `🧾 *OFFICIAL RECEIPT*\n------------------\n🎓 *TIKARKHANJI JNYCTSD*\n------------------\nName: ${s.name}\nBatch: ${s.batch}\nDate: ${dateStr}\n\n💰 *Paid: ₹${amt}*\n📌 Type: ${type}\n\n📉 *Remaining Due: ₹${f.due}*\n------------------\nThank you!`;
-            window.open(`https://wa.me/${s.phone}?text=${encodeURIComponent(msg)}`, '_blank');
+            const text = `🧾 *RECEIPT*%0a------------------%0a🎓 *TIKARKHANJI JNYCTSD*%0a------------------%0aName: ${s.name}%0aBatch: ${s.batch}%0aDate: ${dateStr}%0a%0a💰 *Paid: ₹${amt}*%0a📌 Type: ${type}%0a%0a📉 *Total Due: ₹${f.due}*%0a------------------%0aThank you!`;
+            window.open(`https://wa.me/${s.phone}?text=${text}`, '_blank');
         }
     }
 
     function sendReminder(id) {
         const s = students.find(x => x.id === id);
         const f = getFinance(s);
-        let breakdownTxt = "";
-        if(f.breakdown.admDue > 0) breakdownTxt += `• Admission: ₹${f.breakdown.admDue}\n`;
-        if(f.breakdown.monDue > 0) breakdownTxt += `• Monthly: ₹${f.breakdown.monDue}\n`;
-        if(f.breakdown.examDue > 0) breakdownTxt += `• Exam Fee: ₹${f.breakdown.examDue}\n`;
+        
+        // --- LOGIC TO HIDE EXAM FEE ---
+        let bd = "";
+        let studentTotalDue = 0;
 
-        const msg = `⚠️ *PAYMENT REMINDER*\nDear ${s.name},\nPending fees at TIKARKHANJI JNYCTSD:\n\n${breakdownTxt}------------------\n📉 *TOTAL DUE: ₹${f.due}*\n------------------\nPlease pay soon.`;
-        window.open(`https://wa.me/${s.phone}?text=${encodeURIComponent(msg)}`, '_blank');
+        // Only include Admission and Monthly in the Student Message
+        if(f.breakdown.admDue > 0) {
+            bd += `• Admission: ₹${f.breakdown.admDue}%0a`;
+            studentTotalDue += f.breakdown.admDue;
+        }
+        if(f.breakdown.monDue > 0) {
+            bd += `• Monthly: ₹${f.breakdown.monDue}%0a`;
+            studentTotalDue += f.breakdown.monDue;
+        }
+
+        // Check if there is anything to send
+        if (studentTotalDue <= 0) {
+            // If Student has 0 Course Due, but has Exam Due (Admin sees button, but message shouldn't go)
+            alert("This student only has Exam Fee pending. Reminder NOT sent (Hidden from student).");
+            return; 
+        }
+
+        const text = `⚠️ *COURSE FEE REMINDER*%0a------------------%0aDear ${s.name},%0aYour course fees are pending at TIKARKHANJI JNYCTSD.%0a%0a📊 *Breakdown:*%0a${bd}%0a📉 *COURSE DUE: ₹${studentTotalDue}*%0a------------------%0aPlease clear dues to avoid late fees.`;
+        
+        window.open(`https://wa.me/${s.phone}?text=${text}`, '_blank');
     }
 
     function del(id) { if(confirm("Delete Student?")) { students = students.filter(x=>x.id!==id); saveData(); } }
+</script>
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyCumRYc8Wt0P3Lw_85i5Czore9YiWw0yLU",
+  authDomain: "tikarkhanjijnyctsd.firebaseapp.com",
+  projectId: "tikarkhanjijnyctsd",
+};
+
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+
+// 🔐 শুধু এই Gmail Allow হবে
+const ADMIN_EMAIL = "achintyaghosh37@gmail.com";
+
+auth.onAuthStateChanged(user => {
+  if (!user) {
+    const provider = new firebase.auth.GoogleAuthProvider();
+    auth.signInWithPopup(provider);
+  } else {
+    if (user.email !== ADMIN_EMAIL) {
+      alert("Access Denied ❌");
+      auth.signOut();
+      document.body.innerHTML = "<h2>Unauthorized Access</h2>";
+    }
+  }
+});
 </script>
 </body>
 </html>
