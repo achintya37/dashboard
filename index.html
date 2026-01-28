@@ -84,11 +84,11 @@
     <div id="login-overlay">
         <div class="login-box">
             <h2 style="color: var(--primary); margin-bottom: 10px;">TIKARKHANJI JNYCTSD</h2>
-            <p>Authorized Admin Login</p>
+            <p>Admin Portal</p>
             <button class="google-btn" onclick="googleLogin()">
                 <i class="fab fa-google"></i> Login with Google
             </button>
-            <div class="loader" id="loader" style="display:none; margin-top:10px;">Loading...</div>
+            <div id="loader" style="display:none; margin-top:10px; color:#6b7280;">Authenticating...</div>
             <p id="login-status" style="margin-top: 15px; color: red; font-size: 0.8rem;"></p>
         </div>
     </div>
@@ -105,7 +105,7 @@
     <div class="main" id="main-content">
         
         <div id="dashboard" class="section active">
-            <h2 style="margin-bottom:20px;">📊 Business Overview</h2>
+            <h2 style="margin-bottom:20px; color:#111827;">📊 Business Overview</h2>
             <div class="stats-grid">
                 <div class="stat-card" style="border-color: #2563eb;">
                     <div class="stat-label">Active Students</div>
@@ -258,15 +258,15 @@
     </div>
 
 <script>
-    // 🔥 CONFIG 🔥 (Replace with your actual keys)
+    // 🔥🔥 STEP 1: Paste Your Firebase Config Here 🔥🔥
     const firebaseConfig = {
-        apiKey: "YOUR_API_KEY",
+        apiKey: "YOUR_API_KEY_HERE",
         authDomain: "tikarkhanjijnyctsd.firebaseapp.com",
         databaseURL: "https://tikarkhanjijnyctsd-default-rtdb.firebaseio.com",
         projectId: "tikarkhanjijnyctsd",
         storageBucket: "tikarkhanjijnyctsd.appspot.com",
         messagingSenderId: "513267646081",
-        appId: "1:513267646081:web:..."
+        appId: "1:513267646081:web:1b60262e26e5e6dcef9780"
     };
 
     firebase.initializeApp(firebaseConfig);
@@ -278,7 +278,7 @@
     let students = [];
     let expenses = [];
     let currentId = null;
-    let studentViewMode = 'active'; // 'active' or 'dropout'
+    let studentViewMode = 'active';
 
     // --- AUTH ---
     function googleLogin() {
@@ -287,6 +287,9 @@
         auth.signInWithPopup(provider).catch(err => {
             document.getElementById('loader').style.display = 'none';
             document.getElementById('login-status').innerText = err.message;
+            if(err.code === 'auth/unauthorized-domain') {
+                alert("🔴 AUTH ERROR: Please add this domain to Firebase Console > Authentication > Settings > Authorized Domains.");
+            }
         });
     }
 
@@ -301,7 +304,7 @@
             loadData();
         } else if (user) {
             auth.signOut();
-            alert("Access Denied!");
+            alert("Access Denied! Unauthorized Email.");
         } else {
             document.getElementById('login-overlay').style.display = 'flex';
         }
@@ -328,12 +331,11 @@
         });
     }
 
-    // --- ADMISSION LOGIC ---
+    // --- ADMISSION ---
     function setDefaults() {
         const type = document.getElementById('studentType').value;
         const isOld = document.getElementById('isOldStudent').checked;
         const adm = document.getElementById('admFee');
-        
         if(type === 'senior') {
             adm.value = isOld ? 0 : 400;
             document.getElementById('monthlyFee').value = 300;
@@ -368,11 +370,11 @@
         db.ref('students').push(s);
         e.target.reset();
         setDefaults();
-        alert("Student Added Successfully!");
+        alert("Student Added!");
         navigate('students');
     });
 
-    // --- STUDENT MANAGEMENT (ACTIVE / DROPOUT) ---
+    // --- STUDENT ACTIONS ---
     function switchStudentView(mode) {
         studentViewMode = mode;
         document.getElementById('btn-view-active').classList.toggle('active', mode === 'active');
@@ -381,24 +383,24 @@
     }
 
     function markDropout(id) {
-        if(confirm("Mark as Dropout?\nTheir dues will stop increasing.")) {
+        if(confirm("Confirm Drop-Out?\nStudent will be moved to Dropout List.")) {
             db.ref('students/' + id).update({ status: 'dropout' });
         }
     }
 
     function restoreStudent(id) {
-        if(confirm("Restore this student to Active List?")) {
+        if(confirm("Restore to Active List?")) {
             db.ref('students/' + id).update({ status: 'active' });
         }
     }
 
     function deleteStudent(id) {
-        if(confirm("⚠️ PERMANENTLY DELETE STUDENT?\nThis action cannot be undone.")) {
+        if(confirm("⚠️ DELETE PERMANENTLY?\nThis action cannot be undone!")) {
             db.ref('students/' + id).remove();
         }
     }
 
-    // --- EXPENSE LOGIC ---
+    // --- EXPENSES ---
     document.getElementById('expForm').addEventListener('submit', (e) => {
         e.preventDefault();
         const ex = {
@@ -413,9 +415,7 @@
     });
 
     function deleteExpense(id) {
-        if(confirm("Delete this expense entry?")) {
-            db.ref('expenses/' + id).remove();
-        }
+        if(confirm("Delete this expense?")) db.ref('expenses/' + id).remove();
     }
 
     function renderExpenses() {
@@ -426,12 +426,8 @@
                 <tr>
                     <td>${ex.date}</td>
                     <td><b>${ex.category}</b><br><small>${ex.note}</small></td>
-                    <td style="color:var(--danger); font-weight:bold;">- ₹${ex.amount}</td>
-                    <td>
-                        <button class="action-btn btn-del" onclick="deleteExpense('${ex.id}')" title="Delete">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </td>
+                    <td style="color:var(--danger);">- ₹${ex.amount}</td>
+                    <td><button class="action-btn btn-del" onclick="deleteExpense('${ex.id}')"><i class="fas fa-trash"></i></button></td>
                 </tr>`;
         });
     }
@@ -442,7 +438,6 @@
         s.payments.forEach(p => paid += p.amount);
 
         let totalProjected = s.admFee + s.examFee + (s.monthlyFee * s.duration);
-        
         const start = new Date(s.joinDate);
         const now = new Date();
         let months = (now.getFullYear() - start.getFullYear()) * 12 + (now.getMonth() - start.getMonth()) + 1;
@@ -456,7 +451,6 @@
             currentDue = 0; 
             totalProjected = paid;
         }
-
         return { paid, currentDue, totalProjected };
     }
 
@@ -469,46 +463,41 @@
         const list = students.filter(s => s.status === studentViewMode);
         
         if(list.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="3" style="text-align:center; padding:20px; color:#9ca3af;">No ${studentViewMode} students found.</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="3" style="text-align:center; padding:20px; color:#9ca3af;">No records found.</td></tr>`;
             return;
         }
 
         list.filter(s => s.name.toLowerCase().includes(search)).reverse().forEach(s => {
             const f = getFinance(s);
-            const badge = s.type==='senior' 
-                ? `<span style="background:#f3e8ff; color:#7c3aed; padding:2px 6px; border-radius:4px; font-size:0.75rem;">Senior</span>` 
-                : `<span style="background:#e0f2fe; color:#0284c7; padding:2px 6px; border-radius:4px; font-size:0.75rem;">Junior</span>`;
+            const badge = s.type==='senior' ? 'Senior' : 'Junior';
+            const color = s.type==='senior' ? '#f3e8ff' : '#e0f2fe';
+            const textC = s.type==='senior' ? '#7c3aed' : '#0284c7';
 
-            let actionButtons = '';
-            
+            let buttons = '';
             if(studentViewMode === 'active') {
-                actionButtons = `
-                    <button class="action-btn btn-pay" onclick="openPay('${s.id}')" title="Pay"><i class="fas fa-plus"></i></button>
-                    <a href="https://wa.me/${s.phone}" target="_blank" class="action-btn" style="background:#25D366"><i class="fab fa-whatsapp"></i></a>
-                    <button class="action-btn btn-drop" onclick="markDropout('${s.id}')" title="Mark Dropout"><i class="fas fa-user-slash"></i></button>
-                    <button class="action-btn btn-del" onclick="deleteStudent('${s.id}')" title="Delete"><i class="fas fa-trash"></i></button>
+                buttons = `
+                    <button class="action-btn btn-pay" onclick="openPay('${s.id}')"><i class="fas fa-plus"></i></button>
+                    <a href="https://wa.me/${s.phone}?text=${encodeURIComponent(`*FEE REMINDER*\nDear ${s.name},\nYour pending due is ₹${f.currentDue}.\nPlease pay soon.`)}" target="_blank" class="action-btn" style="background:#25D366"><i class="fab fa-whatsapp"></i></a>
+                    <button class="action-btn btn-drop" onclick="markDropout('${s.id}')"><i class="fas fa-user-slash"></i></button>
+                    <button class="action-btn btn-del" onclick="deleteStudent('${s.id}')"><i class="fas fa-trash"></i></button>
                 `;
             } else {
-                // Dropout View
-                actionButtons = `
-                    <button class="action-btn" style="background:#2563eb" onclick="restoreStudent('${s.id}')" title="Restore"><i class="fas fa-undo"></i></button>
-                    <button class="action-btn btn-del" onclick="deleteStudent('${s.id}')" title="Permanent Delete"><i class="fas fa-trash"></i></button>
+                buttons = `
+                    <button class="action-btn" style="background:#2563eb" onclick="restoreStudent('${s.id}')"><i class="fas fa-undo"></i></button>
+                    <button class="action-btn btn-del" onclick="deleteStudent('${s.id}')"><i class="fas fa-trash"></i></button>
                 `;
             }
 
             tbody.innerHTML += `
                 <tr>
-                    <td>
-                        <b>${s.name}</b> ${badge}<br>
-                        <small style="color:#6b7280">${s.batch}</small>
-                    </td>
+                    <td><b>${s.name}</b> <span class="badge" style="background:${color}; color:${textC}">${badge}</span><br><small style="color:#6b7280">${s.batch}</small></td>
                     <td>
                         <div style="font-weight:700; color:${f.currentDue > 0 ? 'var(--danger)' : 'var(--success)'}">
                             ${f.currentDue > 0 ? 'Due: ₹'+f.currentDue : 'Paid'}
                         </div>
-                        <small>Total Paid: ₹${f.paid}</small>
+                        <small>Paid: ₹${f.paid}</small>
                     </td>
-                    <td>${actionButtons}</td>
+                    <td>${buttons}</td>
                 </tr>`;
         });
     }
@@ -522,7 +511,6 @@
         students.forEach(s => {
             const f = getFinance(s);
             totalRev += f.paid;
-            
             if(s.status === 'dropout') {
                 dropCount++;
             } else {
@@ -542,15 +530,13 @@
         document.getElementById('d_expense').innerText = '₹' + totalExp.toLocaleString();
         
         const profit = totalRev - totalExp;
-        const profitEl = document.getElementById('d_profit');
-        profitEl.innerText = '₹' + profit.toLocaleString();
-        profitEl.style.color = profit >= 0 ? 'var(--success)' : 'var(--danger)';
+        const pEl = document.getElementById('d_profit');
+        pEl.innerText = '₹' + profit.toLocaleString();
+        pEl.style.color = profit >= 0 ? 'var(--success)' : 'var(--danger)';
     }
 
     // --- PAYMENTS ---
-    function openPay(id) {
-        currentId = id; document.getElementById('modal').style.display='flex';
-    }
+    function openPay(id) { currentId = id; document.getElementById('modal').style.display='flex'; }
     function submitPay() {
         const amt = Number(document.getElementById('payAmount').value);
         const type = document.getElementById('payType').value;
@@ -560,8 +546,11 @@
             db.ref('students/'+currentId+'/payments').set([...(s.payments||[]), newPay]);
             document.getElementById('modal').style.display='none';
             document.getElementById('payAmount').value='';
-            const text = `🧾 *RECEIPT*\nName: ${s.name}\nPaid: ₹${amt} (${type})\nThank you!`;
-            window.open(`https://wa.me/${s.phone}?text=${encodeURIComponent(text)}`, '_blank');
+            
+            // PROFESSIONAL RECEIPT
+            const dateStr = new Date().toLocaleDateString('en-IN');
+            const msg = `🧾 *PAYMENT RECEIPT*\n--------------------------------\n🎓 *TIKARKHANJI JNYCTSD*\n--------------------------------\n👤 Name: *${s.name}*\n📂 Batch: ${s.batch}\n📅 Date: ${dateStr}\n\n💰 *Received: ₹${amt}*\n📌 Type: ${type}\n\n✅ *Status: Paid*\n--------------------------------\nThank you for your payment! 🙏`;
+            window.open(`https://wa.me/${s.phone}?text=${encodeURIComponent(msg)}`, '_blank');
         }
     }
 
