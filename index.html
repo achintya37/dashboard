@@ -38,18 +38,24 @@
         .section.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* Stats */
+        /* Stats & Dashboard */
         .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; margin-bottom: 30px; }
         .stat-card { background: white; padding: 25px; border-radius: 16px; position: relative; overflow: hidden; box-shadow: 0 2px 5px rgba(0,0,0,0.05); border-left: 5px solid var(--primary); }
         .stat-val { font-size: 1.8rem; font-weight: 700; color: var(--text); margin-top: 5px; }
         .stat-label { font-size: 0.85rem; font-weight: 600; color: #6b7280; text-transform: uppercase; }
+
+        /* Yearly Grid */
+        .yearly-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(80px, 1fr)); gap: 10px; margin-top: 15px; }
+        .month-box { background: white; border: 1px solid #e5e7eb; padding: 10px; border-radius: 10px; text-align: center; }
+        .month-box h4 { font-size: 0.75rem; color: #6b7280; margin-bottom: 5px; text-transform: uppercase; }
+        .month-box p { font-weight: 700; color: var(--primary); font-size: 0.9rem; }
 
         /* Content & Form */
         .content-card { background: white; padding: 25px; border-radius: 16px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); margin-bottom: 25px; }
         .input-box, select { width: 100%; padding: 12px 15px; border: 2px solid #e5e7eb; border-radius: 10px; margin-bottom: 15px; outline: none; background: #fff; font-size: 0.95rem; }
         .btn { width: 100%; padding: 14px; border: none; border-radius: 10px; font-weight: 600; color: white; cursor: pointer; background: var(--primary); font-size: 1rem; }
         
-        /* Table & Actions */
+        /* Table */
         table { width: 100%; border-collapse: collapse; min-width: 700px; }
         th { background: #f9fafb; padding: 15px; text-align: left; font-size: 0.8rem; font-weight: 700; color: #6b7280; border-bottom: 2px solid #e5e7eb; }
         td { padding: 15px; border-bottom: 1px solid #f3f4f6; font-size: 0.95rem; vertical-align: middle; }
@@ -76,11 +82,25 @@
         .modal { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:200; justify-content:center; align-items:center; }
         .modal-content { background: white; padding: 30px; border-radius: 20px; width: 90%; max-width: 400px; }
 
+        /* Mobile Optimization */
         @media (max-width: 768px) {
-            .sidebar { position: fixed; bottom: 0; left: 0; width: 100%; height: 70px; flex-direction: row; justify-content: space-around; padding: 5px; border-top: 1px solid #e5e7eb; border-right: none; }
+            .sidebar { 
+                position: fixed; bottom: 0; left: 0; width: 100%; height: 65px; 
+                flex-direction: row; justify-content: space-between; padding: 0 10px; 
+                border-top: 1px solid #e5e7eb; border-right: none; overflow-x: auto;
+                background: white; z-index: 1000;
+            }
             .brand { display: none; }
-            .nav-item { flex-direction: column; gap: 2px; font-size: 0.65rem; padding: 8px; margin: 0; border-radius: 8px; background: transparent !important; color: #9ca3af; }
+            .nav-item { 
+                flex-direction: column; gap: 2px; font-size: 0.6rem; padding: 8px 12px; 
+                margin: 0; border-radius: 8px; background: transparent !important; color: #9ca3af; 
+                min-width: 60px; justify-content: center; text-align: center; border-left: none !important;
+            }
+            .nav-item i { font-size: 1.1rem; margin-bottom: 2px; }
             .nav-item.active { color: var(--primary); }
+            /* Mobile Logout */
+            .nav-item[onclick="logout()"] { color: var(--danger) !important; margin-top: 0 !important; }
+            
             .main { padding: 15px; padding-bottom: 100px; }
             .stats-grid, .tracker-cols { grid-template-columns: 1fr; }
         }
@@ -95,17 +115,18 @@
             <button class="google-btn" onclick="googleLogin()">
                 <i class="fab fa-google"></i> Login with Google
             </button>
-            <div id="loader" style="display:none; margin-top:10px; color:#6b7280; font-size:0.8rem;">Authenticating...</div>
+            <div id="loader" style="display:none; margin-top:10px; color:#6b7280; font-size:0.8rem;">Connecting...</div>
             <p id="login-status" style="margin-top: 15px; color: red; font-size: 0.8rem;"></p>
         </div>
     </div>
 
     <div class="sidebar" id="sidebar" style="display: none;">
         <div class="brand"><h1>TIKARKHANJI<br>JNYCTSD</h1><p>MANAGEMENT PRO</p></div>
-        <div class="nav-item active" id="btn-dash" onclick="navigate('dashboard')"><i class="fas fa-th-large"></i><span>Dashboard</span></div>
-        <div class="nav-item" id="btn-track" onclick="navigate('monthTracker')"><i class="fas fa-calendar-check"></i><span>Monthly Fees</span></div> <div class="nav-item" id="btn-adm" onclick="navigate('admission')"><i class="fas fa-user-plus"></i><span>Admission</span></div>
+        <div class="nav-item active" id="btn-dash" onclick="navigate('dashboard')"><i class="fas fa-th-large"></i><span>Home</span></div>
+        <div class="nav-item" id="btn-track" onclick="navigate('monthTracker')"><i class="fas fa-calendar-check"></i><span>Fees</span></div>
+        <div class="nav-item" id="btn-adm" onclick="navigate('admission')"><i class="fas fa-user-plus"></i><span>Add</span></div>
         <div class="nav-item" id="btn-std" onclick="navigate('students')"><i class="fas fa-users"></i><span>Students</span></div>
-        <div class="nav-item" id="btn-exp" onclick="navigate('expenses')"><i class="fas fa-wallet"></i><span>Expenses</span></div>
+        <div class="nav-item" id="btn-exp" onclick="navigate('expenses')"><i class="fas fa-wallet"></i><span>Exp</span></div>
         <div class="nav-item" style="margin-top: auto; color: var(--danger);" onclick="logout()"><i class="fas fa-sign-out-alt"></i><span>Logout</span></div>
     </div>
 
@@ -122,12 +143,11 @@
                 <div class="stat-card" style="border-color: #10b981;">
                     <div class="stat-label">Total Revenue</div>
                     <div class="stat-val" style="color:var(--success)" id="d_collected">₹0</div>
-                    <div style="font-size:0.8rem; color:#6b7280; margin-top:5px;">Lifetime Collection</div>
                 </div>
                 <div class="stat-card" style="border-color: #ef4444;">
                     <div class="stat-label">Market Due</div>
                     <div class="stat-val" style="color:var(--danger)" id="d_due">₹0</div>
-                    <div style="font-size:0.8rem; color:#6b7280; margin-top:5px;">Recoverable Amount</div>
+                    <div style="font-size:0.8rem; color:#6b7280; margin-top:5px;">Till Previous Month</div>
                 </div>
                 <div class="stat-card" style="border-color: #ec4899;">
                     <div class="stat-label">Total Expense</div>
@@ -136,12 +156,16 @@
                 <div class="stat-card" style="border-color: #000;">
                     <div class="stat-label">Net Profit</div>
                     <div class="stat-val" id="d_profit">₹0</div>
-                    <div style="font-size:0.8rem; color:#6b7280; margin-top:5px;">Revenue - Expenses</div>
                 </div>
-                <div class="stat-card" style="border-color: #8b5cf6;">
-                    <div class="stat-label">Projected Revenue</div>
-                    <div class="stat-val" style="color:#8b5cf6" id="d_projected">₹0</div>
-                </div>
+            </div>
+
+            <div class="content-card">
+                <h3 style="margin-bottom:15px; display:flex; justify-content:space-between; align-items:center;">
+                    <span>📈 <span id="currentYear"></span> Monthly Collection</span>
+                    <span style="font-size:0.8rem; color:var(--primary); font-weight:normal;">Auto-updates</span>
+                </h3>
+                <div class="yearly-grid" id="yearlyStats">
+                    </div>
             </div>
         </div>
 
@@ -158,7 +182,6 @@
                         </h3>
                         <div id="unpaidList"></div>
                     </div>
-
                     <div class="tracker-list">
                         <h3 style="color:#10b981; border-bottom:2px solid #10b981; padding-bottom:10px; margin-bottom:10px; position:sticky; top:0; background:white;">
                             ✅ Paid (<span id="paidCount">0</span>)
@@ -286,7 +309,7 @@
     </div>
 
 <script>
-    // 🔥 FIXED CONFIG (Using Valid API Key) 🔥
+    // 🔥 FIXED CONFIG (Using Valid API Key from your screenshots) 🔥
     const firebaseConfig = {
         apiKey: "AIzaSyCUmRYc8WtQP3LW_85i5Czore9YjWw0yLU",
         authDomain: "tikarkhanjijnyctsd.firebaseapp.com",
@@ -304,12 +327,12 @@
     const ADMIN_EMAIL = "achintyaghosh37@gmail.com"; 
 
     // STATE
-    let students = [];
+let students = [];
     let expenses = [];
     let currentId = null;
     let studentViewMode = 'active';
 
-    // --- AUTHENTICATION ---
+    // --- AUTH ---
     function googleLogin() {
         document.getElementById('loader').style.display = 'block';
         const provider = new firebase.auth.GoogleAuthProvider();
@@ -347,7 +370,6 @@
             });
             updateDashboard();
             renderTable();
-            // Load current month in tracker if empty
             if(!document.getElementById('trackerMonth').value) {
                 const now = new Date();
                 const mStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
@@ -366,7 +388,63 @@
         });
     }
 
-    // --- TRACKER LOGIC (RESTORED) ---
+    // --- DASHBOARD (YEARLY BREAKDOWN) ---
+    function updateDashboard() {
+        let activeCount = 0, dropCount = 0;
+        let totalRev = 0, marketDue = 0;
+        let totalExp = 0;
+        
+        const currentYear = new Date().getFullYear();
+        document.getElementById('currentYear').innerText = currentYear;
+        const monthlyStats = Array(12).fill(0); 
+
+        students.forEach(s => {
+            const f = getFinance(s);
+            totalRev += f.paid;
+            
+            if(s.status === 'dropout') {
+                dropCount++;
+            } else {
+                activeCount++;
+                marketDue += f.currentDue;
+            }
+
+            s.payments.forEach(p => {
+                const pDate = new Date(p.date);
+                if (pDate.getFullYear() === currentYear) {
+                    monthlyStats[pDate.getMonth()] += p.amount;
+                }
+            });
+        });
+
+        expenses.forEach(e => totalExp += e.amount);
+
+        document.getElementById('d_active').innerText = activeCount;
+        document.getElementById('d_dropout').innerText = dropCount;
+        document.getElementById('d_collected').innerText = '₹' + totalRev.toLocaleString();
+        document.getElementById('d_due').innerText = '₹' + marketDue.toLocaleString();
+        document.getElementById('d_expense').innerText = '₹' + totalExp.toLocaleString();
+        
+        const profit = totalRev - totalExp;
+        const pEl = document.getElementById('d_profit');
+        pEl.innerText = '₹' + profit.toLocaleString();
+        pEl.style.color = profit >= 0 ? 'var(--success)' : 'var(--danger)';
+
+        // Render Yearly Grid
+        const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+        const grid = document.getElementById('yearlyStats');
+        grid.innerHTML = '';
+        monthlyStats.forEach((amount, index) => {
+            grid.innerHTML += `
+                <div class="month-box">
+                    <h4>${monthNames[index]}</h4>
+                    <p>₹${amount.toLocaleString()}</p>
+                </div>
+            `;
+        });
+    }
+
+    // --- TRACKER LOGIC (FIXED) ---
     function loadTrackerData() {
         const mInput = document.getElementById('trackerMonth').value;
         if(!mInput) return;
@@ -377,13 +455,12 @@
         unpaidList.innerHTML = ''; paidList.innerHTML = '';
         let uCount=0, pCount=0;
 
-        // ONLY ACTIVE STUDENTS
         const activeStudents = students.filter(s => s.status === 'active');
 
         activeStudents.forEach(s => {
+            // Updated Check: Is there ANY payment in this month?
             const hasPaid = s.payments.some(p => {
                 const d = new Date(p.date);
-                // Check if paid in this month (any type or specifically monthly)
                 return d.getFullYear() == year && (d.getMonth()+1) == month && p.type === 'Monthly Fee';
             });
 
@@ -457,7 +534,7 @@
         navigate('students');
     });
 
-    // --- STUDENT ACTIONS ---
+    // --- ACTIONS ---
     function switchStudentView(mode) {
         studentViewMode = mode;
         document.getElementById('btn-view-active').classList.toggle('active', mode === 'active');
@@ -466,21 +543,15 @@
     }
 
     function markDropout(id) {
-        if(confirm("Mark as Dropout?\nStudent will be moved to Dropout List.")) {
-            db.ref('students/' + id).update({ status: 'dropout' });
-        }
+        if(confirm("Confirm Drop-Out?")) db.ref('students/' + id).update({ status: 'dropout' });
     }
 
     function restoreStudent(id) {
-        if(confirm("Restore to Active List?")) {
-            db.ref('students/' + id).update({ status: 'active' });
-        }
+        if(confirm("Restore to Active List?")) db.ref('students/' + id).update({ status: 'active' });
     }
 
     function deleteStudent(id) {
-        if(confirm("⚠️ PERMANENTLY DELETE?\nThis cannot be undone!")) {
-            db.ref('students/' + id).remove();
-        }
+        if(confirm("⚠️ DELETE PERMANENTLY?")) db.ref('students/' + id).remove();
     }
 
     // --- EXPENSES ---
@@ -515,16 +586,18 @@
         });
     }
 
-    // --- FINANCE LOGIC ---
+    // --- FINANCE LOGIC (UPDATED: PREVIOUS MONTH DUE) ---
     function getFinance(s) {
         let paid = 0;
         s.payments.forEach(p => paid += p.amount);
 
-        let totalProjected = s.admFee + s.examFee + (s.monthlyFee * s.duration);
         const start = new Date(s.joinDate);
         const now = new Date();
-        let months = (now.getFullYear() - start.getFullYear()) * 12 + (now.getMonth() - start.getMonth()) + 1;
-        if (months < 1) months = 1;
+        
+        // LOGIC UPDATE: Calculate months passed WITHOUT +1 (Post-paid logic)
+        let months = (now.getFullYear() - start.getFullYear()) * 12 + (now.getMonth() - start.getMonth());
+        
+        if (months < 0) months = 0; // If just joined this month, due is 0
         if (months > s.duration) months = s.duration;
 
         let currentPayable = s.admFee + s.examFee + (s.monthlyFee * months);
@@ -532,9 +605,8 @@
 
         if(s.status === 'dropout') {
             currentDue = 0; 
-            totalProjected = paid;
         }
-        return { paid, currentDue, totalProjected };
+        return { paid, currentDue };
     }
 
     // --- RENDER TABLE ---
@@ -557,8 +629,6 @@
             const textC = s.type==='senior' ? '#7c3aed' : '#0284c7';
 
             let buttons = '';
-            
-            // PROFESSIONAL WHATSAPP REMINDER
             const reminderMsg = `⚠️ *FEE REMINDER*\n--------------------------------\n🎓 *TIKARKHANJI JNYCTSD*\n--------------------------------\n👤 Student: *${s.name}*\n📂 Batch: ${s.batch}\n\n📉 *Pending Due: ₹${f.currentDue}*\n\nYour fees are overdue. Please clear them soon.\n--------------------------------\n🙏 Thank You`;
 
             if(studentViewMode === 'active') {
@@ -577,7 +647,11 @@
 
             tbody.innerHTML += `
                 <tr>
-                    <td><b>${s.name}</b> <span style="background:${color}; color:${textC}; padding:2px 6px; border-radius:4px; font-size:0.75rem;">${badge}</span><br><small style="color:#6b7280">${s.batch}</small></td>
+                    <td>
+                        <b>${s.name}</b> <span style="background:${color}; color:${textC}; padding:2px 6px; border-radius:4px; font-size:0.75rem;">${badge}</span>
+                        <br><i class="fas fa-phone-alt" style="font-size:0.7rem; color:#6b7280; margin-right:3px;"></i><span style="font-size:0.85rem; color:#4b5563;">${s.phone}</span>
+                        <br><small style="color:#6b7280">${s.batch}</small>
+                    </td>
                     <td>
                         <div style="font-weight:700; color:${f.currentDue > 0 ? 'var(--danger)' : 'var(--success)'}">
                             ${f.currentDue > 0 ? 'Due: ₹'+f.currentDue : 'Paid'}
@@ -587,39 +661,6 @@
                     <td>${buttons}</td>
                 </tr>`;
         });
-    }
-
-    // --- DASHBOARD ---
-    function updateDashboard() {
-        let activeCount = 0, dropCount = 0;
-        let totalRev = 0, marketDue = 0, projectedRev = 0;
-        let totalExp = 0;
-
-        students.forEach(s => {
-            const f = getFinance(s);
-            totalRev += f.paid;
-            if(s.status === 'dropout') {
-                dropCount++;
-            } else {
-                activeCount++;
-                marketDue += f.currentDue;
-                projectedRev += f.totalProjected;
-            }
-        });
-
-        expenses.forEach(e => totalExp += e.amount);
-
-        document.getElementById('d_active').innerText = activeCount;
-        document.getElementById('d_dropout').innerText = dropCount;
-        document.getElementById('d_collected').innerText = '₹' + totalRev.toLocaleString();
-        document.getElementById('d_due').innerText = '₹' + marketDue.toLocaleString();
-        document.getElementById('d_projected').innerText = '₹' + projectedRev.toLocaleString();
-        document.getElementById('d_expense').innerText = '₹' + totalExp.toLocaleString();
-        
-        const profit = totalRev - totalExp;
-        const pEl = document.getElementById('d_profit');
-        pEl.innerText = '₹' + profit.toLocaleString();
-        pEl.style.color = profit >= 0 ? 'var(--success)' : 'var(--danger)';
     }
 
     // --- PAYMENTS ---
@@ -634,10 +675,8 @@
             document.getElementById('modal').style.display='none';
             document.getElementById('payAmount').value='';
             
-            // PROFESSIONAL RECEIPT MESSAGE
             const dateStr = new Date().toLocaleDateString('en-IN');
             const receiptMsg = `🧾 *PAYMENT RECEIPT*\n--------------------------------\n🎓 *TIKARKHANJI JNYCTSD*\n--------------------------------\n👤 Name: *${s.name}*\n📂 Batch: ${s.batch}\n📅 Date: ${dateStr}\n\n💰 *Received: ₹${amt}*\n📌 Type: ${type}\n\n✅ *Status: Paid*\n--------------------------------\nThank you for your payment! 🙏`;
-            
             window.open(`https://wa.me/${s.phone}?text=${encodeURIComponent(receiptMsg)}`, '_blank');
         }
     }
