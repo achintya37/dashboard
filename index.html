@@ -13,7 +13,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
     <style>
-        :root { --primary: #0ea5e9; --primary-dark: #0284c7; --bg: #f8fafc; --white: #ffffff; --text: #1e293b; --success: #10b981; --danger: #ef4444; }
+        :root { --primary: #0ea5e9; --primary-dark: #0284c7; --bg: #f8fafc; --white: #ffffff; --text: #1e293b; --success: #10b981; --danger: #ef4444; --warning: #f59e0b; }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; -webkit-tap-highlight-color: transparent; }
         body { background-color: var(--bg); display: flex; height: 100vh; overflow: hidden; }
 
@@ -30,7 +30,7 @@
         .brand h1 { font-size: 1.3rem; font-weight: 800; color: var(--primary-dark); line-height: 1.2; }
         .nav-item { padding: 14px; margin-bottom: 10px; border-radius: 10px; color: #475569; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 12px; }
         .nav-item.active { background: var(--primary); color: white; }
-        .main { flex: 1; padding: 30px; overflow-y: auto; height: 100vh; padding-bottom: 120px; display: none; } /* Scroll fix */
+        .main { flex: 1; padding: 30px; overflow-y: auto; height: 100vh; padding-bottom: 120px; display: none; }
         
         .section { display: none; }
         .section.active { display: block; animation: fadeIn 0.3s; }
@@ -43,7 +43,7 @@
         
         .chart-box { background: white; padding: 15px; border-radius: 16px; height: 350px; margin-bottom: 30px; }
         .content-card { background: white; padding: 20px; border-radius: 16px; margin-bottom: 20px; }
-        .input-box { width: 100%; padding: 12px; border: 2px solid #e2e8f0; border-radius: 8px; margin-bottom: 15px; outline: none; }
+        .input-box, select { width: 100%; padding: 12px; border: 2px solid #e2e8f0; border-radius: 8px; margin-bottom: 15px; outline: none; background: #fff; }
         .btn { width: 100%; padding: 15px; border: none; border-radius: 10px; font-weight: 700; color: white; cursor: pointer; background: var(--primary); margin-top: 10px; }
         
         table { width: 100%; border-collapse: collapse; min-width: 600px; margin-top: 15px; }
@@ -52,13 +52,24 @@
         .action-btn { width: 34px; height: 34px; border-radius: 50%; border: none; color: white; cursor: pointer; margin-right: 5px; }
         
         .modal { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:200; justify-content:center; align-items:center; }
-        .modal-content { background: white; padding: 25px; border-radius: 20px; width: 90%; max-width: 380px; }
+        .modal-content { background: white; padding: 25px; border-radius: 20px; width: 90%; max-width: 380px; max-height: 80vh; overflow-y: auto; }
+
+        /* Month Tracker Specifics */
+        .month-selector { margin-bottom: 20px; display: flex; align-items: center; gap: 10px; background: white; padding: 15px; border-radius: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .tracker-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .tracker-list { background: white; padding: 15px; border-radius: 12px; height: 400px; overflow-y: auto; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .tracker-item { display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid #eee; }
+        .tracker-item:last-child { border-bottom: none; }
+        .tracker-badge { padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; }
+        .bg-paid { background: #dcfce7; color: #166534; }
+        .bg-unpaid { background: #fee2e2; color: #991b1b; }
 
         @media (max-width: 768px) {
             .sidebar { position: fixed; bottom: 0; left: 0; width: 100%; height: 70px; flex-direction: row; justify-content: space-around; padding: 10px; border-top: 2px solid #bae6fd; z-index: 1000; background: white;}
             .brand { display: none; }
             .nav-item { flex-direction: column; gap: 4px; font-size: 0.7rem; padding: 8px; margin: 0; }
             .main { padding: 20px; padding-bottom: 120px; }
+            .tracker-cols { grid-template-columns: 1fr; } /* Stack on mobile */
         }
     </style>
 </head>
@@ -72,7 +83,6 @@
             <button class="google-btn" onclick="googleLogin()">
                 <i class="fab fa-google"></i> Login with Google
             </button>
-            <br>
             <div class="loader" id="loader"></div>
             <p id="login-status" style="margin-top: 15px; color: red; font-size: 0.9rem;"></p>
         </div>
@@ -82,7 +92,7 @@
         <div class="brand"><h1>TIKARKHANJI<br>JNYCTSD</h1><p>FEE MANAGEMENT</p></div>
         <div class="nav-item active" id="btn-dash" onclick="navigate('dashboard')"><i class="fas fa-chart-pie"></i><span>Dashboard</span></div>
         <div class="nav-item" id="btn-adm" onclick="navigate('admission')"><i class="fas fa-user-plus"></i><span>Admission</span></div>
-        <div class="nav-item" id="btn-std" onclick="navigate('students')"><i class="fas fa-list"></i><span>Students</span></div>
+        <div class="nav-item" id="btn-track" onclick="navigate('monthTracker')"><i class="fas fa-calendar-check"></i><span>Monthly Tracker</span></div> <div class="nav-item" id="btn-std" onclick="navigate('students')"><i class="fas fa-list"></i><span>Students</span></div>
         <div class="nav-item" style="margin-top: auto; background: #fee2e2; color: #ef4444;" onclick="logout()"><i class="fas fa-sign-out-alt"></i><span>Logout</span></div>
     </div>
 
@@ -92,14 +102,39 @@
             <div class="stats-grid">
                 <div class="stat-card"><h3>Students</h3><h1 id="d_students">0</h1></div>
                 <div class="stat-card" style="border-color:#10b981"><h3>Collected</h3><h1 style="color:#10b981" id="d_collected">₹0</h1></div>
-                <div class="stat-card" style="border-color:#ef4444"><h3>Total Pending (Admin)</h3><h1 style="color:#ef4444" id="d_due">₹0</h1></div>
+                <div class="stat-card" style="border-color:#ef4444"><h3>Market Due</h3><h1 style="color:#ef4444" id="d_due">₹0</h1></div>
             </div>
             <div class="breakdown-grid">
-                <div class="mini-card"><h3 style="color:#ef4444" id="d_due_adm">₹0</h3><p>Admission Due</p></div>
-                <div class="mini-card"><h3 style="color:#ef4444" id="d_due_mon">₹0</h3><p>Monthly Due</p></div>
-                <div class="mini-card" style="background:#fff7ed"><h3 style="color:#ea580c" id="d_due_exam">₹0</h3><p>Exam Due (Hidden)</p></div>
+                <div class="mini-card"><h3 style="color:#0ea5e9" id="d_active_mon">0</h3><p>Monthly Students</p></div>
+                <div class="mini-card"><h3 style="color:#8b5cf6" id="d_active_fix">0</h3><p>Course Students</p></div>
             </div>
             <div class="chart-box"><canvas id="financeChart"></canvas></div>
+            <div style="height: 50px;"></div>
+        </div>
+
+        <div id="monthTracker" class="section">
+            <h2 style="margin-bottom:20px">📅 Monthly Fee Tracker</h2>
+            
+            <div class="month-selector">
+                <label style="font-weight: 600;">Select Month:</label>
+                <input type="month" id="trackerMonth" class="input-box" style="margin-bottom:0; width: auto;" onchange="loadTrackerData()">
+            </div>
+
+            <div class="tracker-cols">
+                <div class="tracker-list">
+                    <h3 style="color:#ef4444; border-bottom: 2px solid #ef4444; padding-bottom: 10px; margin-bottom: 10px;">
+                        ❌ Unpaid (<span id="unpaidCount">0</span>)
+                    </h3>
+                    <div id="unpaidList"></div>
+                </div>
+
+                <div class="tracker-list">
+                    <h3 style="color:#10b981; border-bottom: 2px solid #10b981; padding-bottom: 10px; margin-bottom: 10px;">
+                        ✅ Paid (<span id="paidCount">0</span>)
+                    </h3>
+                    <div id="paidList"></div>
+                </div>
+            </div>
             <div style="height: 50px;"></div>
         </div>
 
@@ -107,18 +142,35 @@
             <h2 style="margin-bottom:20px">👤 New Admission</h2>
             <div class="content-card">
                 <form id="admForm">
+                    <div style="margin-bottom: 15px; background: #f0f9ff; padding: 10px; border-radius: 8px; border: 1px solid #bae6fd;">
+                        <label style="font-weight: 600; display: block; margin-bottom: 5px;">Student Category:</label>
+                        <select id="studentType" onchange="toggleFeeInputs()" style="margin-bottom: 5px;">
+                            <option value="monthly">Monthly Student (Class 9 & Below)</option>
+                            <option value="course">Fixed Course Student</option>
+                        </select>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <input type="checkbox" id="isOldStudent" onchange="toggleOldStudent()" style="width: 20px; height: 20px;">
+                            <label for="isOldStudent" style="font-size: 0.9rem; cursor: pointer;">Old Student? (No Admission Fee)</label>
+                        </div>
+                    </div>
+
                     <input type="text" id="name" required class="input-box" placeholder="Student Name">
                     <input type="text" id="batch" required class="input-box" placeholder="Batch Name">
                     <input type="number" id="phone" required class="input-box" placeholder="Phone Number">
+                    <label style="font-size: 0.8rem; font-weight: 600;">Joining Date:</label>
                     <input type="date" id="joinDate" required class="input-box">
-                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px">
-                        <input type="number" id="admFee" value="400" class="input-box" placeholder="Adm Fee">
-                        <input type="number" id="monthlyFee" value="300" class="input-box" placeholder="Monthly Fee">
+                    
+                    <div id="feeSection">
+                        <input type="number" id="admFee" value="500" class="input-box" placeholder="Admission Fee">
+                        <div id="monthlyInputs">
+                            <input type="number" id="monthlyFee" value="250" class="input-box" placeholder="Monthly Fee Amount">
+                        </div>
+                        <div id="courseInputs" style="display: none;">
+                            <input type="number" id="courseFee" value="5000" class="input-box" placeholder="Total Course Fee">
+                        </div>
+                        <input type="number" id="examFee" value="0" class="input-box" placeholder="Exam Fee (Optional)">
                     </div>
-                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px">
-                        <input type="number" id="duration" value="12" class="input-box" placeholder="Months">
-                        <input type="number" id="examFee" value="500" class="input-box" placeholder="Exam Fee">
-                    </div>
+
                     <button type="submit" class="btn">Add Student</button>
                 </form>
             </div>
@@ -128,8 +180,8 @@
         <div id="students" class="section">
             <h2 style="margin-bottom:20px">📋 Student List</h2>
             <div class="content-card">
-                <input type="text" id="search" placeholder="Search..." onkeyup="renderTable()" class="input-box">
-                <div style="overflow-x:auto"><table id="table"><thead><tr><th>Name</th><th>Contact</th><th>Due (Total)</th><th>Action</th></tr></thead><tbody id="tbody"></tbody></table></div>
+                <input type="text" id="search" placeholder="Search Name..." onkeyup="renderTable()" class="input-box">
+                <div style="overflow-x:auto"><table id="table"><thead><tr><th>Name/Type</th><th>Contact</th><th>Status/Due</th><th>Action</th></tr></thead><tbody id="tbody"></tbody></table></div>
             </div>
             <div style="height: 50px;"></div>
         </div>
@@ -138,33 +190,29 @@
     <div id="modal" class="modal">
         <div class="modal-content">
             <h3>💰 Collect Payment</h3><br>
-            <select id="payType" class="input-box">
-                <option>Monthly Fee</option><option>Admission Fee</option><option>Exam Fee</option>
-            </select>
-            <input type="number" id="payAmount" class="input-box" placeholder="Amount">
-            <button onclick="submitPay()" class="btn">Confirm</button>
+            <select id="payType" class="input-box"></select>
+            <input type="number" id="payAmount" class="input-box" placeholder="Enter Amount">
+            <button onclick="submitPay()" class="btn">Confirm Payment</button>
             <button onclick="document.getElementById('modal').style.display='none'" class="btn" style="background:#e2e8f0; color:#333">Cancel</button>
         </div>
     </div>
 
 <script>
-    // 🔥 YOUR FIREBASE CONFIG (Copied from your screenshot) 🔥
+    // 🔥 YOUR FIREBASE CONFIG (Step 3 থেকে পাওয়া কোড এখানে) 🔥
     const firebaseConfig = {
-        apiKey: "AIzaSyCUmRYc8WtQP3LW_85i5Czore9YjWw0yLU",
+        apiKey: "YOUR_API_KEY",
         authDomain: "tikarkhanjijnyctsd.firebaseapp.com",
         databaseURL: "https://tikarkhanjijnyctsd-default-rtdb.firebaseio.com",
         projectId: "tikarkhanjijnyctsd",
-        storageBucket: "tikarkhanjijnyctsd.firebasestorage.app",
+        storageBucket: "tikarkhanjijnyctsd.appspot.com",
         messagingSenderId: "513267646081",
-        appId: "1:513267646081:web:1b60262e26e5e6dcef9780"
+        appId: "1:513267646081:web:..."
     };
 
-    // Initialize Firebase
+    // Initialize
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     const db = firebase.database();
-    
-    // 🔐 ADMIN EMAIL (এই ইমেইল ছাড়া কেউ লগইন করতে পারবে না)
     const ADMIN_EMAIL = "achintyaghosh37@gmail.com"; 
 
     // --- VARIABLES ---
@@ -179,9 +227,6 @@
         auth.signInWithPopup(provider).catch(err => {
             document.getElementById('loader').style.display = 'none';
             document.getElementById('login-status').innerText = err.message;
-            if(err.code === 'auth/unauthorized-domain') {
-                alert("Error: Please make sure 'github.io' is added in Firebase Authorized Domains.");
-            }
         });
     }
 
@@ -192,98 +237,153 @@
 
     auth.onAuthStateChanged(user => {
         document.getElementById('loader').style.display = 'none';
-        if (user) {
-            if (user.email === ADMIN_EMAIL) {
-                // Success: Show App
-                document.getElementById('login-overlay').style.display = 'none';
-                document.getElementById('sidebar').style.display = 'flex';
-                document.getElementById('main-content').style.display = 'block';
-                loadData();
-            } else {
-                // Fail: Wrong Email
-                auth.signOut();
-                alert("Access Denied! You are not the Admin.");
-            }
+        if (user && user.email === ADMIN_EMAIL) {
+            document.getElementById('login-overlay').style.display = 'none';
+            document.getElementById('sidebar').style.display = 'flex';
+            document.getElementById('main-content').style.display = 'block';
+            loadData();
+        } else if (user) {
+            auth.signOut();
+            alert("Access Denied!");
         } else {
-            // Not Logged In
             document.getElementById('login-overlay').style.display = 'flex';
-            document.getElementById('sidebar').style.display = 'none';
-            document.getElementById('main-content').style.display = 'none';
         }
     });
 
-    // --- DATABASE (REALTIME) ---
+    // --- DATABASE ---
     function loadData() {
         db.ref('students').on('value', (snapshot) => {
             const data = snapshot.val();
             students = data ? Object.keys(data).map(key => ({ id: key, ...data[key] })) : [];
-            // Repair Data
+            // Data Repair
             students.forEach(s => {
                 if (!s.payments) s.payments = [];
-                s.admFee = s.admFee || 0; s.monthlyFee = s.monthlyFee || 0; s.examFee = s.examFee || 0;
+                s.type = s.type || 'monthly';
+                s.isOld = s.isOld || false;
+                s.admFee = s.admFee || 0;
+                s.monthlyFee = s.monthlyFee || 0;
+                s.courseFee = s.courseFee || 0;
+                s.examFee = s.examFee || 0;
             });
             updateDashboard();
             renderTable();
+            
+            // Auto-load current month for tracker if visible
+            const now = new Date();
+            const monthStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+            if(!document.getElementById('trackerMonth').value) {
+                document.getElementById('trackerMonth').value = monthStr;
+            }
+            loadTrackerData();
         });
     }
 
-    function saveDataToFirebase(studentData) {
-        db.ref('students').push(studentData);
+    function saveDataToFirebase(data) { db.ref('students').push(data); }
+    function deleteFromFirebase(id) { if(confirm("Delete?")) db.ref('students/' + id).remove(); }
+
+    // --- MONTHLY TRACKER LOGIC (NEW) ---
+    function loadTrackerData() {
+        const monthInput = document.getElementById('trackerMonth').value;
+        if(!monthInput) return;
+        const [year, month] = monthInput.split('-'); // YYYY-MM
+
+        const unpaidList = document.getElementById('unpaidList');
+        const paidList = document.getElementById('paidList');
+        unpaidList.innerHTML = '';
+        paidList.innerHTML = '';
+
+        let pCount = 0, uCount = 0;
+
+        // Only filter Monthly students
+        const monthlyStudents = students.filter(s => s.type === 'monthly');
+
+        monthlyStudents.forEach(s => {
+            // Check if this specific month is paid
+            // We check matching year/month in payments array with type 'Monthly Fee'
+            const hasPaid = s.payments.some(p => {
+                const d = new Date(p.date);
+                return p.type === 'Monthly Fee' && 
+                       d.getFullYear() == year && 
+                       (d.getMonth() + 1) == month;
+            });
+
+            const div = document.createElement('div');
+            div.className = 'tracker-item';
+            
+            if(hasPaid) {
+                div.innerHTML = `
+                    <div><b>${s.name}</b><br><small>${s.batch}</small></div>
+                    <span class="tracker-badge bg-paid">PAID</span>
+                `;
+                paidList.appendChild(div);
+                pCount++;
+            } else {
+                // Formatting Month Name for WhatsApp
+                const dateObj = new Date(year, month - 1);
+                const monthName = dateObj.toLocaleString('default', { month: 'long', year: 'numeric' });
+                
+                div.innerHTML = `
+                    <div><b>${s.name}</b><br><small>${s.batch}</small></div>
+                    <button class="action-btn" style="background:#f59e0b" onclick="sendSpecificReminder('${s.phone}', '${s.name}', '${monthName}')" title="Send Reminder">
+                        <i class="fas fa-bell"></i>
+                    </button>
+                `;
+                unpaidList.appendChild(div);
+                uCount++;
+            }
+        });
+
+        document.getElementById('unpaidCount').innerText = uCount;
+        document.getElementById('paidCount').innerText = pCount;
     }
 
-    function deleteFromFirebase(id) {
-        if(confirm("Delete this student permanently?")) {
-            db.ref('students/' + id).remove();
-        }
+    function sendSpecificReminder(phone, name, monthName) {
+        const text = `⚠️ *MONTHLY FEE REMINDER*%0a------------------%0aDear ${name},%0aYour monthly fee for *${monthName}* is pending at TIKARKHANJI JNYCTSD.%0aPlease pay soon.`;
+        window.open(`https://wa.me/${phone}?text=${text}`, '_blank');
     }
 
-    // --- APP LOGIC ---
+    // --- APP NAVIGATION ---
     function navigate(id) {
         document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
         document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
         document.getElementById(id).classList.add('active');
-        if(id==='dashboard') document.getElementById('btn-dash').classList.add('active');
-        if(id==='admission') document.getElementById('btn-adm').classList.add('active');
-        if(id==='students') document.getElementById('btn-std').classList.add('active');
+        
+        // Active Button Mapping
+        const btnMap = { 'dashboard': 'btn-dash', 'admission': 'btn-adm', 'monthTracker': 'btn-track', 'students': 'btn-std' };
+        if(btnMap[id]) document.getElementById(btnMap[id]).classList.add('active');
+        
+        if(id === 'monthTracker') loadTrackerData();
     }
 
-    // Admission
-    document.getElementById('admForm').addEventListener('submit', (e) => {
-        e.preventDefault();
-        const s = {
-            name: document.getElementById('name').value,
-            batch: document.getElementById('batch').value,
-            phone: document.getElementById('phone').value,
-            joinDate: document.getElementById('joinDate').value,
-            admFee: Number(document.getElementById('admFee').value),
-            monthlyFee: Number(document.getElementById('monthlyFee').value),
-            duration: Number(document.getElementById('duration').value),
-            examFee: Number(document.getElementById('examFee').value),
-            payments: []
-        };
-        saveDataToFirebase(s);
-        e.target.reset();
-        alert("Student Added!");
-        navigate('students');
-    });
-
-    // Calculations
+    // --- FINANCIAL CALCULATIONS & TABLE ---
     function getFinance(s) {
-        const total = s.admFee + (s.monthlyFee * s.duration) + s.examFee;
-        let paidAdm=0, paidMon=0, paidExam=0;
-        (s.payments || []).forEach(p => {
-            if(p.type==='Admission Fee') paidAdm+=p.amount;
-            else if(p.type==='Monthly Fee') paidMon+=p.amount;
-            else if(p.type==='Exam Fee') paidExam+=p.amount;
+        let paidAdm = 0, paidTuition = 0, paidExam = 0;
+        s.payments.forEach(p => {
+            if(p.type === 'Admission Fee') paidAdm += p.amount;
+            else if(p.type === 'Exam Fee') paidExam += p.amount;
+            else paidTuition += p.amount;
         });
-        const totalPaid = paidAdm + paidMon + paidExam;
-        return {
-            total, paid: totalPaid, due: total - totalPaid,
-            bd: { adm: s.admFee-paidAdm, mon: (s.monthlyFee*s.duration)-paidMon, exam: s.examFee-paidExam }
-        };
+
+        let totalDue = 0;
+        let breakdown = {};
+
+        if (s.type === 'monthly') {
+            const start = new Date(s.joinDate);
+            const now = new Date();
+            let months = (now.getFullYear() - start.getFullYear()) * 12 + (now.getMonth() - start.getMonth()) + 1;
+            if(months < 1) months = 1;
+            const totalMonthlyDue = months * s.monthlyFee;
+            const currentMonDue = totalMonthlyDue - paidTuition;
+            totalDue = (s.admFee - paidAdm) + (s.examFee - paidExam) + currentMonDue;
+            breakdown = { tuition: currentMonDue };
+        } else {
+            const courseDue = s.courseFee - paidTuition;
+            totalDue = (s.admFee - paidAdm) + (s.examFee - paidExam) + courseDue;
+            breakdown = { tuition: courseDue };
+        }
+        return { totalDue, breakdown, paidTotal: paidAdm + paidTuition + paidExam };
     }
 
-    // Render Table
     function renderTable() {
         const tbody = document.getElementById('tbody');
         const search = document.getElementById('search').value.toLowerCase();
@@ -291,22 +391,17 @@
         
         students.filter(s => s.name.toLowerCase().includes(search)).reverse().forEach(s => {
             const f = getFinance(s);
-            let status = f.due > 0 ? `<span style='color:red; font-weight:bold'>Due: ₹${f.due}</span>` : `<span style='color:green; font-weight:bold'>Paid</span>`;
-            
-            // Logic: Hide bell if only Exam fee is due
-            let studentVisibleDue = Math.max(0, f.bd.adm) + Math.max(0, f.bd.mon);
-            let bellBtn = studentVisibleDue > 0 ? 
-                `<button class="action-btn" style="background:#f59e0b" onclick="sendReminder('${s.id}')"><i class="fas fa-bell"></i></button>` : '';
+            const typeBadge = s.type === 'monthly' ? `<span style="background:#e0f2fe; color:#0284c7; padding:2px 6px; border-radius:4px; font-size:0.7rem;">Monthly</span>` : `<span style="background:#f3e8ff; color:#7c3aed; padding:2px 6px; border-radius:4px; font-size:0.7rem;">Course</span>`;
+            const dueText = f.breakdown.tuition > 0 ? `Due: ₹${f.breakdown.tuition}` : `Paid`;
 
             tbody.innerHTML += `
                 <tr>
-                    <td><b>${s.name}</b><br><small style="color:#64748b">${s.batch}</small></td>
+                    <td><b>${s.name}</b> ${typeBadge}<br><small style="color:#64748b">${s.batch}</small></td>
                     <td>${s.phone}<br>
-                        <a href="tel:${s.phone}" class="action-btn" style="background:#3b82f6; padding:5px;"><i class="fas fa-phone"></i></a>
-                        <a href="https://wa.me/${s.phone}" target="_blank" class="action-btn" style="background:#22c55e; padding:5px;"><i class="fab fa-whatsapp"></i></a>
-                        ${bellBtn}
+                        <a href="tel:${s.phone}" class="action-btn" style="background:#3b82f6"><i class="fas fa-phone"></i></a>
+                        <a href="https://wa.me/${s.phone}" target="_blank" class="action-btn" style="background:#25D366"><i class="fab fa-whatsapp"></i></a>
                     </td>
-                    <td>Paid: ₹${f.paid}<br>${status}</td>
+                    <td><small>Total Due: ₹${f.totalDue}</small><br><span style="font-weight:bold; color:${f.breakdown.tuition > 0 ? '#ef4444' : '#10b981'}">${dueText}</span></td>
                     <td>
                         <button class="action-btn" style="background:#10b981" onclick="openPay('${s.id}')"><i class="fas fa-plus"></i></button>
                         <button class="action-btn" style="background:#ef4444" onclick="deleteFromFirebase('${s.id}')"><i class="fas fa-trash"></i></button>
@@ -315,29 +410,65 @@
         });
     }
 
-    // Dashboard
-    function updateDashboard() {
-        let tCol=0, tDue=0, dAdm=0, dMon=0, dExam=0;
-        const monthlyData = {};
+    // --- PAYMENT ---
+    function openPay(id) {
+        currentId = id; 
+        const s = students.find(x => x.id === id);
+        const select = document.getElementById('payType');
+        select.innerHTML = '';
+        const opt1 = document.createElement('option');
+        opt1.value = s.type === 'monthly' ? "Monthly Fee" : "Course Fee Installment";
+        opt1.innerText = opt1.value;
+        select.appendChild(opt1);
+        select.innerHTML += `<option>Admission Fee</option><option>Exam Fee</option>`;
+        document.getElementById('modal').style.display='flex';
+    }
 
+    function submitPay() {
+        const amt = Number(document.getElementById('payAmount').value);
+        const type = document.getElementById('payType').value;
+        if(amt > 0 && currentId) {
+            const s = students.find(x => x.id === currentId);
+            const newPayment = { date: new Date().toISOString(), amount: amt, type: type };
+            db.ref('students/' + currentId + '/payments').set([...(s.payments||[]), newPayment]);
+            document.getElementById('modal').style.display='none';
+            document.getElementById('payAmount').value = '';
+            
+            const text = `🧾 *RECEIPT*%0aName: ${s.name}%0aPaid: ₹${amt} (${type})%0aThank you!`;
+            window.open(`https://wa.me/${s.phone}?text=${text}`, '_blank');
+        }
+    }
+
+    // --- FORM LOGIC ---
+    function toggleFeeInputs() {
+        const type = document.getElementById('studentType').value;
+        document.getElementById('monthlyInputs').style.display = type === 'monthly' ? 'block' : 'none';
+        document.getElementById('courseInputs').style.display = type === 'course' ? 'block' : 'none';
+    }
+    function toggleOldStudent() {
+        const isOld = document.getElementById('isOldStudent').checked;
+        document.getElementById('admFee').value = isOld ? 0 : 500;
+        document.getElementById('admFee').disabled = isOld;
+    }
+
+    // --- DASHBOARD ---
+    function updateDashboard() {
+        let tCol=0, tDue=0, mCount=0, cCount=0;
+        const monthlyData = {};
         students.forEach(s => {
             const f = getFinance(s);
-            tCol += f.paid; tDue += f.due;
-            dAdm += Math.max(0, f.bd.adm); dMon += Math.max(0, f.bd.mon); dExam += Math.max(0, f.bd.exam);
-
+            tCol += f.paidTotal; tDue += f.totalDue;
+            if(s.type === 'monthly') mCount++; else cCount++;
             (s.payments||[]).forEach(p => {
-                const d = new Date(p.date);
-                const k = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+                const k = `${new Date(p.date).getFullYear()}-${String(new Date(p.date).getMonth()+1).padStart(2,'0')}`;
                 monthlyData[k] = (monthlyData[k]||0) + p.amount;
             });
         });
-
         document.getElementById('d_students').innerText = students.length;
         document.getElementById('d_collected').innerText = '₹' + tCol;
         document.getElementById('d_due').innerText = '₹' + tDue;
-        document.getElementById('d_due_adm').innerText = '₹' + dAdm;
-        document.getElementById('d_due_mon').innerText = '₹' + dMon;
-        document.getElementById('d_due_exam').innerText = '₹' + dExam;
+        document.getElementById('d_active_mon').innerText = mCount;
+        document.getElementById('d_active_fix').innerText = cCount;
 
         const ctx = document.getElementById('financeChart');
         if (ctx) {
@@ -345,49 +476,10 @@
             const keys = Object.keys(monthlyData).sort();
             financeChart = new Chart(ctx.getContext('2d'), {
                 type: 'bar',
-                data: { labels: keys, datasets: [{ label: 'Collection', data: keys.map(k=>monthlyData[k]), backgroundColor: '#0ea5e9', borderRadius: 5 }] },
+                data: { labels: keys, datasets: [{ label: 'Collection', data: keys.map(k=>monthlyData[k]), backgroundColor: '#0ea5e9' }] },
                 options: { responsive: true, maintainAspectRatio: false }
             });
         }
-    }
-
-    // Payment
-    function openPay(id) { currentId = id; document.getElementById('modal').style.display='flex'; }
-    function submitPay() {
-        const amt = Number(document.getElementById('payAmount').value);
-        const type = document.getElementById('payType').value;
-        if(amt > 0 && currentId) {
-            const s = students.find(x => x.id === currentId);
-            const newPayment = { date: new Date().toISOString(), amount: amt, type: type };
-            // Update Firebase
-            const updatedPayments = [...(s.payments||[]), newPayment];
-            db.ref('students/' + currentId + '/payments').set(updatedPayments);
-            
-            document.getElementById('modal').style.display='none';
-            document.getElementById('payAmount').value = '';
-            
-            // Receipt
-            const text = `🧾 *RECEIPT*%0a------------------%0aName: ${s.name}%0aBatch: ${s.batch}%0a💰 *Paid: ₹${amt}* (${type})%0a------------------%0aThank you!`;
-            window.open(`https://wa.me/${s.phone}?text=${text}`, '_blank');
-        }
-    }
-
-    // Reminder (Hides Exam Fee)
-    function sendReminder(id) {
-        const s = students.find(x => x.id === id);
-        const f = getFinance(s);
-        const studentDue = Math.max(0, f.bd.adm) + Math.max(0, f.bd.mon);
-        
-        if(studentDue <= 0) {
-            alert("Only Exam Fee Pending. No SMS sent."); return;
-        }
-
-        let bd = "";
-        if(f.bd.adm > 0) bd += `• Admission: ₹${f.bd.adm}%0a`;
-        if(f.bd.mon > 0) bd += `• Monthly: ₹${f.bd.mon}%0a`;
-
-        const text = `⚠️ *FEE REMINDER*%0a------------------%0aDear ${s.name},%0aYour fees are pending at TIKARKHANJI JNYCTSD.%0a%0a📊 *Breakdown:*%0a${bd}%0a📉 *TOTAL DUE: ₹${studentDue}*%0a------------------%0aPlease pay soon.`;
-        window.open(`https://wa.me/${s.phone}?text=${text}`, '_blank');
     }
 
     document.getElementById('joinDate').valueAsDate = new Date();
