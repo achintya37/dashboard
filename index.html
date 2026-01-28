@@ -66,6 +66,12 @@
         .btn-del { background: #fee2e2; color: var(--danger); } 
         .btn-del:hover { background: var(--danger); color: white; }
 
+        /* Tracker Specific */
+        .tracker-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .tracker-list { background: white; padding: 15px; border-radius: 12px; height: 400px; overflow-y: auto; border: 1px solid #e5e7eb; }
+        .tracker-item { display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid #f3f4f6; }
+        .bg-paid { background: #dcfce7; color: #166534; padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; }
+
         /* Modal */
         .modal { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:200; justify-content:center; align-items:center; }
         .modal-content { background: white; padding: 30px; border-radius: 20px; width: 90%; max-width: 400px; }
@@ -76,7 +82,7 @@
             .nav-item { flex-direction: column; gap: 2px; font-size: 0.65rem; padding: 8px; margin: 0; border-radius: 8px; background: transparent !important; color: #9ca3af; }
             .nav-item.active { color: var(--primary); }
             .main { padding: 15px; padding-bottom: 100px; }
-            .stats-grid { grid-template-columns: 1fr; }
+            .stats-grid, .tracker-cols { grid-template-columns: 1fr; }
         }
     </style>
 </head>
@@ -89,7 +95,7 @@
             <button class="google-btn" onclick="googleLogin()">
                 <i class="fab fa-google"></i> Login with Google
             </button>
-            <div id="loader" style="display:none; margin-top:10px; color:#6b7280; font-size:0.8rem;">Connecting to Database...</div>
+            <div id="loader" style="display:none; margin-top:10px; color:#6b7280; font-size:0.8rem;">Authenticating...</div>
             <p id="login-status" style="margin-top: 15px; color: red; font-size: 0.8rem;"></p>
         </div>
     </div>
@@ -97,7 +103,7 @@
     <div class="sidebar" id="sidebar" style="display: none;">
         <div class="brand"><h1>TIKARKHANJI<br>JNYCTSD</h1><p>MANAGEMENT PRO</p></div>
         <div class="nav-item active" id="btn-dash" onclick="navigate('dashboard')"><i class="fas fa-th-large"></i><span>Dashboard</span></div>
-        <div class="nav-item" id="btn-adm" onclick="navigate('admission')"><i class="fas fa-user-plus"></i><span>Admission</span></div>
+        <div class="nav-item" id="btn-track" onclick="navigate('monthTracker')"><i class="fas fa-calendar-check"></i><span>Monthly Fees</span></div> <div class="nav-item" id="btn-adm" onclick="navigate('admission')"><i class="fas fa-user-plus"></i><span>Admission</span></div>
         <div class="nav-item" id="btn-std" onclick="navigate('students')"><i class="fas fa-users"></i><span>Students</span></div>
         <div class="nav-item" id="btn-exp" onclick="navigate('expenses')"><i class="fas fa-wallet"></i><span>Expenses</span></div>
         <div class="nav-item" style="margin-top: auto; color: var(--danger);" onclick="logout()"><i class="fas fa-sign-out-alt"></i><span>Logout</span></div>
@@ -135,6 +141,30 @@
                 <div class="stat-card" style="border-color: #8b5cf6;">
                     <div class="stat-label">Projected Revenue</div>
                     <div class="stat-val" style="color:#8b5cf6" id="d_projected">₹0</div>
+                </div>
+            </div>
+        </div>
+
+        <div id="monthTracker" class="section">
+            <h2 style="margin-bottom:20px">📅 Monthly Fee Status</h2>
+            <div class="content-card">
+                <label style="font-weight:600; margin-right:10px;">Select Month:</label>
+                <input type="month" id="trackerMonth" class="input-box" style="margin-bottom:20px; width:auto;" onchange="loadTrackerData()">
+                
+                <div class="tracker-cols">
+                    <div class="tracker-list">
+                        <h3 style="color:#ef4444; border-bottom:2px solid #ef4444; padding-bottom:10px; margin-bottom:10px; position:sticky; top:0; background:white;">
+                            ❌ Unpaid (<span id="unpaidCount">0</span>)
+                        </h3>
+                        <div id="unpaidList"></div>
+                    </div>
+
+                    <div class="tracker-list">
+                        <h3 style="color:#10b981; border-bottom:2px solid #10b981; padding-bottom:10px; margin-bottom:10px; position:sticky; top:0; background:white;">
+                            ✅ Paid (<span id="paidCount">0</span>)
+                        </h3>
+                        <div id="paidList"></div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -256,7 +286,7 @@
     </div>
 
 <script>
-    // 🔥🔥 FIXED CONFIG (From Your Screenshot) 🔥🔥
+    // 🔥 FIXED CONFIG (Using Valid API Key) 🔥
     const firebaseConfig = {
         apiKey: "AIzaSyCUmRYc8WtQP3LW_85i5Czore9YjWw0yLU",
         authDomain: "tikarkhanjijnyctsd.firebaseapp.com",
@@ -286,9 +316,6 @@
         auth.signInWithPopup(provider).catch(err => {
             document.getElementById('loader').style.display = 'none';
             document.getElementById('login-status').innerText = err.message;
-            if(err.code === 'auth/api-key-not-valid') {
-                alert("CRITICAL ERROR: API Key Invalid. Please use the code provided in this response.");
-            }
         });
     }
 
@@ -320,6 +347,15 @@
             });
             updateDashboard();
             renderTable();
+            // Load current month in tracker if empty
+            if(!document.getElementById('trackerMonth').value) {
+                const now = new Date();
+                const mStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+                document.getElementById('trackerMonth').value = mStr;
+                loadTrackerData();
+            } else {
+                loadTrackerData();
+            }
         });
 
         db.ref('expenses').on('value', (snapshot) => {
@@ -328,6 +364,54 @@
             updateDashboard();
             renderExpenses();
         });
+    }
+
+    // --- TRACKER LOGIC (RESTORED) ---
+    function loadTrackerData() {
+        const mInput = document.getElementById('trackerMonth').value;
+        if(!mInput) return;
+        const [year, month] = mInput.split('-');
+
+        const unpaidList = document.getElementById('unpaidList');
+        const paidList = document.getElementById('paidList');
+        unpaidList.innerHTML = ''; paidList.innerHTML = '';
+        let uCount=0, pCount=0;
+
+        // ONLY ACTIVE STUDENTS
+        const activeStudents = students.filter(s => s.status === 'active');
+
+        activeStudents.forEach(s => {
+            const hasPaid = s.payments.some(p => {
+                const d = new Date(p.date);
+                // Check if paid in this month (any type or specifically monthly)
+                return d.getFullYear() == year && (d.getMonth()+1) == month && p.type === 'Monthly Fee';
+            });
+
+            const div = document.createElement('div');
+            div.className = 'tracker-item';
+
+            if(hasPaid) {
+                div.innerHTML = `<div><b>${s.name}</b><br><small>${s.batch}</small></div><span class="bg-paid">PAID</span>`;
+                paidList.appendChild(div);
+                pCount++;
+            } else {
+                const monthName = new Date(year, month-1).toLocaleString('default', { month: 'long' });
+                div.innerHTML = `
+                    <div><b>${s.name}</b><br><small>${s.batch}</small></div>
+                    <button class="action-btn btn-wa" style="background:#25D366" onclick="sendSpecificReminder('${s.phone}','${s.name}','${monthName}')">
+                        <i class="fab fa-whatsapp"></i>
+                    </button>`;
+                unpaidList.appendChild(div);
+                uCount++;
+            }
+        });
+        document.getElementById('unpaidCount').innerText = uCount;
+        document.getElementById('paidCount').innerText = pCount;
+    }
+
+    function sendSpecificReminder(phone, name, month) {
+        const text = `⚠️ *MONTHLY FEE REMINDER*\n--------------------------------\n🎓 *TIKARKHANJI JNYCTSD*\n--------------------------------\n👤 Student: *${name}*\n📅 Month: *${month}*\n\nYour monthly fee is pending. Please clear it soon.\n--------------------------------\n🙏 Thank You`;
+        window.open(`https://wa.me/${phone}?text=${encodeURIComponent(text)}`, '_blank');
     }
 
     // --- ADMISSION ---
@@ -369,7 +453,7 @@
         db.ref('students').push(s);
         e.target.reset();
         setDefaults();
-        alert("Student Added Successfully!");
+        alert("Student Added!");
         navigate('students');
     });
 
@@ -453,7 +537,7 @@
         return { paid, currentDue, totalProjected };
     }
 
-    // --- RENDER TABLE (With Professional Messages) ---
+    // --- RENDER TABLE ---
     function renderTable() {
         const tbody = document.getElementById('tbody');
         const search = document.getElementById('search').value.toLowerCase();
@@ -475,7 +559,7 @@
             let buttons = '';
             
             // PROFESSIONAL WHATSAPP REMINDER
-            const reminderMsg = `⚠️ *FEE REMINDER*\n--------------------------------\n🎓 *TIKARKHANJI JNYCTSD*\n--------------------------------\n👤 Student: *${s.name}*\n📂 Batch: ${s.batch}\n\n📉 *Pending Due: ₹${f.currentDue}*\n\nYour fees are overdue. Please clear them to avoid late charges.\n--------------------------------\n🙏 Thank You`;
+            const reminderMsg = `⚠️ *FEE REMINDER*\n--------------------------------\n🎓 *TIKARKHANJI JNYCTSD*\n--------------------------------\n👤 Student: *${s.name}*\n📂 Batch: ${s.batch}\n\n📉 *Pending Due: ₹${f.currentDue}*\n\nYour fees are overdue. Please clear them soon.\n--------------------------------\n🙏 Thank You`;
 
             if(studentViewMode === 'active') {
                 buttons = `
@@ -538,7 +622,7 @@
         pEl.style.color = profit >= 0 ? 'var(--success)' : 'var(--danger)';
     }
 
-    // --- PAYMENTS (With Professional Receipt) ---
+    // --- PAYMENTS ---
     function openPay(id) { currentId = id; document.getElementById('modal').style.display='flex'; }
     function submitPay() {
         const amt = Number(document.getElementById('payAmount').value);
@@ -563,7 +647,7 @@
         document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
         document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
         document.getElementById(id).classList.add('active');
-        const map = {'dashboard':'btn-dash', 'admission':'btn-adm', 'students':'btn-std', 'expenses':'btn-exp'};
+        const map = {'dashboard':'btn-dash', 'monthTracker':'btn-track', 'admission':'btn-adm', 'students':'btn-std', 'expenses':'btn-exp'};
         if(map[id]) document.getElementById(map[id]).classList.add('active');
         document.querySelector('.main').scrollTop = 0;
     }
