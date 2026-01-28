@@ -7,545 +7,390 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
     <style>
-        :root {
-            --primary: #0ea5e9;       
-            --primary-dark: #0284c7;  
-            --bg: #f8fafc;
-            --white: #ffffff;
-            --text: #1e293b;
-            --success: #10b981;
-            --danger: #ef4444;
-            --warning: #f59e0b;
-        }
-
+        :root { --primary: #0ea5e9; --primary-dark: #0284c7; --bg: #f8fafc; --white: #ffffff; --text: #1e293b; --success: #10b981; --danger: #ef4444; }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; -webkit-tap-highlight-color: transparent; }
         body { background-color: var(--bg); display: flex; height: 100vh; overflow: hidden; }
 
-        /* --- SIDEBAR --- */
-        .sidebar { 
-            width: 280px; 
-            background: linear-gradient(180deg, #f0f9ff 0%, #ffffff 100%);
-            padding: 25px; 
-            display: flex; 
-            flex-direction: column; 
-            box-shadow: 2px 0 10px rgba(0,0,0,0.05); 
-            z-index: 100;
-            border-right: 1px solid #bae6fd;
-        }
+        /* Login Screen */
+        #login-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+        .login-box { text-align: center; padding: 30px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); background: #f0f9ff; width: 90%; max-width: 400px; }
+        .google-btn { background: #4285F4; color: white; border: none; padding: 12px 20px; border-radius: 5px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 10px; margin: 20px auto; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+        .loader { border: 4px solid #f3f3f3; border-top: 4px solid #3498db; border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; margin: 0 auto; display: none; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
+        /* App UI */
+        .sidebar { width: 280px; background: linear-gradient(180deg, #f0f9ff 0%, #ffffff 100%); padding: 25px; display: flex; flex-direction: column; box-shadow: 2px 0 10px rgba(0,0,0,0.05); z-index: 100; border-right: 1px solid #bae6fd; }
         .brand { margin-bottom: 30px; border-bottom: 2px solid #bae6fd; padding-bottom: 20px; }
-        .brand h1 { font-size: 1.3rem; font-weight: 800; color: var(--primary-dark); line-height: 1.2; text-transform: uppercase; }
-        .brand p { font-size: 0.75rem; font-weight: 600; color: #64748b; margin-top: 5px; letter-spacing: 1px; }
-
-        .nav-item {
-            padding: 14px;
-            margin-bottom: 10px;
-            border-radius: 10px;
-            color: #475569;
-            font-weight: 600;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            transition: all 0.2s;
-            border: 1px solid transparent;
-            user-select: none;
-        }
-        .nav-item:hover { background: #bae6fd; color: var(--primary-dark); }
-        .nav-item.active { 
-            background: var(--primary); 
-            color: white; 
-            box-shadow: 0 4px 12px rgba(14, 165, 233, 0.3);
-        }
-
-        /* --- MAIN CONTENT --- */
-        .main { 
-            flex: 1; 
-            padding: 30px; 
-            overflow-y: auto; 
-            height: 100vh; 
-            position: relative;
-            padding-bottom: 100px; /* Extra padding for mobile scroll */
-        }
+        .brand h1 { font-size: 1.3rem; font-weight: 800; color: var(--primary-dark); line-height: 1.2; }
+        .nav-item { padding: 14px; margin-bottom: 10px; border-radius: 10px; color: #475569; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 12px; }
+        .nav-item.active { background: var(--primary); color: white; }
+        .main { flex: 1; padding: 30px; overflow-y: auto; height: 100vh; padding-bottom: 120px; display: none; } /* Scroll fix */
         
-        .section { display: none; opacity: 0; transition: opacity 0.3s ease; }
-        .section.active { display: block; opacity: 1; animation: fadeIn 0.3s ease-in-out; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .section { display: none; }
+        .section.active { display: block; animation: fadeIn 0.3s; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        .header-title { font-size: 1.6rem; font-weight: 700; color: var(--text); margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
-        
-        /* Stats */
-        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; margin-bottom: 30px; }
-        .stat-card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); border-left: 5px solid var(--primary); }
-        .stat-num { font-size: 1.8rem; font-weight: 700; color: var(--text); margin-top: 5px; }
-        .stat-label { color: #64748b; font-size: 0.85rem; font-weight: 600; text-transform: uppercase; }
-
-        .breakdown-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 10px; margin-bottom: 30px; }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; margin-bottom: 20px; }
+        .stat-card { background: white; padding: 20px; border-radius: 12px; border-left: 5px solid var(--primary); box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .breakdown-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 10px; margin-bottom: 20px; }
         .mini-card { background: white; padding: 10px; border-radius: 10px; border: 1px solid #e2e8f0; text-align: center; }
-        .mini-val { font-size: 1rem; font-weight: 700; color: var(--danger); }
-        .mini-lbl { font-size: 0.7rem; color: #64748b; margin-top: 2px; }
-
-        /* Chart */
-        .chart-box { background: white; padding: 15px; border-radius: 16px; height: 350px; box-shadow: 0 4px 6px rgba(0,0,0,0.02); margin-bottom: 40px; border: 1px solid #f1f5f9; }
-
-        /* Forms & Tables */
-        .content-card { background: white; padding: 20px; border-radius: 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.02); margin-bottom: 20px; }
-        .form-group { margin-bottom: 15px; }
-        .form-group label { display: block; margin-bottom: 6px; font-weight: 600; color: #334155; font-size: 0.9rem; }
-        .input-box { width: 100%; padding: 12px; border: 2px solid #e2e8f0; border-radius: 8px; outline: none; background: #f8fafc; font-size: 1rem; }
-        .input-box:focus { border-color: var(--primary); background: white; }
-
-        .btn { width: 100%; padding: 15px; border: none; border-radius: 10px; font-weight: 700; color: white; cursor: pointer; font-size: 1rem; margin-top: 10px;}
-        .btn-primary { background: var(--primary); box-shadow: 0 4px 10px rgba(14, 165, 233, 0.3); } 
-
-        .table-wrap { overflow-x: auto; margin-top: 15px; }
-        table { width: 100%; border-collapse: collapse; min-width: 600px; }
-        th { background: #f0f9ff; color: var(--primary-dark); padding: 12px; text-align: left; font-size: 0.8rem; font-weight: 700; border-bottom: 2px solid #bae6fd; }
-        td { padding: 12px; border-bottom: 1px solid #e2e8f0; color: #334155; }
-
-        .action-btn { width: 34px; height: 34px; border-radius: 50%; border: none; color: white; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; margin-right: 5px; }
-        .btn-pay-now { background: var(--success); padding: 6px 15px; border-radius: 6px; color: white; font-size: 0.8rem; border: none; cursor: pointer; font-weight: 600; }
-
-        /* Modal */
+        
+        .chart-box { background: white; padding: 15px; border-radius: 16px; height: 350px; margin-bottom: 30px; }
+        .content-card { background: white; padding: 20px; border-radius: 16px; margin-bottom: 20px; }
+        .input-box { width: 100%; padding: 12px; border: 2px solid #e2e8f0; border-radius: 8px; margin-bottom: 15px; outline: none; }
+        .btn { width: 100%; padding: 15px; border: none; border-radius: 10px; font-weight: 700; color: white; cursor: pointer; background: var(--primary); margin-top: 10px; }
+        
+        table { width: 100%; border-collapse: collapse; min-width: 600px; margin-top: 15px; }
+        th { background: #f0f9ff; padding: 12px; text-align: left; font-size: 0.8rem; border-bottom: 2px solid #bae6fd; }
+        td { padding: 12px; border-bottom: 1px solid #e2e8f0; font-size: 0.9rem; }
+        .action-btn { width: 34px; height: 34px; border-radius: 50%; border: none; color: white; cursor: pointer; margin-right: 5px; }
+        
         .modal { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:200; justify-content:center; align-items:center; }
         .modal-content { background: white; padding: 25px; border-radius: 20px; width: 90%; max-width: 380px; }
 
-        /* Mobile Optimization */
         @media (max-width: 768px) {
-            .sidebar { 
-                position: fixed; bottom: 0; left: 0; width: 100%; height: 70px; 
-                flex-direction: row; justify-content: space-around; 
-                padding: 10px; border-top: 2px solid #bae6fd; border-right: none; 
-                background: white; z-index: 1000; 
-            }
+            .sidebar { position: fixed; bottom: 0; left: 0; width: 100%; height: 70px; flex-direction: row; justify-content: space-around; padding: 10px; border-top: 2px solid #bae6fd; z-index: 1000; background: white;}
             .brand { display: none; }
-            .nav-item { flex-direction: column; gap: 4px; font-size: 0.7rem; padding: 8px; border-radius: 8px; margin: 0; border:none; }
-            .main { padding: 20px; padding-bottom: 120px; } /* Ensures scroll reaches bottom */
-            .stats-grid { grid-template-columns: 1fr; }
+            .nav-item { flex-direction: column; gap: 4px; font-size: 0.7rem; padding: 8px; margin: 0; }
+            .main { padding: 20px; padding-bottom: 120px; }
         }
     </style>
 </head>
 <body>
 
-    <div class="sidebar">
-        <div class="brand">
-            <h1>TIKARKHANJI<br>JNYCTSD</h1>
-            <p>FEE MANAGEMENT SYSTEM</p>
-        </div>
-        
-        <div class="nav-item active" id="btn-dash" onclick="navigate('dashboard')">
-            <i class="fas fa-chart-pie fa-lg"></i> <span>Dashboard</span>
-        </div>
-        <div class="nav-item" id="btn-adm" onclick="navigate('admission')">
-            <i class="fas fa-user-plus fa-lg"></i> <span>Admission</span>
-        </div>
-        <div class="nav-item" id="btn-std" onclick="navigate('students')">
-            <i class="fas fa-list fa-lg"></i> <span>Students</span>
+    <div id="login-overlay">
+        <div class="login-box">
+            <h2 style="color: var(--primary-dark); margin-bottom: 10px;">TIKARKHANJI JNYCTSD</h2>
+            <p>Admin Access Only</p>
+            <br>
+            <button class="google-btn" onclick="googleLogin()">
+                <i class="fab fa-google"></i> Login with Google
+            </button>
+            <br>
+            <div class="loader" id="loader"></div>
+            <p id="login-status" style="margin-top: 15px; color: red; font-size: 0.9rem;"></p>
         </div>
     </div>
 
-    <div class="main">
-        
+    <div class="sidebar" id="sidebar" style="display: none;">
+        <div class="brand"><h1>TIKARKHANJI<br>JNYCTSD</h1><p>FEE MANAGEMENT</p></div>
+        <div class="nav-item active" id="btn-dash" onclick="navigate('dashboard')"><i class="fas fa-chart-pie"></i><span>Dashboard</span></div>
+        <div class="nav-item" id="btn-adm" onclick="navigate('admission')"><i class="fas fa-user-plus"></i><span>Admission</span></div>
+        <div class="nav-item" id="btn-std" onclick="navigate('students')"><i class="fas fa-list"></i><span>Students</span></div>
+        <div class="nav-item" style="margin-top: auto; background: #fee2e2; color: #ef4444;" onclick="logout()"><i class="fas fa-sign-out-alt"></i><span>Logout</span></div>
+    </div>
+
+    <div class="main" id="main-content">
         <div id="dashboard" class="section active">
-            <div class="header-title"><i class="fas fa-chart-line" style="color:var(--primary)"></i> Financial Overview</div>
-            
+            <h2 style="margin-bottom:20px">📊 Dashboard</h2>
             <div class="stats-grid">
-                <div class="stat-card" style="border-color: #0ea5e9;">
-                    <div class="stat-label">Total Students</div>
-                    <div class="stat-num" id="d_students">0</div>
-                </div>
-                <div class="stat-card" style="border-color: #10b981;">
-                    <div class="stat-label">Total Collected</div>
-                    <div class="stat-num" style="color:#10b981" id="d_collected">₹0</div>
-                </div>
-                <div class="stat-card" style="border-color: #ef4444;">
-                    <div class="stat-label">Total Due (Admin View)</div>
-                    <div class="stat-num" style="color:#ef4444" id="d_due">₹0</div>
-                </div>
+                <div class="stat-card"><h3>Students</h3><h1 id="d_students">0</h1></div>
+                <div class="stat-card" style="border-color:#10b981"><h3>Collected</h3><h1 style="color:#10b981" id="d_collected">₹0</h1></div>
+                <div class="stat-card" style="border-color:#ef4444"><h3>Total Pending (Admin)</h3><h1 style="color:#ef4444" id="d_due">₹0</h1></div>
             </div>
-
-            <h4 style="margin-bottom:10px; color:#64748b; font-weight:600; font-size:0.85rem;">PENDING DUES BREAKDOWN</h4>
             <div class="breakdown-grid">
-                <div class="mini-card">
-                    <div class="mini-val" id="d_due_adm">₹0</div>
-                    <div class="mini-lbl">Admission</div>
-                </div>
-                <div class="mini-card">
-                    <div class="mini-val" id="d_due_mon">₹0</div>
-                    <div class="mini-lbl">Monthly</div>
-                </div>
-                <div class="mini-card" style="background:#fff7ed; border-color:#fed7aa">
-                    <div class="mini-val" style="color:#ea580c" id="d_due_exam">₹0</div>
-                    <div class="mini-lbl">Exam Fee (Internal)</div>
-                </div>
+                <div class="mini-card"><h3 style="color:#ef4444" id="d_due_adm">₹0</h3><p>Admission Due</p></div>
+                <div class="mini-card"><h3 style="color:#ef4444" id="d_due_mon">₹0</h3><p>Monthly Due</p></div>
+                <div class="mini-card" style="background:#fff7ed"><h3 style="color:#ea580c" id="d_due_exam">₹0</h3><p>Exam Due (Hidden)</p></div>
             </div>
-
-            <div class="chart-box">
-                <canvas id="financeChart"></canvas>
-            </div>
+            <div class="chart-box"><canvas id="financeChart"></canvas></div>
+            <div style="height: 50px;"></div>
         </div>
 
         <div id="admission" class="section">
-            <div class="header-title">👤 New Admission</div>
+            <h2 style="margin-bottom:20px">👤 New Admission</h2>
             <div class="content-card">
                 <form id="admForm">
-                    <div class="form-group"><label>Student Name</label><input type="text" id="name" required class="input-box" placeholder="Student Full Name"></div>
-                    <div class="form-group"><label>Batch</label><input type="text" id="batch" required class="input-box" placeholder="e.g. Batch A"></div>
-                    <div class="form-group"><label>Phone (WhatsApp)</label><input type="number" id="phone" required class="input-box" placeholder="10 Digit Mobile"></div>
-                    <div class="form-group"><label>Joining Date</label><input type="date" id="joinDate" required class="input-box"></div>
-                    
-                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px;">
-                        <div class="form-group"><label>Adm. Fee</label><input type="number" id="admFee" value="400" class="input-box"></div>
-                        <div class="form-group"><label>Monthly Fee</label><input type="number" id="monthlyFee" value="300" class="input-box"></div>
+                    <input type="text" id="name" required class="input-box" placeholder="Student Name">
+                    <input type="text" id="batch" required class="input-box" placeholder="Batch Name">
+                    <input type="number" id="phone" required class="input-box" placeholder="Phone Number">
+                    <input type="date" id="joinDate" required class="input-box">
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px">
+                        <input type="number" id="admFee" value="400" class="input-box" placeholder="Adm Fee">
+                        <input type="number" id="monthlyFee" value="300" class="input-box" placeholder="Monthly Fee">
                     </div>
-                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px;">
-                        <div class="form-group"><label>Duration</label><input type="number" id="duration" value="12" class="input-box"></div>
-                        <div class="form-group"><label>Exam Fee (Hidden in Msg)</label><input type="number" id="examFee" value="500" class="input-box"></div>
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px">
+                        <input type="number" id="duration" value="12" class="input-box" placeholder="Months">
+                        <input type="number" id="examFee" value="500" class="input-box" placeholder="Exam Fee">
                     </div>
-
-                    <button type="submit" class="btn btn-primary">Confirm Admission</button>
+                    <button type="submit" class="btn">Add Student</button>
                 </form>
             </div>
+            <div style="height: 50px;"></div>
         </div>
 
         <div id="students" class="section">
-            <div class="header-title">📋 Student Records</div>
+            <h2 style="margin-bottom:20px">📋 Student List</h2>
             <div class="content-card">
-                <input type="text" id="search" placeholder="🔍 Search Name..." onkeyup="renderTable()" class="input-box">
-                <div class="table-wrap">
-                    <table id="table">
-                        <thead>
-                            <tr>
-                                <th>Student</th>
-                                <th>Contact</th>
-                                <th>Admin View (Total Due)</th>
-                                <th>Action</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tbody"></tbody>
-                    </table>
-                </div>
+                <input type="text" id="search" placeholder="Search..." onkeyup="renderTable()" class="input-box">
+                <div style="overflow-x:auto"><table id="table"><thead><tr><th>Name</th><th>Contact</th><th>Due (Total)</th><th>Action</th></tr></thead><tbody id="tbody"></tbody></table></div>
             </div>
+            <div style="height: 50px;"></div>
         </div>
     </div>
 
     <div id="modal" class="modal">
         <div class="modal-content">
             <h3>💰 Collect Payment</h3><br>
-            <div class="form-group">
-                <label>Type</label>
-                <select id="payType" class="input-box">
-                    <option>Monthly Fee</option>
-                    <option>Admission Fee</option>
-                    <option>Exam Fee</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label>Amount (₹)</label>
-                <input type="number" id="payAmount" class="input-box">
-            </div>
-            <button onclick="submitPay()" class="btn btn-primary">Confirm</button>
-            <button onclick="document.getElementById('modal').style.display='none'" class="btn" style="background:#e2e8f0; color:#333; margin-top:10px;">Cancel</button>
+            <select id="payType" class="input-box">
+                <option>Monthly Fee</option><option>Admission Fee</option><option>Exam Fee</option>
+            </select>
+            <input type="number" id="payAmount" class="input-box" placeholder="Amount">
+            <button onclick="submitPay()" class="btn">Confirm</button>
+            <button onclick="document.getElementById('modal').style.display='none'" class="btn" style="background:#e2e8f0; color:#333">Cancel</button>
         </div>
     </div>
-    <script>
-    // --- DATABASE ---
-    let students = [];
-    try {
-        students = JSON.parse(localStorage.getItem('tikarkhanji_pro_v5')) || [];
-    } catch (e) {
-        students = [];
-    }
-    
-    // REPAIR DATA IF NEEDED
-    students.forEach(s => {
-        if (!s.payments) s.payments = [];
-        if (s.admFee === undefined) s.admFee = 0;
-        if (s.monthlyFee === undefined) s.monthlyFee = 0;
-        if (s.examFee === undefined) s.examFee = 0;
-    });
 
+<script>
+    // 🔥 YOUR FIREBASE CONFIG (Copied from your screenshot) 🔥
+    const firebaseConfig = {
+        apiKey: "AIzaSyCUmRYc8WtQP3LW_85i5Czore9YjWw0yLU",
+        authDomain: "tikarkhanjijnyctsd.firebaseapp.com",
+        databaseURL: "https://tikarkhanjijnyctsd-default-rtdb.firebaseio.com",
+        projectId: "tikarkhanjijnyctsd",
+        storageBucket: "tikarkhanjijnyctsd.firebasestorage.app",
+        messagingSenderId: "513267646081",
+        appId: "1:513267646081:web:1b60262e26e5e6dcef9780"
+    };
+
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.database();
+    
+    // 🔐 ADMIN EMAIL (এই ইমেইল ছাড়া কেউ লগইন করতে পারবে না)
+    const ADMIN_EMAIL = "achintyaghosh37@gmail.com"; 
+
+    // --- VARIABLES ---
+    let students = [];
     let currentId = null;
     let financeChart = null;
 
-    // --- NAVIGATION ---
-    window.navigate = function(targetId) {
+    // --- AUTHENTICATION ---
+    function googleLogin() {
+        document.getElementById('loader').style.display = 'block';
+        const provider = new firebase.auth.GoogleAuthProvider();
+        auth.signInWithPopup(provider).catch(err => {
+            document.getElementById('loader').style.display = 'none';
+            document.getElementById('login-status').innerText = err.message;
+            if(err.code === 'auth/unauthorized-domain') {
+                alert("Error: Please make sure 'github.io' is added in Firebase Authorized Domains.");
+            }
+        });
+    }
+
+    function logout() {
+        auth.signOut();
+        location.reload();
+    }
+
+    auth.onAuthStateChanged(user => {
+        document.getElementById('loader').style.display = 'none';
+        if (user) {
+            if (user.email === ADMIN_EMAIL) {
+                // Success: Show App
+                document.getElementById('login-overlay').style.display = 'none';
+                document.getElementById('sidebar').style.display = 'flex';
+                document.getElementById('main-content').style.display = 'block';
+                loadData();
+            } else {
+                // Fail: Wrong Email
+                auth.signOut();
+                alert("Access Denied! You are not the Admin.");
+            }
+        } else {
+            // Not Logged In
+            document.getElementById('login-overlay').style.display = 'flex';
+            document.getElementById('sidebar').style.display = 'none';
+            document.getElementById('main-content').style.display = 'none';
+        }
+    });
+
+    // --- DATABASE (REALTIME) ---
+    function loadData() {
+        db.ref('students').on('value', (snapshot) => {
+            const data = snapshot.val();
+            students = data ? Object.keys(data).map(key => ({ id: key, ...data[key] })) : [];
+            // Repair Data
+            students.forEach(s => {
+                if (!s.payments) s.payments = [];
+                s.admFee = s.admFee || 0; s.monthlyFee = s.monthlyFee || 0; s.examFee = s.examFee || 0;
+            });
+            updateDashboard();
+            renderTable();
+        });
+    }
+
+    function saveDataToFirebase(studentData) {
+        db.ref('students').push(studentData);
+    }
+
+    function deleteFromFirebase(id) {
+        if(confirm("Delete this student permanently?")) {
+            db.ref('students/' + id).remove();
+        }
+    }
+
+    // --- APP LOGIC ---
+    function navigate(id) {
         document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
         document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
-
-        const targetSection = document.getElementById(targetId);
-        if(targetSection) {
-            targetSection.classList.add('active');
-            document.querySelector('.main').scrollTop = 0;
-        }
-
-        if(targetId === 'dashboard') {
-            document.getElementById('btn-dash').classList.add('active');
-            updateDashboard();
-        } else if(targetId === 'admission') {
-            document.getElementById('btn-adm').classList.add('active');
-        } else if(targetId === 'students') {
-            document.getElementById('btn-std').classList.add('active');
-            renderTable();
-        }
+        document.getElementById(id).classList.add('active');
+        if(id==='dashboard') document.getElementById('btn-dash').classList.add('active');
+        if(id==='admission') document.getElementById('btn-adm').classList.add('active');
+        if(id==='students') document.getElementById('btn-std').classList.add('active');
     }
 
-    // --- INIT ---
-    window.onload = () => {
-        document.getElementById('joinDate').valueAsDate = new Date();
-        renderTable();
-        updateDashboard();
-    };
-
-    function saveData() {
-        localStorage.setItem('tikarkhanji_pro_v5', JSON.stringify(students));
-        updateDashboard();
-        renderTable();
-    }
-
-    // --- ADMISSION ---
+    // Admission
     document.getElementById('admForm').addEventListener('submit', (e) => {
         e.preventDefault();
         const s = {
-            id: Date.now(),
             name: document.getElementById('name').value,
             batch: document.getElementById('batch').value,
             phone: document.getElementById('phone').value,
             joinDate: document.getElementById('joinDate').value,
-            admFee: Number(document.getElementById('admFee').value) || 0,
-            monthlyFee: Number(document.getElementById('monthlyFee').value) || 0,
-            duration: Number(document.getElementById('duration').value) || 12,
-            examFee: Number(document.getElementById('examFee').value) || 0,
+            admFee: Number(document.getElementById('admFee').value),
+            monthlyFee: Number(document.getElementById('monthlyFee').value),
+            duration: Number(document.getElementById('duration').value),
+            examFee: Number(document.getElementById('examFee').value),
             payments: []
         };
-        students.push(s);
-        saveData();
+        saveDataToFirebase(s);
         e.target.reset();
-        
-        // Restore defaults
-        document.getElementById('admFee').value = "400";
-        document.getElementById('monthlyFee').value = "300";
-        document.getElementById('examFee').value = "500";
-        document.getElementById('duration').value = "12";
-        document.getElementById('joinDate').valueAsDate = new Date();
-        
-        alert("Student Added Successfully!");
+        alert("Student Added!");
         navigate('students');
     });
 
-    // --- FINANCE LOGIC ---
+    // Calculations
     function getFinance(s) {
-        const total = (s.admFee||0) + ((s.monthlyFee||0) * (s.duration||0)) + (s.examFee||0);
-        let paidAdm = 0, paidMon = 0, paidExam = 0;
-        
+        const total = s.admFee + (s.monthlyFee * s.duration) + s.examFee;
+        let paidAdm=0, paidMon=0, paidExam=0;
         (s.payments || []).forEach(p => {
-            if(p.type === 'Admission Fee') paidAdm += p.amount;
-            else if(p.type === 'Monthly Fee') paidMon += p.amount;
-            else if(p.type === 'Exam Fee') paidExam += p.amount;
+            if(p.type==='Admission Fee') paidAdm+=p.amount;
+            else if(p.type==='Monthly Fee') paidMon+=p.amount;
+            else if(p.type==='Exam Fee') paidExam+=p.amount;
         });
-
-        const paidTotal = paidAdm + paidMon + paidExam;
-        
+        const totalPaid = paidAdm + paidMon + paidExam;
         return {
-            total,
-            paid: paidTotal,
-            due: total - paidTotal, // Total Due (Includes Exam)
-            breakdown: {
-                admDue: (s.admFee||0) - paidAdm,
-                monDue: ((s.monthlyFee||0) * (s.duration||0)) - paidMon,
-                examDue: (s.examFee||0) - paidExam
-            }
+            total, paid: totalPaid, due: total - totalPaid,
+            bd: { adm: s.admFee-paidAdm, mon: (s.monthlyFee*s.duration)-paidMon, exam: s.examFee-paidExam }
         };
     }
 
-    // --- RENDER TABLE ---
+    // Render Table
     function renderTable() {
         const tbody = document.getElementById('tbody');
         const search = document.getElementById('search').value.toLowerCase();
         tbody.innerHTML = '';
-
-        const filtered = students.filter(s => (s.name || "").toLowerCase().includes(search) || (s.phone || "").includes(search)).reverse();
-
-        filtered.forEach(s => {
+        
+        students.filter(s => s.name.toLowerCase().includes(search)).reverse().forEach(s => {
             const f = getFinance(s);
-            const tr = document.createElement('tr');
+            let status = f.due > 0 ? `<span style='color:red; font-weight:bold'>Due: ₹${f.due}</span>` : `<span style='color:green; font-weight:bold'>Paid</span>`;
             
-            // Admin View Status (Includes Exam Fee)
-            let status = f.due > 0 
-                ? `<span style="color:#ef4444; background:#fee2e2; padding:3px 8px; border-radius:4px; font-weight:700; font-size:0.75rem;">Total Due: ₹${f.due}</span>` 
-                : `<span style="color:#10b981; background:#dcfce7; padding:3px 8px; border-radius:4px; font-weight:700; font-size:0.75rem;">Paid Full</span>`;
+            // Logic: Hide bell if only Exam fee is due
+            let studentVisibleDue = Math.max(0, f.bd.adm) + Math.max(0, f.bd.mon);
+            let bellBtn = studentVisibleDue > 0 ? 
+                `<button class="action-btn" style="background:#f59e0b" onclick="sendReminder('${s.id}')"><i class="fas fa-bell"></i></button>` : '';
 
-            // Calculate Student Visible Due (Exclude Exam Fee)
-            const studentVisibleDue = f.breakdown.admDue + f.breakdown.monDue;
-
-            let noticeBtn = '';
-            // Only show button if there is ANY due (even exam due), but logic inside controls message
-            if(f.due > 0) {
-                noticeBtn = `<button class="action-btn" style="background:#f59e0b" onclick="sendReminder(${s.id})" title="Send Reminder"><i class="fas fa-bell"></i></button>`;
-            }
-
-            tr.innerHTML = `
-                <td>
-                    <div style="font-weight:700; color:#1e293b">${s.name}</div>
-                    <div style="font-size:0.75rem; color:#64748b; background:#f1f5f9; display:inline-block; padding:2px 6px; border-radius:4px;">${s.batch}</div>
-                </td>
-                <td>
-                    <div style="font-weight:600; font-size:0.9rem">${s.phone}</div>
-                    <div style="margin-top:5px;">
-                        <a href="tel:${s.phone}" class="action-btn" style="background:#3b82f6"><i class="fas fa-phone"></i></a>
-                        <a href="https://wa.me/${s.phone}" target="_blank" class="action-btn" style="background:#22c55e"><i class="fab fa-whatsapp"></i></a>
-                        ${noticeBtn}
-                    </div>
-                </td>
-                <td>
-                    <div style="color:#10b981; font-weight:700; font-size:0.85rem;">Paid: ₹${f.paid}</div>
-                    <div style="margin-top:4px;">${status}</div>
-                </td>
-                <td>
-                    <button class="btn-pay-now" onclick="openPay(${s.id})">Pay</button>
-                    <button class="action-btn" style="background:#ef4444; width:28px; height:28px; margin-left:5px;" onclick="del(${s.id})"><i class="fas fa-trash"></i></button>
-                </td>
-            `;
-            tbody.appendChild(tr);
+            tbody.innerHTML += `
+                <tr>
+                    <td><b>${s.name}</b><br><small style="color:#64748b">${s.batch}</small></td>
+                    <td>${s.phone}<br>
+                        <a href="tel:${s.phone}" class="action-btn" style="background:#3b82f6; padding:5px;"><i class="fas fa-phone"></i></a>
+                        <a href="https://wa.me/${s.phone}" target="_blank" class="action-btn" style="background:#22c55e; padding:5px;"><i class="fab fa-whatsapp"></i></a>
+                        ${bellBtn}
+                    </td>
+                    <td>Paid: ₹${f.paid}<br>${status}</td>
+                    <td>
+                        <button class="action-btn" style="background:#10b981" onclick="openPay('${s.id}')"><i class="fas fa-plus"></i></button>
+                        <button class="action-btn" style="background:#ef4444" onclick="deleteFromFirebase('${s.id}')"><i class="fas fa-trash"></i></button>
+                    </td>
+                </tr>`;
         });
     }
-    // --- DASHBOARD ---
+
+    // Dashboard
     function updateDashboard() {
-        try {
-            let totalDue = 0, totalCollected = 0;
-            let dueAdm = 0, dueMon = 0, dueExam = 0;
-            const monthlyData = {};
+        let tCol=0, tDue=0, dAdm=0, dMon=0, dExam=0;
+        const monthlyData = {};
 
-            students.forEach(s => {
-                const f = getFinance(s);
-                totalCollected += f.paid;
-                totalDue += f.due; // Admin sees total due
-                
-                dueAdm += Math.max(0, f.breakdown.admDue);
-                dueMon += Math.max(0, f.breakdown.monDue);
-                dueExam += Math.max(0, f.breakdown.examDue);
+        students.forEach(s => {
+            const f = getFinance(s);
+            tCol += f.paid; tDue += f.due;
+            dAdm += Math.max(0, f.bd.adm); dMon += Math.max(0, f.bd.mon); dExam += Math.max(0, f.bd.exam);
 
-                (s.payments || []).forEach(p => {
-                    const d = new Date(p.date);
-                    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
-                    if(!monthlyData[key]) monthlyData[key] = 0;
-                    monthlyData[key] += p.amount;
-                });
+            (s.payments||[]).forEach(p => {
+                const d = new Date(p.date);
+                const k = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+                monthlyData[k] = (monthlyData[k]||0) + p.amount;
             });
+        });
 
-            document.getElementById('d_students').innerText = students.length;
-            document.getElementById('d_collected').innerText = '₹' + totalCollected;
-            document.getElementById('d_due').innerText = '₹' + totalDue;
-            document.getElementById('d_due_adm').innerText = '₹' + dueAdm;
-            document.getElementById('d_due_mon').innerText = '₹' + dueMon;
-            document.getElementById('d_due_exam').innerText = '₹' + dueExam;
+        document.getElementById('d_students').innerText = students.length;
+        document.getElementById('d_collected').innerText = '₹' + tCol;
+        document.getElementById('d_due').innerText = '₹' + tDue;
+        document.getElementById('d_due_adm').innerText = '₹' + dAdm;
+        document.getElementById('d_due_mon').innerText = '₹' + dMon;
+        document.getElementById('d_due_exam').innerText = '₹' + dExam;
 
-            // Chart
-            const ctx = document.getElementById('financeChart');
-            if (ctx && typeof Chart !== 'undefined') {
-                const context = ctx.getContext('2d');
-                if(financeChart) financeChart.destroy();
-                const sortedKeys = Object.keys(monthlyData).sort();
-                const labels = sortedKeys.map(k => {
-                    const [y, m] = k.split('-');
-                    return new Date(y, m-1).toLocaleString('default', { month: 'short', year: '2-digit' });
-                });
-                const data = sortedKeys.map(k => monthlyData[k]);
-                const gradient = context.createLinearGradient(0,0,0,400);
-                gradient.addColorStop(0, '#0ea5e9'); gradient.addColorStop(1, '#0284c7');
-                financeChart = new Chart(context, {
-                    type: 'bar',
-                    data: { labels: labels, datasets: [{ label: 'Collection', data: data, backgroundColor: gradient, borderRadius: 6 }] },
-                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true }, x: { grid: { display: false } } } }
-                });
-            }
-        } catch (err) {}
+        const ctx = document.getElementById('financeChart');
+        if (ctx) {
+            if(financeChart) financeChart.destroy();
+            const keys = Object.keys(monthlyData).sort();
+            financeChart = new Chart(ctx.getContext('2d'), {
+                type: 'bar',
+                data: { labels: keys, datasets: [{ label: 'Collection', data: keys.map(k=>monthlyData[k]), backgroundColor: '#0ea5e9', borderRadius: 5 }] },
+                options: { responsive: true, maintainAspectRatio: false }
+            });
+        }
     }
 
-    // --- ACTIONS & WHATSAPP GENERATION (EXAM FEE HIDDEN) ---
+    // Payment
     function openPay(id) { currentId = id; document.getElementById('modal').style.display='flex'; }
-    
     function submitPay() {
         const amt = Number(document.getElementById('payAmount').value);
         const type = document.getElementById('payType').value;
         if(amt > 0 && currentId) {
             const s = students.find(x => x.id === currentId);
-            s.payments.push({ date: new Date().toISOString(), amount: amt, type: type });
-            saveData();
+            const newPayment = { date: new Date().toISOString(), amount: amt, type: type };
+            // Update Firebase
+            const updatedPayments = [...(s.payments||[]), newPayment];
+            db.ref('students/' + currentId + '/payments').set(updatedPayments);
+            
             document.getElementById('modal').style.display='none';
             document.getElementById('payAmount').value = '';
-
-            // RECEIPT CAN SHOW TOTAL DUE (Usually receipt shows updated balance)
-            const f = getFinance(s);
-            const dateStr = new Date().toLocaleDateString('en-IN');
-            const text = `🧾 *RECEIPT*%0a------------------%0a🎓 *TIKARKHANJI JNYCTSD*%0a------------------%0aName: ${s.name}%0aBatch: ${s.batch}%0aDate: ${dateStr}%0a%0a💰 *Paid: ₹${amt}*%0a📌 Type: ${type}%0a%0a📉 *Total Due: ₹${f.due}*%0a------------------%0aThank you!`;
+            
+            // Receipt
+            const text = `🧾 *RECEIPT*%0a------------------%0aName: ${s.name}%0aBatch: ${s.batch}%0a💰 *Paid: ₹${amt}* (${type})%0a------------------%0aThank you!`;
             window.open(`https://wa.me/${s.phone}?text=${text}`, '_blank');
         }
     }
 
+    // Reminder (Hides Exam Fee)
     function sendReminder(id) {
         const s = students.find(x => x.id === id);
         const f = getFinance(s);
+        const studentDue = Math.max(0, f.bd.adm) + Math.max(0, f.bd.mon);
         
-        // --- LOGIC TO HIDE EXAM FEE ---
+        if(studentDue <= 0) {
+            alert("Only Exam Fee Pending. No SMS sent."); return;
+        }
+
         let bd = "";
-        let studentTotalDue = 0;
+        if(f.bd.adm > 0) bd += `• Admission: ₹${f.bd.adm}%0a`;
+        if(f.bd.mon > 0) bd += `• Monthly: ₹${f.bd.mon}%0a`;
 
-        // Only include Admission and Monthly in the Student Message
-        if(f.breakdown.admDue > 0) {
-            bd += `• Admission: ₹${f.breakdown.admDue}%0a`;
-            studentTotalDue += f.breakdown.admDue;
-        }
-        if(f.breakdown.monDue > 0) {
-            bd += `• Monthly: ₹${f.breakdown.monDue}%0a`;
-            studentTotalDue += f.breakdown.monDue;
-        }
-
-        // Check if there is anything to send
-        if (studentTotalDue <= 0) {
-            // If Student has 0 Course Due, but has Exam Due (Admin sees button, but message shouldn't go)
-            alert("This student only has Exam Fee pending. Reminder NOT sent (Hidden from student).");
-            return; 
-        }
-
-        const text = `⚠️ *COURSE FEE REMINDER*%0a------------------%0aDear ${s.name},%0aYour course fees are pending at TIKARKHANJI JNYCTSD.%0a%0a📊 *Breakdown:*%0a${bd}%0a📉 *COURSE DUE: ₹${studentTotalDue}*%0a------------------%0aPlease clear dues to avoid late fees.`;
-        
+        const text = `⚠️ *FEE REMINDER*%0a------------------%0aDear ${s.name},%0aYour fees are pending at TIKARKHANJI JNYCTSD.%0a%0a📊 *Breakdown:*%0a${bd}%0a📉 *TOTAL DUE: ₹${studentDue}*%0a------------------%0aPlease pay soon.`;
         window.open(`https://wa.me/${s.phone}?text=${text}`, '_blank');
     }
 
-    function del(id) { if(confirm("Delete Student?")) { students = students.filter(x=>x.id!==id); saveData(); } }
-</script>
-<!-- Firebase -->
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-
-<script>
-const firebaseConfig = {
-  apiKey: "AIzaSyCumRYc8Wt0P3Lw_85i5Czore9YiWw0yLU",
-  authDomain: "tikarkhanjijnyctsd.firebaseapp.com",
-  projectId: "tikarkhanjijnyctsd",
-};
-
-firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
-
-// 🔐 শুধু এই Gmail Allow হবে
-const ADMIN_EMAIL = "achintyaghosh37@gmail.com";
-
-auth.onAuthStateChanged(user => {
-  if (!user) {
-    const provider = new firebase.auth.GoogleAuthProvider();
-    auth.signInWithPopup(provider);
-  } else {
-    if (user.email !== ADMIN_EMAIL) {
-      alert("Access Denied ❌");
-      auth.signOut();
-      document.body.innerHTML = "<h2>Unauthorized Access</h2>";
-    }
-  }
-});
+    document.getElementById('joinDate').valueAsDate = new Date();
 </script>
 </body>
 </html>
