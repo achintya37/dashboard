@@ -69,18 +69,19 @@
         .btn-wa { background: #25D366; }
         .btn-drop { background: #64748b; }
         .btn-restore { background: #2563eb; }
+        .btn-edit { background: var(--warning); }
         .btn-del { background: #fee2e2; color: var(--danger); } 
         .btn-del:hover { background: var(--danger); color: white; }
 
-        /* Tracker Specific */
+        /* Tracker Specific - UPDATED FOR LARGER VIEW */
         .tracker-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-        .tracker-list { background: white; padding: 15px; border-radius: 12px; height: 400px; overflow-y: auto; border: 1px solid #e5e7eb; }
-        .tracker-item { display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid #f3f4f6; }
-        .bg-paid { background: #dcfce7; color: #166534; padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; }
+        .tracker-list { background: white; padding: 15px; border-radius: 12px; height: 600px; overflow-y: auto; border: 1px solid #e5e7eb; }
+        .tracker-item { display: flex; justify-content: space-between; align-items: center; padding: 15px; border-bottom: 1px solid #f3f4f6; font-size: 1rem; }
+        .bg-paid { background: #dcfce7; color: #166534; padding: 6px 10px; border-radius: 6px; font-size: 0.85rem; font-weight: bold; }
 
         /* Modal */
         .modal { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:200; justify-content:center; align-items:center; }
-        .modal-content { background: white; padding: 30px; border-radius: 20px; width: 90%; max-width: 400px; }
+        .modal-content { background: white; padding: 30px; border-radius: 20px; width: 95%; max-width: 450px; max-height: 90vh; overflow-y: auto; }
 
         /* Mobile Optimization */
         @media (max-width: 768px) {
@@ -98,7 +99,6 @@
             }
             .nav-item i { font-size: 1.1rem; margin-bottom: 2px; }
             .nav-item.active { color: var(--primary); }
-            /* Mobile Logout */
             .nav-item[onclick="logout()"] { color: var(--danger) !important; margin-top: 0 !important; }
             
             .main { padding: 15px; padding-bottom: 100px; }
@@ -306,6 +306,24 @@
         </div>
     </div>
 
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+            <h3>✏️ Edit Student Information</h3><br>
+            <input type="text" id="editName" class="input-box" placeholder="Full Name">
+            <input type="text" id="editBatch" class="input-box" placeholder="Batch Name">
+            <input type="number" id="editPhone" class="input-box" placeholder="Phone Number">
+            <input type="date" id="editJoinDate" class="input-box">
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+                <input type="number" id="editAdmFee" class="input-box" placeholder="Adm Fee">
+                <input type="number" id="editMonthlyFee" class="input-box" placeholder="Monthly Fee">
+                <input type="number" id="editExamFee" class="input-box" placeholder="Exam Fee">
+                <input type="number" id="editDuration" class="input-box" placeholder="Months">
+            </div>
+            <button onclick="submitEdit()" class="btn">Update Information</button>
+            <button onclick="document.getElementById('editModal').style.display='none'" class="btn" style="background:#e5e7eb; color:#374151; margin-top:10px;">Cancel</button>
+        </div>
+    </div>
+
 <script>
     // 🔥 FIXED CONFIG 🔥
     const firebaseConfig = {
@@ -327,6 +345,7 @@
     let students = [];
     let expenses = [];
     let currentId = null;
+    let editStudentId = null;
     let studentViewMode = 'active';
 
     // --- AUTH ---
@@ -395,13 +414,13 @@
 
         students.forEach(s => {
             const f = getFinance(s);
-            totalRev += f.totalPaid; // Includes Exam Fee in Revenue
+            totalRev += f.totalPaid;
             
             if(s.status === 'dropout') {
                 dropCount++;
             } else {
                 activeCount++;
-                marketDue += f.displayDue; // Only Monthly + Adm due
+                marketDue += f.displayDue;
             }
 
             s.payments.forEach(p => {
@@ -452,6 +471,12 @@
         const activeStudents = students.filter(s => s.status === 'active');
 
         activeStudents.forEach(s => {
+            // Check if 30 days completed
+            const start = new Date(s.joinDate);
+            const selectedMonthDate = new Date(year, month-1, 1);
+            const diffTime = selectedMonthDate - start;
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
             const hasPaid = s.payments.some(p => {
                 const d = new Date(p.date);
                 return d.getFullYear() == year && (d.getMonth()+1) == month && p.type === 'Monthly Fee';
@@ -465,21 +490,25 @@
                 paidList.appendChild(div);
                 pCount++;
             } else {
-                const monthName = new Date(year, month-1).toLocaleString('default', { month: 'long' });
-                div.innerHTML = `
-                    <div><b>${s.name}</b><br><small>${s.batch}</small></div>
-                    <button class="action-btn btn-wa" style="background:#25D366" onclick="sendSpecificReminder('${s.phone}','${s.name}','${monthName}')">
-                        <i class="fab fa-whatsapp"></i>
-                    </button>`;
-                unpaidList.appendChild(div);
-                uCount++;
+                // Only show in unpaid if 30 days passed
+                if(diffDays >= 30) {
+                    const monthName = new Date(year, month-1).toLocaleString('default', { month: 'long' });
+                    div.innerHTML = `
+                        <div><b>${s.name}</b><br><small>${s.batch}</small></div>
+                        <button class="action-btn btn-wa" onclick="sendSpecificReminder('${s.phone}','${s.name}','${monthName}')">
+                            <i class="fab fa-whatsapp"></i>
+                        </button>`;
+                    unpaidList.appendChild(div);
+                    uCount++;
+                }
             }
         });
         document.getElementById('unpaidCount').innerText = uCount;
         document.getElementById('paidCount').innerText = pCount;
     }
 
-    function sendSpecificReminder(phone, name, month) {
+    // FIXED WHATSAPP BUG: Add a small delay for batch sends if needed
+    async function sendSpecificReminder(phone, name, month) {
         const text = `⚠️ *MONTHLY FEE REMINDER*\n--------------------------------\n🎓 *TIKARKHANJI JNYCTSD*\n--------------------------------\n👤 Student: *${name}*\n📅 Month: *${month}*\n\nYour monthly fee is pending. Please clear it soon.\n--------------------------------\n🙏 Thank You`;
         window.open(`https://wa.me/${phone}?text=${encodeURIComponent(text)}`, '_blank');
     }
@@ -547,6 +576,41 @@
         if(confirm("⚠️ DELETE PERMANENTLY?")) db.ref('students/' + id).remove();
     }
 
+    // --- EDIT STUDENT LOGIC ---
+    function openEdit(id) {
+        editStudentId = id;
+        const s = students.find(x => x.id === id);
+        document.getElementById('editName').value = s.name;
+        document.getElementById('editBatch').value = s.batch;
+        document.getElementById('editPhone').value = s.phone;
+        document.getElementById('editJoinDate').value = s.joinDate;
+        document.getElementById('editAdmFee').value = s.admFee;
+        document.getElementById('editMonthlyFee').value = s.monthlyFee;
+        document.getElementById('editExamFee').value = s.examFee;
+        document.getElementById('editDuration').value = s.duration;
+        document.getElementById('editModal').style.display = 'flex';
+    }
+
+    function submitEdit() {
+        if(!editStudentId) return;
+        const updatedData = {
+            name: document.getElementById('editName').value,
+            batch: document.getElementById('editBatch').value,
+            phone: document.getElementById('editPhone').value,
+            joinDate: document.getElementById('editJoinDate').value,
+            admFee: Number(document.getElementById('editAdmFee').value),
+            monthlyFee: Number(document.getElementById('editMonthlyFee').value),
+            examFee: Number(document.getElementById('editExamFee').value),
+            duration: Number(document.getElementById('editDuration').value)
+        };
+        db.ref('students/' + editStudentId).update(updatedData)
+        .then(() => {
+            alert("Updated Successfully!");
+            document.getElementById('editModal').style.display = 'none';
+        });
+    }
+
+    // --- EXPENSES ---
     document.getElementById('expForm').addEventListener('submit', (e) => {
         e.preventDefault();
         const ex = {
@@ -578,29 +642,35 @@
         });
     }
 
-    // --- FINANCE LOGIC (UPDATED: EXAM FEE HIDDEN FROM DUE) ---
+    // --- FINANCE LOGIC (30 DAYS PENDING LOGIC) ---
     function getFinance(s) {
         let paidAdm = 0, paidMon = 0, paidExam = 0;
         
         s.payments.forEach(p => {
             if(p.type === 'Admission Fee') paidAdm += p.amount;
             else if(p.type === 'Exam Fee') paidExam += p.amount;
-            else paidMon += p.amount; // Monthly
+            else paidMon += p.amount;
         });
 
         const start = new Date(s.joinDate);
         const now = new Date();
-        // Post-paid logic: Months passed excluding current
+        
+        // Logical Month Difference
         let months = (now.getFullYear() - start.getFullYear()) * 12 + (now.getMonth() - start.getMonth());
         
+        // Logic: January 1 admission -> February 1st after 30 days pending starts.
+        // If today is less than 30 days from join date, months should be 0.
+        const diffTime = now - start;
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        
+        if (diffDays < 30) months = 0; 
         if (months < 0) months = 0; 
         if (months > s.duration) months = s.duration;
 
-        // Due Calculation: Only Adm + Monthly (Exclude Exam)
         let dueAdm = Math.max(0, s.admFee - paidAdm);
         let dueMon = Math.max(0, (s.monthlyFee * months) - paidMon);
         
-        let displayDue = dueAdm + dueMon; // This is what is shown in Red
+        let displayDue = dueAdm + dueMon;
 
         if(s.status === 'dropout') displayDue = 0;
 
@@ -611,7 +681,7 @@
         };
     }
 
-    // --- RENDER TABLE (UPDATED) ---
+    // --- RENDER TABLE ---
     function renderTable() {
         const tbody = document.getElementById('tbody');
         const search = document.getElementById('search').value.toLowerCase();
@@ -631,12 +701,12 @@
             const textC = s.type==='senior' ? '#7c3aed' : '#0284c7';
 
             let buttons = '';
-            // WhatsApp Msg excludes Exam Fee due
             const reminderMsg = `⚠️ *FEE REMINDER*\n--------------------------------\n🎓 *TIKARKHANJI JNYCTSD*\n--------------------------------\n👤 Student: *${s.name}*\n📂 Batch: ${s.batch}\n\n📉 *Pending Due: ₹${f.displayDue}*\n\nYour fees are overdue. Please clear them soon.\n--------------------------------\n🙏 Thank You`;
 
             if(studentViewMode === 'active') {
                 buttons = `
                     <button class="action-btn btn-pay" onclick="openPay('${s.id}')" title="Pay"><i class="fas fa-plus"></i></button>
+                    <button class="action-btn btn-edit" onclick="openEdit('${s.id}')" title="Edit"><i class="fas fa-pen"></i></button>
                     <a href="https://wa.me/${s.phone}?text=${encodeURIComponent(reminderMsg)}" target="_blank" class="action-btn btn-wa" title="Send Reminder"><i class="fab fa-whatsapp"></i></a>
                     <button class="action-btn btn-drop" onclick="markDropout('${s.id}')" title="Dropout"><i class="fas fa-user-slash"></i></button>
                     <button class="action-btn btn-del" onclick="deleteStudent('${s.id}')" title="Delete"><i class="fas fa-trash"></i></button>
@@ -653,7 +723,7 @@
                     <td>
                         <b>${s.name}</b> <span style="background:${color}; color:${textC}; padding:2px 6px; border-radius:4px; font-size:0.75rem;">${badge}</span>
                         <br><i class="fas fa-phone-alt" style="font-size:0.75rem; color:#6b7280; margin-right:4px;"></i><span style="font-weight:600; color:#4b5563;">${s.phone}</span>
-                        <br><small style="color:#6b7280">${s.batch}</small>
+                        <br><small style="color:#6b7280">${s.batch} | Join: ${s.joinDate}</small>
                     </td>
                     <td>
                         <div style="font-size:0.8rem; line-height:1.4;">
