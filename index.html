@@ -38,32 +38,33 @@
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
     <style>
-        /* Minimal custom CSS for things Tailwind doesn't cover natively out-of-the-box perfectly */
-        body { background-color: #f3f4f6; overflow: hidden; }
-        .section { display: none; animation: fadeIn 0.3s ease-out; }
-        .section.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        body { background-color: #f3f4f6; overflow: hidden; -webkit-tap-highlight-color: transparent; }
+        .section { display: none; }
+        .section.active { display: block; animation: fadeIn 0.2s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        /* Custom Scrollbar for better performance */
+        ::-webkit-scrollbar { width: 5px; height: 5px; }
         ::-webkit-scrollbar-track { background: #f1f1f1; }
-        ::-webkit-scrollbar-thumb { background: #c1c1c1; border-radius: 10px; }
-        ::-webkit-scrollbar-thumb:hover { background: #a8a8a8; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        
+        /* Performance boost for tables on mobile */
+        .table-container { -webkit-overflow-scrolling: touch; overscroll-behavior-x: contain; }
 
         @media (max-width: 768px) {
-            .sidebar-mobile { position: fixed; bottom: 0; left: 0; width: 100%; height: 65px; flex-direction: row; justify-content: space-around; border-top: 1px solid #e5e7eb; background: white; z-index: 50; overflow-x: auto; padding: 0 5px; }
-            .main-content { padding-bottom: 80px !important; }
+            .sidebar-mobile { position: fixed; bottom: 0; left: 0; width: 100%; height: 60px; flex-direction: row; justify-content: space-around; border-top: 1px solid #e5e7eb; background: white; z-index: 50; overflow-x: auto; padding: 0 5px; }
+            .main-content { padding-bottom: 75px !important; padding: 12px; }
         }
     </style>
 </head>
 <body class="flex h-screen text-gray-800">
 
     <!-- LOGIN OVERLAY -->
-    <div id="login-overlay" class="fixed inset-0 bg-gray-50 z-[9999] flex flex-col justify-center items-center">
-        <div class="bg-white p-8 rounded-2xl shadow-xl w-[90%] max-w-md text-center">
+    <div id="login-overlay" class="fixed inset-0 bg-white z-[9999] flex flex-col justify-center items-center">
+        <div class="bg-white p-6 rounded-2xl shadow-lg w-[90%] max-w-md text-center border border-gray-100">
             <h2 class="text-xl font-bold text-primary mb-2">Tikarkhanji Jawaharlal Nehru YOUTH Computer Training Institute</h2>
             <p class="text-gray-500 mb-6 font-medium">Admin Portal</p>
-            <button onclick="googleLogin()" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 px-6 rounded-full transition flex items-center justify-center gap-3 shadow-lg shadow-blue-500/30">
+            <button onclick="googleLogin()" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 px-6 rounded-xl transition flex items-center justify-center gap-3">
                 <i class="fab fa-google"></i> Login with Google
             </button>
             <div id="loader" class="hidden mt-4 text-gray-500 text-sm"><i class="fas fa-spinner fa-spin mr-2"></i>Connecting...</div>
@@ -72,32 +73,32 @@
     </div>
 
     <!-- SIDEBAR -->
-    <div id="sidebar" class="hidden md:flex flex-col w-72 bg-white shadow-xl z-40 border-r border-gray-100 sidebar-mobile">
-        <div class="hidden md:block p-6 border-b border-gray-100 mb-4">
+    <div id="sidebar" class="hidden md:flex flex-col w-64 bg-white shadow-md z-40 border-r border-gray-200 sidebar-mobile">
+        <div class="hidden md:block p-5 border-b border-gray-100 mb-2">
             <h1 class="text-lg font-extrabold text-primary leading-tight">JNYCTSD</h1>
             <p class="text-xs text-gray-500 font-semibold tracking-wider mt-1">FEE MANAGEMENT</p>
         </div>
         
-        <div class="flex-1 px-4 overflow-y-auto flex md:flex-col gap-1">
-            <button id="btn-dash" onclick="navigate('dashboard')" class="nav-item flex flex-col md:flex-row items-center gap-1 md:gap-3 p-2 md:p-3 rounded-xl text-gray-500 hover:bg-blue-50 hover:text-primary transition font-semibold text-[10px] md:text-sm w-full text-center md:text-left">
+        <div class="flex-1 px-3 overflow-y-auto flex md:flex-col gap-1 mt-2">
+            <button id="btn-dash" onclick="navigate('dashboard')" class="nav-item flex flex-col md:flex-row items-center gap-1 md:gap-3 p-2 md:p-3 rounded-lg text-gray-500 hover:bg-blue-50 hover:text-primary font-semibold text-[10px] md:text-sm w-full text-center md:text-left transition-colors">
                 <i class="fas fa-th-large text-lg md:w-5"></i><span>Dashboard</span>
             </button>
-            <button id="btn-track" onclick="navigate('monthTracker')" class="nav-item flex flex-col md:flex-row items-center gap-1 md:gap-3 p-2 md:p-3 rounded-xl text-gray-500 hover:bg-blue-50 hover:text-primary transition font-semibold text-[10px] md:text-sm w-full text-center md:text-left">
+            <button id="btn-track" onclick="navigate('monthTracker')" class="nav-item flex flex-col md:flex-row items-center gap-1 md:gap-3 p-2 md:p-3 rounded-lg text-gray-500 hover:bg-blue-50 hover:text-primary font-semibold text-[10px] md:text-sm w-full text-center md:text-left transition-colors">
                 <i class="fas fa-calendar-check text-lg md:w-5"></i><span>Tracker</span>
             </button>
-            <button id="btn-adm" onclick="navigate('admission')" class="nav-item flex flex-col md:flex-row items-center gap-1 md:gap-3 p-2 md:p-3 rounded-xl text-gray-500 hover:bg-blue-50 hover:text-primary transition font-semibold text-[10px] md:text-sm w-full text-center md:text-left">
+            <button id="btn-adm" onclick="navigate('admission')" class="nav-item flex flex-col md:flex-row items-center gap-1 md:gap-3 p-2 md:p-3 rounded-lg text-gray-500 hover:bg-blue-50 hover:text-primary font-semibold text-[10px] md:text-sm w-full text-center md:text-left transition-colors">
                 <i class="fas fa-user-plus text-lg md:w-5"></i><span>Admission</span>
             </button>
-            <button id="btn-std" onclick="navigate('students')" class="nav-item flex flex-col md:flex-row items-center gap-1 md:gap-3 p-2 md:p-3 rounded-xl text-gray-500 hover:bg-blue-50 hover:text-primary transition font-semibold text-[10px] md:text-sm w-full text-center md:text-left">
+            <button id="btn-std" onclick="navigate('students')" class="nav-item flex flex-col md:flex-row items-center gap-1 md:gap-3 p-2 md:p-3 rounded-lg text-gray-500 hover:bg-blue-50 hover:text-primary font-semibold text-[10px] md:text-sm w-full text-center md:text-left transition-colors">
                 <i class="fas fa-users text-lg md:w-5"></i><span>Students</span>
             </button>
-            <button id="btn-exp" onclick="navigate('expenses')" class="nav-item flex flex-col md:flex-row items-center gap-1 md:gap-3 p-2 md:p-3 rounded-xl text-gray-500 hover:bg-blue-50 hover:text-primary transition font-semibold text-[10px] md:text-sm w-full text-center md:text-left">
+            <button id="btn-exp" onclick="navigate('expenses')" class="nav-item flex flex-col md:flex-row items-center gap-1 md:gap-3 p-2 md:p-3 rounded-lg text-gray-500 hover:bg-blue-50 hover:text-primary font-semibold text-[10px] md:text-sm w-full text-center md:text-left transition-colors">
                 <i class="fas fa-wallet text-lg md:w-5"></i><span>Expenses</span>
             </button>
         </div>
 
         <div class="hidden md:block p-4 mt-auto">
-            <button onclick="logout()" class="flex items-center gap-3 p-3 rounded-xl text-red-500 hover:bg-red-50 transition font-semibold text-sm w-full">
+            <button onclick="logout()" class="flex items-center gap-3 p-3 rounded-lg text-red-500 hover:bg-red-50 font-semibold text-sm w-full transition-colors">
                 <i class="fas fa-sign-out-alt w-5"></i><span>Logout</span>
             </button>
         </div>
@@ -108,38 +109,38 @@
         
         <!-- DASHBOARD -->
         <div id="dashboard" class="section active max-w-7xl mx-auto">
-            <h2 class="text-2xl font-bold mb-6 text-gray-800">📊 Business Overview</h2>
+            <h2 class="text-xl md:text-2xl font-bold mb-4 text-gray-800">📊 Business Overview</h2>
             
-            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
-                <div class="bg-white p-5 rounded-2xl shadow-sm border-l-4 border-blue-500">
-                    <p class="text-xs font-bold text-gray-500 uppercase">Active Students</p>
-                    <h3 class="text-2xl font-bold mt-1" id="d_active">0</h3>
+            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 mb-6">
+                <div class="bg-white p-4 rounded-xl shadow-sm border-l-4 border-blue-500">
+                    <p class="text-[10px] md:text-xs font-bold text-gray-500 uppercase">Active Students</p>
+                    <h3 class="text-xl md:text-2xl font-bold mt-1" id="d_active">0</h3>
                 </div>
-                <div class="bg-white p-5 rounded-2xl shadow-sm border-l-4 border-gray-400">
-                    <p class="text-xs font-bold text-gray-500 uppercase">Dropouts</p>
-                    <h3 class="text-2xl font-bold mt-1 text-gray-600" id="d_dropout">0</h3>
+                <div class="bg-white p-4 rounded-xl shadow-sm border-l-4 border-gray-400">
+                    <p class="text-[10px] md:text-xs font-bold text-gray-500 uppercase">Dropouts</p>
+                    <h3 class="text-xl md:text-2xl font-bold mt-1 text-gray-600" id="d_dropout">0</h3>
                 </div>
-                <div class="bg-white p-5 rounded-2xl shadow-sm border-l-4 border-green-500">
-                    <p class="text-xs font-bold text-gray-500 uppercase">Total Revenue</p>
-                    <h3 class="text-2xl font-bold mt-1 text-green-600" id="d_collected">₹0</h3>
+                <div class="bg-white p-4 rounded-xl shadow-sm border-l-4 border-green-500">
+                    <p class="text-[10px] md:text-xs font-bold text-gray-500 uppercase">Total Revenue</p>
+                    <h3 class="text-xl md:text-2xl font-bold mt-1 text-green-600" id="d_collected">₹0</h3>
                 </div>
-                <div class="bg-white p-5 rounded-2xl shadow-sm border-l-4 border-red-500">
-                    <p class="text-xs font-bold text-gray-500 uppercase">Total Due Fees</p>
-                    <h3 class="text-2xl font-bold mt-1 text-red-500" id="d_due">₹0</h3>
+                <div class="bg-white p-4 rounded-xl shadow-sm border-l-4 border-red-500">
+                    <p class="text-[10px] md:text-xs font-bold text-gray-500 uppercase">Main Due</p>
+                    <h3 class="text-xl md:text-2xl font-bold mt-1 text-red-500" id="d_due">₹0</h3>
                 </div>
-                <div class="bg-white p-5 rounded-2xl shadow-sm border-l-4 border-pink-500">
-                    <p class="text-xs font-bold text-gray-500 uppercase">Total Expense</p>
-                    <h3 class="text-2xl font-bold mt-1 text-pink-500" id="d_expense">₹0</h3>
+                <div class="bg-white p-4 rounded-xl shadow-sm border-l-4 border-purple-500">
+                    <p class="text-[10px] md:text-xs font-bold text-gray-500 uppercase">Exam Due</p>
+                    <h3 class="text-xl md:text-2xl font-bold mt-1 text-purple-600" id="d_exam_due">₹0</h3>
                 </div>
-                <div class="bg-white p-5 rounded-2xl shadow-sm border-l-4 border-dark">
-                    <p class="text-xs font-bold text-gray-500 uppercase">Net Profit</p>
-                    <h3 class="text-2xl font-bold mt-1" id="d_profit">₹0</h3>
+                <div class="bg-white p-4 rounded-xl shadow-sm border-l-4 border-pink-500">
+                    <p class="text-[10px] md:text-xs font-bold text-gray-500 uppercase">Total Expense</p>
+                    <h3 class="text-xl md:text-2xl font-bold mt-1 text-pink-500" id="d_expense">₹0</h3>
                 </div>
             </div>
 
-            <div class="bg-white p-6 rounded-2xl shadow-sm mb-6">
-                <h3 class="text-lg font-bold mb-4 text-gray-800">📈 <span id="currentYear"></span> Monthly Collection</h3>
-                <div class="relative h-64 w-full">
+            <div class="bg-white p-4 md:p-6 rounded-xl shadow-sm mb-6">
+                <h3 class="text-base md:text-lg font-bold mb-4 text-gray-800">📈 <span id="currentYear"></span> Monthly Collection</h3>
+                <div class="relative h-48 md:h-64 w-full">
                     <canvas id="revenueChart"></canvas>
                 </div>
             </div>
@@ -147,22 +148,22 @@
 
         <!-- TRACKER -->
         <div id="monthTracker" class="section max-w-7xl mx-auto">
-            <h2 class="text-2xl font-bold mb-6 text-gray-800">📅 Monthly Fee Status</h2>
-            <div class="bg-white p-6 rounded-2xl shadow-sm">
-                <div class="flex items-center gap-4 mb-6">
-                    <label class="font-semibold text-gray-700">Select Month:</label>
-                    <input type="month" id="trackerMonth" class="border-2 border-gray-200 rounded-lg p-2 outline-none focus:border-primary transition" onchange="loadTrackerData()">
+            <h2 class="text-xl md:text-2xl font-bold mb-4 text-gray-800">📅 Monthly Fee Status</h2>
+            <div class="bg-white p-4 md:p-6 rounded-xl shadow-sm">
+                <div class="flex flex-col md:flex-row md:items-center gap-3 mb-5">
+                    <label class="font-semibold text-gray-700 text-sm md:text-base">Select Month:</label>
+                    <input type="month" id="trackerMonth" class="border border-gray-300 rounded-lg p-2 outline-none focus:border-primary w-fit" onchange="loadTrackerData()">
                 </div>
                 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div class="border border-gray-200 rounded-xl p-4 bg-gray-50 h-[600px] overflow-y-auto">
-                        <h3 class="font-bold text-red-500 border-b-2 border-red-200 pb-3 mb-3 sticky top-0 bg-gray-50 z-10">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="border border-gray-200 rounded-lg p-3 bg-gray-50 h-[500px] overflow-y-auto">
+                        <h3 class="font-bold text-red-500 border-b-2 border-red-200 pb-2 mb-2 sticky top-0 bg-gray-50 z-10 text-sm md:text-base">
                             ❌ Unpaid (<span id="unpaidCount">0</span>)
                         </h3>
                         <div id="unpaidList" class="flex flex-col gap-2"></div>
                     </div>
-                    <div class="border border-gray-200 rounded-xl p-4 bg-gray-50 h-[600px] overflow-y-auto">
-                        <h3 class="font-bold text-green-500 border-b-2 border-green-200 pb-3 mb-3 sticky top-0 bg-gray-50 z-10">
+                    <div class="border border-gray-200 rounded-lg p-3 bg-gray-50 h-[500px] overflow-y-auto">
+                        <h3 class="font-bold text-green-500 border-b-2 border-green-200 pb-2 mb-2 sticky top-0 bg-gray-50 z-10 text-sm md:text-base">
                             ✅ Paid (<span id="paidCount">0</span>)
                         </h3>
                         <div id="paidList" class="flex flex-col gap-2"></div>
@@ -173,160 +174,154 @@
 
         <!-- ADMISSION -->
         <div id="admission" class="section max-w-3xl mx-auto">
-            <h2 class="text-2xl font-bold mb-6 text-gray-800">👤 New Admission</h2>
-            <div class="bg-white p-6 md:p-8 rounded-2xl shadow-sm">
-                <form id="admForm" class="space-y-5">
-                    <div class="bg-blue-50 p-5 rounded-xl border border-blue-100">
-                        <label class="block font-semibold mb-2 text-gray-700">Student Type</label>
-                        <select id="studentType" onchange="setDefaults()" class="w-full border-2 border-white rounded-lg p-3 outline-none focus:border-primary shadow-sm mb-3 bg-white">
+            <h2 class="text-xl md:text-2xl font-bold mb-4 text-gray-800">👤 New Admission</h2>
+            <div class="bg-white p-4 md:p-6 rounded-xl shadow-sm">
+                <form id="admForm" class="space-y-4">
+                    <div class="bg-blue-50 p-4 rounded-lg border border-blue-100">
+                        <label class="block font-semibold mb-1 text-gray-700 text-sm">Student Type</label>
+                        <select id="studentType" onchange="setDefaults()" class="w-full border border-gray-300 rounded-lg p-2.5 outline-none focus:border-primary bg-white text-sm mb-2">
                             <option value="junior">Junior Student (Class 9 & Below)</option>
                             <option value="senior">Senior Student (Course Based)</option>
                         </select>
-                        <label class="flex items-center gap-3 cursor-pointer text-gray-700 font-medium">
-                            <input type="checkbox" id="isOldStudent" onchange="toggleOldStudent()" class="w-5 h-5 text-primary rounded focus:ring-primary">
+                        <label class="flex items-center gap-2 cursor-pointer text-gray-700 font-medium text-sm mt-2">
+                            <input type="checkbox" id="isOldStudent" onchange="toggleOldStudent()" class="w-4 h-4 text-primary rounded">
                             Existing Student (0 Admission Fee)
                         </label>
                     </div>
 
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-                        <input type="text" id="name" required class="w-full border-2 border-gray-200 rounded-lg p-3 outline-none focus:border-primary" placeholder="Full Name">
-                        <input type="text" id="batch" required class="w-full border-2 border-gray-200 rounded-lg p-3 outline-none focus:border-primary" placeholder="Batch Name/Time">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <input type="text" id="name" required class="w-full border border-gray-300 rounded-lg p-2.5 outline-none focus:border-primary text-sm" placeholder="Full Name">
+                        <input type="text" id="batch" required class="w-full border border-gray-300 rounded-lg p-2.5 outline-none focus:border-primary text-sm" placeholder="Batch Name/Time">
                     </div>
                     
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-                        <input type="number" id="phone" required class="w-full border-2 border-gray-200 rounded-lg p-3 outline-none focus:border-primary" placeholder="Mobile Number">
-                        <input type="text" id="cardNumber" class="w-full border-2 border-gray-200 rounded-lg p-3 outline-none focus:border-primary hidden" placeholder="Card Number (For Senior)">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <input type="number" id="phone" required class="w-full border border-gray-300 rounded-lg p-2.5 outline-none focus:border-primary text-sm" placeholder="Mobile Number">
+                        <input type="text" id="cardNumber" class="w-full border border-gray-300 rounded-lg p-2.5 outline-none focus:border-primary text-sm hidden" placeholder="Card Number (For Senior)">
                     </div>
                     
                     <div>
-                        <label class="block text-sm font-semibold text-gray-600 mb-1">Joining Date</label>
-                        <input type="date" id="joinDate" required class="w-full border-2 border-gray-200 rounded-lg p-3 outline-none focus:border-primary">
+                        <label class="block text-xs font-semibold text-gray-600 mb-1">Joining Date</label>
+                        <input type="date" id="joinDate" required class="w-full border border-gray-300 rounded-lg p-2.5 outline-none focus:border-primary text-sm">
                     </div>
                     
-                    <div class="bg-gray-50 p-5 rounded-xl border border-gray-100">
-                        <h4 class="font-bold text-gray-700 mb-4">Fee Structure Configuration</h4>
-                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div class="bg-gray-50 p-4 rounded-lg border border-gray-200 mt-2">
+                        <h4 class="font-bold text-gray-700 mb-3 text-sm">Fee Structure Configuration</h4>
+                        <div class="grid grid-cols-2 gap-3">
                             <div>
-                                <label class="text-xs text-gray-500 font-semibold">Total Adm Fee</label>
-                                <input type="number" id="admFee" class="w-full border-2 border-gray-200 rounded-lg p-2 outline-none mt-1">
+                                <label class="text-xs text-gray-500 font-semibold">Adm Fee</label>
+                                <input type="number" id="admFee" class="w-full border border-gray-300 rounded-lg p-2 outline-none text-sm mt-1">
                             </div>
                             <div>
                                 <label class="text-xs text-gray-500 font-semibold">Monthly Fee</label>
-                                <input type="number" id="monthlyFee" class="w-full border-2 border-gray-200 rounded-lg p-2 outline-none mt-1">
+                                <input type="number" id="monthlyFee" class="w-full border border-gray-300 rounded-lg p-2 outline-none text-sm mt-1">
                             </div>
                             <div>
-                                <label class="text-xs text-gray-500 font-semibold">Total Exam Fee</label>
-                                <input type="number" id="examFee" class="w-full border-2 border-gray-200 rounded-lg p-2 outline-none mt-1">
+                                <label class="text-xs text-purple-600 font-semibold">Exam Fee (Separate)</label>
+                                <input type="number" id="examFee" class="w-full border border-purple-200 rounded-lg p-2 outline-none text-sm mt-1 focus:border-purple-500 bg-purple-50">
                             </div>
                             <div>
-                                <label class="text-xs text-gray-500 font-semibold">Course Duration</label>
-                                <input type="number" id="duration" class="w-full border-2 border-gray-200 rounded-lg p-2 outline-none mt-1" placeholder="Months">
+                                <label class="text-xs text-gray-500 font-semibold">Duration (Months)</label>
+                                <input type="number" id="duration" class="w-full border border-gray-300 rounded-lg p-2 outline-none text-sm mt-1">
                             </div>
                         </div>
                     </div>
-                    <button type="submit" class="w-full bg-primary hover:bg-blue-700 text-white font-bold py-4 rounded-xl transition shadow-lg shadow-blue-500/30">Confirm Admission</button>
+                    <button type="submit" class="w-full bg-primary hover:bg-blue-700 text-white font-bold py-3 rounded-lg transition shadow-md mt-2">Confirm Admission</button>
                 </form>
             </div>
         </div>
 
         <!-- STUDENTS LIST -->
         <div id="students" class="section max-w-7xl mx-auto">
-            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
-                <h2 class="text-2xl font-bold text-gray-800">📋 Student Directory</h2>
-                <button onclick="sendBulkWA()" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-lg shadow transition flex items-center gap-2">
-                    <i class="fab fa-whatsapp text-lg"></i> Send Bulk Due Reminder
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-3">
+                <h2 class="text-xl md:text-2xl font-bold text-gray-800">📋 Student Directory</h2>
+                <button onclick="sendBulkWA()" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-lg shadow text-sm flex items-center gap-2 w-full md:w-auto justify-center">
+                    <i class="fab fa-whatsapp"></i> Send Bulk Reminder
                 </button>
             </div>
 
-            <div class="bg-white p-6 rounded-2xl shadow-sm">
-                <!-- Filters -->
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                    <input type="text" id="search" placeholder="🔍 Search name or phone..." onkeyup="renderTable()" class="w-full border-2 border-gray-200 rounded-lg p-3 outline-none focus:border-primary">
-                    
-                    <select id="filterType" onchange="renderTable()" class="w-full border-2 border-gray-200 rounded-lg p-3 outline-none focus:border-primary bg-white">
+            <div class="bg-white p-4 md:p-6 rounded-xl shadow-sm">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
+                    <input type="text" id="search" placeholder="🔍 Search name or phone..." onkeyup="renderTable()" class="w-full border border-gray-300 rounded-lg p-2 outline-none focus:border-primary text-sm">
+                    <select id="filterType" onchange="renderTable()" class="w-full border border-gray-300 rounded-lg p-2 outline-none focus:border-primary text-sm">
                         <option value="all">All Students</option>
                         <option value="junior">Junior Students</option>
                         <option value="senior">Senior Students</option>
                         <option value="dropout">Dropouts</option>
                     </select>
-
-                    <select id="filterStatus" onchange="renderTable()" class="w-full border-2 border-gray-200 rounded-lg p-3 outline-none focus:border-primary bg-white">
+                    <select id="filterStatus" onchange="renderTable()" class="w-full border border-gray-300 rounded-lg p-2 outline-none focus:border-primary text-sm">
                         <option value="all">All Status</option>
                         <option value="due">Has Dues</option>
                         <option value="paid">Fully Paid</option>
                     </select>
                 </div>
 
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left border-collapse min-w-[800px]">
+                <div class="overflow-x-auto table-container">
+                    <table class="w-full text-left border-collapse min-w-[700px]">
                         <thead>
-                            <tr class="bg-gray-50 text-gray-500 text-sm border-b-2 border-gray-200">
-                                <th class="p-4 font-bold w-16 text-center">Sl.</th>
-                                <th class="p-4 font-bold">Student Details</th>
-                                <th class="p-4 font-bold">Payment Progress</th>
-                                <th class="p-4 font-bold text-right">Status / Actions</th>
+                            <tr class="bg-gray-50 text-gray-600 text-xs md:text-sm border-b border-gray-200">
+                                <th class="p-3 font-bold w-12 text-center">Sl.</th>
+                                <th class="p-3 font-bold">Details</th>
+                                <th class="p-3 font-bold">Payments</th>
+                                <th class="p-3 font-bold text-right">Action</th>
                             </tr>
                         </thead>
-                        <tbody id="tbody" class="divide-y divide-gray-100"></tbody>
+                        <tbody id="tbody" class="divide-y divide-gray-100 text-sm"></tbody>
                     </table>
                 </div>
             </div>
         </div>
 
-        <!-- STUDENT PROFILE VIEW (SPA integration) -->
+        <!-- STUDENT PROFILE -->
         <div id="studentProfile" class="section max-w-5xl mx-auto">
-            <button onclick="navigate('students')" class="mb-4 text-gray-500 hover:text-primary font-semibold flex items-center gap-2 transition">
-                <i class="fas fa-arrow-left"></i> Back to Directory
+            <button onclick="navigate('students')" class="mb-4 text-gray-500 hover:text-primary font-semibold flex items-center gap-2 text-sm">
+                <i class="fas fa-arrow-left"></i> Back
             </button>
-            
-            <div id="profileContent">
-                <!-- Injected via JS -->
-            </div>
+            <div id="profileContent"></div>
         </div>
 
         <!-- EXPENSES -->
         <div id="expenses" class="section max-w-5xl mx-auto">
-            <h2 class="text-2xl font-bold mb-6 text-gray-800">💸 Expense Manager</h2>
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div class="bg-white p-6 rounded-2xl shadow-sm lg:col-span-1 h-fit">
-                    <form id="expForm" class="space-y-4">
+            <h2 class="text-xl md:text-2xl font-bold mb-4 text-gray-800">💸 Expense Manager</h2>
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                <div class="bg-white p-4 md:p-6 rounded-xl shadow-sm lg:col-span-1 h-fit">
+                    <form id="expForm" class="space-y-3">
                         <div>
-                            <label class="text-sm font-bold text-gray-600">Category</label>
-                            <select id="expCat" class="w-full border-2 border-gray-200 rounded-lg p-3 outline-none focus:border-purple-500 mt-1 bg-white">
+                            <label class="text-xs font-bold text-gray-600">Category</label>
+                            <select id="expCat" class="w-full border border-gray-300 rounded-lg p-2.5 outline-none focus:border-purple-500 mt-1 text-sm bg-white">
                                 <option>Salary</option><option>Electricity Bill</option>
                                 <option>Broadband</option><option>Computer Repair</option>
                                 <option>Room Rent</option><option>Others</option>
                             </select>
                         </div>
                         <div>
-                            <label class="text-sm font-bold text-gray-600">Amount (₹)</label>
-                            <input type="number" id="expAmount" required class="w-full border-2 border-gray-200 rounded-lg p-3 outline-none focus:border-purple-500 mt-1">
+                            <label class="text-xs font-bold text-gray-600">Amount (₹)</label>
+                            <input type="number" id="expAmount" required class="w-full border border-gray-300 rounded-lg p-2.5 outline-none focus:border-purple-500 mt-1 text-sm">
                         </div>
                         <div>
-                            <label class="text-sm font-bold text-gray-600">Date</label>
-                            <input type="date" id="expDate" required class="w-full border-2 border-gray-200 rounded-lg p-3 outline-none focus:border-purple-500 mt-1">
+                            <label class="text-xs font-bold text-gray-600">Date</label>
+                            <input type="date" id="expDate" required class="w-full border border-gray-300 rounded-lg p-2.5 outline-none focus:border-purple-500 mt-1 text-sm">
                         </div>
                         <div>
-                            <label class="text-sm font-bold text-gray-600">Note (Optional)</label>
-                            <input type="text" id="expNote" class="w-full border-2 border-gray-200 rounded-lg p-3 outline-none focus:border-purple-500 mt-1">
+                            <label class="text-xs font-bold text-gray-600">Note</label>
+                            <input type="text" id="expNote" class="w-full border border-gray-300 rounded-lg p-2.5 outline-none focus:border-purple-500 mt-1 text-sm">
                         </div>
-                        <button type="submit" class="w-full bg-purple-500 hover:bg-purple-600 text-white font-bold py-3 rounded-xl transition shadow-lg shadow-purple-500/30">Add Expense</button>
+                        <button type="submit" class="w-full bg-purple-500 hover:bg-purple-600 text-white font-bold py-2.5 rounded-lg transition shadow mt-2">Add</button>
                     </form>
                 </div>
                 
-                <div class="bg-white p-6 rounded-2xl shadow-sm lg:col-span-2">
-                    <h3 class="font-bold text-lg mb-4">Expense History</h3>
-                    <div class="overflow-x-auto">
+                <div class="bg-white p-4 md:p-6 rounded-xl shadow-sm lg:col-span-2">
+                    <h3 class="font-bold text-base mb-3">Expense History</h3>
+                    <div class="overflow-x-auto table-container">
                         <table class="w-full text-left border-collapse">
                             <thead>
-                                <tr class="bg-gray-50 text-gray-500 text-sm border-b-2 border-gray-200">
-                                    <th class="p-3 font-bold">Date</th>
-                                    <th class="p-3 font-bold">Details</th>
-                                    <th class="p-3 font-bold text-right">Amount</th>
-                                    <th class="p-3 font-bold text-center">Action</th>
+                                <tr class="bg-gray-50 text-gray-500 text-xs border-b border-gray-200">
+                                    <th class="p-2 font-bold">Date</th>
+                                    <th class="p-2 font-bold">Details</th>
+                                    <th class="p-2 font-bold text-right">Amount</th>
+                                    <th class="p-2 font-bold text-center"></th>
                                 </tr>
                             </thead>
-                            <tbody id="expBody" class="divide-y divide-gray-100"></tbody>
+                            <tbody id="expBody" class="divide-y divide-gray-100 text-sm"></tbody>
                         </table>
                     </div>
                 </div>
@@ -334,65 +329,65 @@
         </div>
     </div>
 
-    <!-- MODALS -->
+    <!-- MODALS (No Backdrop blur for performance) -->
     
     <!-- Payment Modal -->
-    <div id="modal" class="fixed inset-0 bg-black/50 z-[200] hidden justify-center items-center backdrop-blur-sm p-4">
-        <div class="bg-white p-6 rounded-2xl w-full max-w-sm shadow-2xl">
-            <h3 class="text-xl font-bold mb-4 text-gray-800">💰 Receive Payment</h3>
-            <div class="space-y-4">
-                <select id="payType" class="w-full border-2 border-gray-200 rounded-lg p-3 outline-none focus:border-success bg-white">
+    <div id="modal" class="fixed inset-0 bg-black/60 z-[200] hidden justify-center items-center p-4">
+        <div class="bg-white p-5 rounded-xl w-full max-w-sm shadow-xl">
+            <h3 class="text-lg font-bold mb-4 text-gray-800">💰 Receive Payment</h3>
+            <div class="space-y-3">
+                <select id="payType" class="w-full border border-gray-300 rounded-lg p-2.5 outline-none focus:border-success bg-white text-sm">
                     <option>Monthly Fee</option>
                     <option>Admission Fee</option>
                     <option>Exam Fee</option>
                 </select>
-                <input type="number" id="payAmount" class="w-full border-2 border-gray-200 rounded-lg p-3 outline-none focus:border-success" placeholder="Amount (₹)">
+                <input type="number" id="payAmount" class="w-full border border-gray-300 rounded-lg p-2.5 outline-none focus:border-success text-sm" placeholder="Amount (₹)">
                 
-                <div class="flex gap-3 mt-6">
-                    <button onclick="document.getElementById('modal').style.display='none'" class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-3 rounded-xl transition">Cancel</button>
-                    <button onclick="submitPay()" class="flex-1 bg-success hover:bg-green-600 text-white font-bold py-3 rounded-xl transition shadow-lg shadow-green-500/30">Confirm</button>
+                <div class="flex gap-2 mt-4">
+                    <button onclick="document.getElementById('modal').style.display='none'" class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-2.5 rounded-lg text-sm transition">Cancel</button>
+                    <button onclick="submitPay()" class="flex-1 bg-success hover:bg-green-600 text-white font-bold py-2.5 rounded-lg text-sm transition shadow">Confirm</button>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- Edit Student Modal -->
-    <div id="editModal" class="fixed inset-0 bg-black/50 z-[200] hidden justify-center items-center backdrop-blur-sm p-4">
-        <div class="bg-white p-6 rounded-2xl w-full max-w-lg shadow-2xl max-h-[90vh] overflow-y-auto">
-            <h3 class="text-xl font-bold mb-4 text-gray-800">✏️ Edit Student Info</h3>
-            <div class="space-y-4">
-                <input type="text" id="editName" class="w-full border-2 border-gray-200 rounded-lg p-3 outline-none focus:border-warning" placeholder="Full Name">
-                <input type="text" id="editBatch" class="w-full border-2 border-gray-200 rounded-lg p-3 outline-none focus:border-warning" placeholder="Batch Name">
-                <input type="number" id="editPhone" class="w-full border-2 border-gray-200 rounded-lg p-3 outline-none focus:border-warning" placeholder="Phone Number">
-                <input type="text" id="editCardNumber" class="w-full border-2 border-gray-200 rounded-lg p-3 outline-none focus:border-warning hidden" placeholder="Card Number (For Senior)">
+    <div id="editModal" class="fixed inset-0 bg-black/60 z-[200] hidden justify-center items-center p-4">
+        <div class="bg-white p-5 rounded-xl w-full max-w-lg shadow-xl max-h-[90vh] overflow-y-auto">
+            <h3 class="text-lg font-bold mb-3 text-gray-800">✏️ Edit Student Info</h3>
+            <div class="space-y-3">
+                <input type="text" id="editName" class="w-full border border-gray-300 rounded-lg p-2 outline-none focus:border-warning text-sm" placeholder="Full Name">
+                <input type="text" id="editBatch" class="w-full border border-gray-300 rounded-lg p-2 outline-none focus:border-warning text-sm" placeholder="Batch Name">
+                <input type="number" id="editPhone" class="w-full border border-gray-300 rounded-lg p-2 outline-none focus:border-warning text-sm" placeholder="Phone Number">
+                <input type="text" id="editCardNumber" class="w-full border border-gray-300 rounded-lg p-2 outline-none focus:border-warning text-sm hidden" placeholder="Card Number (For Senior)">
                 
                 <div>
                     <label class="text-xs font-bold text-gray-500">Join Date</label>
-                    <input type="date" id="editJoinDate" class="w-full border-2 border-gray-200 rounded-lg p-3 outline-none focus:border-warning">
+                    <input type="date" id="editJoinDate" class="w-full border border-gray-300 rounded-lg p-2 outline-none focus:border-warning text-sm">
                 </div>
 
-                <div class="grid grid-cols-2 gap-4 bg-gray-50 p-4 rounded-xl border border-gray-100">
+                <div class="grid grid-cols-2 gap-3 bg-gray-50 p-3 rounded-lg border border-gray-200">
                     <div>
-                        <label class="text-xs font-bold text-gray-500">Total Adm Fee</label>
-                        <input type="number" id="editAdmFee" class="w-full border-2 border-gray-200 rounded-lg p-2 outline-none">
+                        <label class="text-xs font-bold text-gray-500">Adm Fee</label>
+                        <input type="number" id="editAdmFee" class="w-full border border-gray-300 rounded-lg p-2 outline-none text-sm">
                     </div>
                     <div>
                         <label class="text-xs font-bold text-gray-500">Monthly Fee</label>
-                        <input type="number" id="editMonthlyFee" class="w-full border-2 border-gray-200 rounded-lg p-2 outline-none">
+                        <input type="number" id="editMonthlyFee" class="w-full border border-gray-300 rounded-lg p-2 outline-none text-sm">
                     </div>
                     <div>
-                        <label class="text-xs font-bold text-gray-500">Total Exam Fee</label>
-                        <input type="number" id="editExamFee" class="w-full border-2 border-gray-200 rounded-lg p-2 outline-none">
+                        <label class="text-xs font-bold text-purple-600">Exam Fee</label>
+                        <input type="number" id="editExamFee" class="w-full border border-purple-200 bg-purple-50 rounded-lg p-2 outline-none text-sm">
                     </div>
                     <div>
                         <label class="text-xs font-bold text-gray-500">Duration (Months)</label>
-                        <input type="number" id="editDuration" class="w-full border-2 border-gray-200 rounded-lg p-2 outline-none">
+                        <input type="number" id="editDuration" class="w-full border border-gray-300 rounded-lg p-2 outline-none text-sm">
                     </div>
                 </div>
 
-                <div class="flex gap-3 mt-6">
-                    <button onclick="document.getElementById('editModal').style.display='none'" class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-3 rounded-xl transition">Cancel</button>
-                    <button onclick="submitEdit()" class="flex-1 bg-warning hover:bg-yellow-600 text-white font-bold py-3 rounded-xl transition shadow-lg shadow-yellow-500/30">Update</button>
+                <div class="flex gap-2 mt-4">
+                    <button onclick="document.getElementById('editModal').style.display='none'" class="flex-1 bg-gray-100 text-gray-700 font-bold py-2.5 rounded-lg text-sm">Cancel</button>
+                    <button onclick="submitEdit()" class="flex-1 bg-warning text-white font-bold py-2.5 rounded-lg text-sm shadow">Update</button>
                 </div>
             </div>
         </div>
@@ -400,7 +395,7 @@
 
 <script>
     // ==========================================
-    // YOUR FIREBASE CONFIG HERE - DO NOT CHANGE
+    // YOUR FIREBASE CONFIG HERE
     // ==========================================
     const firebaseConfig = {
         apiKey: "AIzaSyCUmRYc8WtQP3LW_85i5Czore9YjWw0yLU",
@@ -423,7 +418,7 @@
     let currentId = null;
     let editStudentId = null;
     let chartInstance = null;
-    let currentFilteredList = []; // Used for Bulk WA
+    let currentFilteredList = []; 
 
     // --- AUTH ---
     function googleLogin() {
@@ -479,7 +474,7 @@
         });
     }
 
-    // --- CORE FINANCE LOGIC (Fixed as per request) ---
+    // --- CORE FINANCE LOGIC (Exam Fee Separated) ---
     function getFinance(s) {
         let paidAdm = 0, paidMon = 0, paidExam = 0;
         
@@ -490,40 +485,54 @@
             else paidMon += amt;
         });
 
-        // Safe parsing for structural fields
         const totalAdmFee = Number(s.admFee) || 0;
         const monthlyFee = Number(s.monthlyFee) || 0;
         const totalExamFee = Number(s.examFee) || 0;
-        const duration = Number(s.duration) || 12; // default 12 if missing
+        const duration = Number(s.duration) || 12;
 
-        const totalFees = totalAdmFee + (monthlyFee * duration) + totalExamFee;
-        const totalPaid = paidAdm + paidMon + paidExam;
+        // Main Due (Without Exam)
+        const totalFees = totalAdmFee + (monthlyFee * duration);
+        const totalPaidMain = paidAdm + paidMon; 
         
-        // Correct formula requested
-        let due = totalFees - totalPaid;
-
-        // Prevent negative dues (if overpaid) and handle dropouts
+        let due = totalFees - totalPaidMain;
         if (due < 0) due = 0; 
         if (s.status === 'dropout') due = 0;
 
-        return { due, paidAdm, paidMon, paidExam, totalPaid, totalFees };
+        // Exam Due Separated
+        let examDue = totalExamFee - paidExam;
+        if (examDue < 0) examDue = 0;
+        if (s.status === 'dropout') examDue = 0;
+
+        return { 
+            due, 
+            paidAdm, 
+            paidMon, 
+            paidExam, 
+            totalPaidMain, 
+            totalFees, 
+            examDue, 
+            totalExamFee,
+            grandTotalPaid: paidAdm + paidMon + paidExam
+        };
     }
 
     // --- DASHBOARD & CHARTS ---
     function updateDashboard() {
-        let activeCount = 0, dropCount = 0, totalRev = 0, totalDue = 0, totalExp = 0;
+        let activeCount = 0, dropCount = 0, totalRev = 0, totalDue = 0, totalExamDue = 0, totalExp = 0;
         const currentYear = new Date().getFullYear();
         document.getElementById('currentYear').innerText = currentYear;
         const monthlyStats = Array(12).fill(0); 
 
         students.forEach(s => {
             const f = getFinance(s);
-            totalRev += f.totalPaid;
+            totalRev += f.grandTotalPaid;
+            
             if(s.status === 'dropout') {
                 dropCount++;
             } else { 
                 activeCount++; 
                 totalDue += f.due; 
+                totalExamDue += f.examDue;
             }
 
             s.payments.forEach(p => {
@@ -538,12 +547,12 @@
         document.getElementById('d_dropout').innerText = dropCount;
         document.getElementById('d_collected').innerText = '₹' + totalRev.toLocaleString();
         document.getElementById('d_due').innerText = '₹' + totalDue.toLocaleString();
+        document.getElementById('d_exam_due').innerText = '₹' + totalExamDue.toLocaleString();
         document.getElementById('d_expense').innerText = '₹' + totalExp.toLocaleString();
         
         const profit = totalRev - totalExp;
         const pEl = document.getElementById('d_profit');
-        pEl.innerText = '₹' + profit.toLocaleString();
-        pEl.className = `text-2xl font-bold mt-1 ${profit >= 0 ? 'text-green-600' : 'text-red-500'}`;
+        if(pEl) pEl.innerText = '₹' + profit.toLocaleString();
 
         initChart(monthlyStats);
     }
@@ -562,7 +571,7 @@
                     label: 'Collection (₹)',
                     data: dataArray,
                     backgroundColor: '#3b82f6',
-                    borderRadius: 6,
+                    borderRadius: 4,
                 }]
             },
             options: {
@@ -570,14 +579,14 @@
                 maintainAspectRatio: false,
                 plugins: { legend: { display: false } },
                 scales: {
-                    y: { beginAtZero: true, grid: { borderDash: [4, 4] } },
+                    y: { beginAtZero: true },
                     x: { grid: { display: false } }
                 }
             }
         });
     }
 
-    // --- TRACKER ---
+    // --- TRACKER (Join Date Based) ---
     function loadTrackerData() {
         const mInput = document.getElementById('trackerMonth').value;
         if(!mInput) return;
@@ -587,32 +596,37 @@
         const paidList = document.getElementById('paidList');
         unpaidList.innerHTML = ''; paidList.innerHTML = '';
         let uCount=0, pCount=0;
+        const today = new Date();
 
         students.filter(s => s.status === 'active').forEach(s => {
-            const start = new Date(s.joinDate);
-            const selectedMonthDate = new Date(year, month-1, 1);
-            const diffDays = Math.ceil((selectedMonthDate - start) / (1000 * 60 * 60 * 24));
+            const joinDateObj = new Date(s.joinDate);
+            const joinDay = joinDateObj.getDate();
+            const dueDateForMonth = new Date(year, month - 1, joinDay);
+            
+            // Skip if the selected month is before they joined
+            if(new Date(year, month-1, 1) < new Date(joinDateObj.getFullYear(), joinDateObj.getMonth(), 1)) return;
 
             const hasPaid = s.payments.some(p => {
                 const d = new Date(p.date);
                 return d.getFullYear() == year && (d.getMonth()+1) == month && p.type === 'Monthly Fee';
             });
 
-            const f = getFinance(s); // check if course is over or fully paid
+            const f = getFinance(s); 
 
             const div = document.createElement('div');
-            div.className = 'flex justify-between items-center p-3 bg-white rounded-lg border border-gray-100 shadow-sm';
+            div.className = 'flex justify-between items-center p-2.5 bg-white rounded border border-gray-100 shadow-sm';
 
             if(hasPaid) {
-                div.innerHTML = `<div><p class="font-bold text-gray-800">${s.name}</p><p class="text-xs text-gray-500">${s.batch}</p></div><span class="bg-green-100 text-green-700 px-3 py-1 rounded-md text-xs font-bold">PAID</span>`;
+                div.innerHTML = `<div><p class="font-bold text-gray-800 text-sm">${s.name}</p><p class="text-[10px] text-gray-500">${s.batch}</p></div><span class="bg-green-100 text-green-700 px-2 py-0.5 rounded text-[10px] font-bold">PAID</span>`;
                 paidList.appendChild(div);
                 pCount++;
             } else {
-                if(diffDays >= 30 && f.due > 0) { // Only show unpaid if they actually owe money
+                // Check if current date has crossed their specific due date
+                if(today >= dueDateForMonth && f.due > 0) {
                     const monthName = new Date(year, month-1).toLocaleString('default', { month: 'long' });
                     div.innerHTML = `
-                        <div><p class="font-bold text-gray-800">${s.name}</p><p class="text-xs text-gray-500">${s.batch}</p></div>
-                        <button class="w-10 h-10 rounded-full bg-green-500 text-white flex justify-center items-center hover:bg-green-600 transition shadow" onclick="sendSpecificReminder('${s.phone}','${s.name}','${monthName}', ${f.due})">
+                        <div><p class="font-bold text-gray-800 text-sm">${s.name}</p><p class="text-[10px] text-gray-500">${s.batch} | Due Date: ${joinDay}</p></div>
+                        <button class="w-8 h-8 rounded-full bg-green-500 text-white flex justify-center items-center hover:bg-green-600 transition shadow" onclick="sendSpecificReminder('${s.phone}','${s.name}','${monthName}')">
                             <i class="fab fa-whatsapp"></i>
                         </button>`;
                     unpaidList.appendChild(div);
@@ -624,8 +638,9 @@
         document.getElementById('paidCount').innerText = pCount;
     }
 
-    function sendSpecificReminder(phone, name, month, due) {
-        const text = `⚠️ *MONTHLY FEE REMINDER*\n--------------------------------\n🎓 *TIKARKHANJI JNYCTSD*\n--------------------------------\n👤 Student: *${name}*\n📅 Month: *${month}*\n📉 *Total Due: ₹${due}*\n\nYour fee is pending. Please clear it soon.\n🙏 Thank You`;
+    // Professional Strings (Exactly as before)
+    function sendSpecificReminder(phone, name, month) {
+        const text = `⚠️ *MONTHLY FEE REMINDER*\n--------------------------------\n🎓 *TIKARKHANJI JNYCTSD*\n--------------------------------\n👤 Student: *${name}*\n📅 Month: *${month}*\n\nYour monthly fee is pending. Please clear it soon.\n--------------------------------\n🙏 Thank You`;
         window.open(`https://wa.me/${phone}?text=${encodeURIComponent(text)}`, '_blank');
     }
 
@@ -680,15 +695,14 @@
         
         db.ref('students').push(s).then(() => {
             if(type === 'senior') {
-                const welcomeMsg = `🎉 *WELCOME TO TIKARKHANJI JNYCTSD* 🎉\n--------------------------------\nDear *${name}*,\n\nWe are extremely delighted to welcome you! 🎓\nYour admission as a Senior Student is confirmed.\n\n📚 *Batch:* ${batch}\n💳 *Card No:* ${cardNo || 'N/A'}\n\nWe look forward to an excellent learning journey.\n--------------------------------\n*Admin, Tikarkhanji JNYCTSD*`;
+                const welcomeMsg = `🎉 *WELCOME TO TIKARKHANJI JNYCTSD* 🎉\n--------------------------------\nDear *${name}*,\n\nWe are extremely delighted to welcome you to our center! 🎓\nYour admission as a Senior Student is confirmed.\n\n📚 *Batch:* ${batch}\n💳 *Card No:* ${cardNo || 'N/A'}\n\nWe look forward to an excellent learning journey together.\n--------------------------------\nBest Regards,\n*Admin, Tikarkhanji JNYCTSD*`;
                 window.open(`https://wa.me/${phone}?text=${encodeURIComponent(welcomeMsg)}`, '_blank');
             }
 
             e.target.reset();
             setDefaults();
             alert("Student Added Successfully!");
-            
-            document.getElementById('filterType').value = type; // Auto filter
+            document.getElementById('filterType').value = type;
             navigate('students');
         });
     });
@@ -702,13 +716,11 @@
         
         tbody.innerHTML = '';
 
-        // Apply Search and Filters
         let list = students.filter(s => {
             const matchSearch = s.name.toLowerCase().includes(search) || s.phone.includes(search);
             const matchType = (filterType === 'all' && s.status !== 'dropout') || 
                               (filterType === 'dropout' && s.status === 'dropout') ||
                               (filterType === s.type && s.status !== 'dropout');
-            
             if(!matchSearch || !matchType) return false;
 
             const f = getFinance(s);
@@ -717,102 +729,95 @@
             return true;
         });
 
-        // Requirement: Sort students by join date (ascending)
         list.sort((a, b) => new Date(a.joinDate) - new Date(b.joinDate));
-        
-        currentFilteredList = list; // Save for Bulk WA feature
+        currentFilteredList = list; 
 
         if(list.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="4" class="text-center p-8 text-gray-400">No students found matching criteria.</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="4" class="text-center p-6 text-gray-400">No data found.</td></tr>`;
             return;
         }
 
         let serialNumber = 1;
+        let htmlStr = ''; // String building for performance
 
         list.forEach(s => {
             const f = getFinance(s);
             const isSenior = s.type === 'senior';
             const badgeClass = isSenior ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700';
-            const badgeText = isSenior ? 'Senior' : 'Junior';
-            const cardDisplay = (isSenior && s.cardNumber) ? `<span class="mt-1 inline-block text-xs font-bold text-purple-600 bg-purple-50 px-2 py-1 rounded">💳 ${s.cardNumber}</span>` : '';
+            const cardDisplay = (isSenior && s.cardNumber) ? `<span class="mt-1 inline-block text-[10px] font-bold text-purple-600 bg-purple-50 px-1.5 py-0.5 rounded">💳 ${s.cardNumber}</span>` : '';
             
             const isDropout = s.status === 'dropout';
             const dueClass = f.due > 0 ? 'text-red-500 bg-red-50' : 'text-green-600 bg-green-50';
-            
+            const examBadge = f.examDue > 0 ? `<div class="text-[10px] text-purple-600 font-bold mt-1">Exam Due: ₹${f.examDue}</div>` : '';
+
             let buttons = '';
             if(!isDropout) {
                 buttons = `
-                    <button class="w-8 h-8 rounded bg-green-500 hover:bg-green-600 text-white shadow" onclick="openPay('${s.id}')" title="Pay Fee"><i class="fas fa-rupee-sign"></i></button>
-                    <button class="w-8 h-8 rounded bg-blue-500 hover:bg-blue-600 text-white shadow" onclick="openProfile('${s.id}')" title="View Profile"><i class="fas fa-eye"></i></button>
-                    <button class="w-8 h-8 rounded bg-yellow-500 hover:bg-yellow-600 text-white shadow" onclick="openEdit('${s.id}')" title="Edit"><i class="fas fa-pen text-xs"></i></button>
-                    <button class="w-8 h-8 rounded bg-gray-500 hover:bg-gray-600 text-white shadow" onclick="markDropout('${s.id}')" title="Mark Dropout"><i class="fas fa-user-slash text-xs"></i></button>
+                    <button class="w-7 h-7 rounded bg-green-500 text-white shadow" onclick="openPay('${s.id}')"><i class="fas fa-rupee-sign text-xs"></i></button>
+                    <button class="w-7 h-7 rounded bg-blue-500 text-white shadow" onclick="openProfile('${s.id}')"><i class="fas fa-eye text-xs"></i></button>
+                    <button class="w-7 h-7 rounded bg-yellow-500 text-white shadow" onclick="openEdit('${s.id}')"><i class="fas fa-pen text-xs"></i></button>
+                    <button class="w-7 h-7 rounded bg-gray-500 text-white shadow" onclick="markDropout('${s.id}')"><i class="fas fa-user-slash text-[10px]"></i></button>
                 `;
             } else {
                 buttons = `
-                    <button class="px-3 py-1 rounded bg-blue-500 hover:bg-blue-600 text-white text-sm shadow font-bold" onclick="restoreStudent('${s.id}')">Restore</button>
-                    <button class="px-3 py-1 rounded bg-red-100 hover:bg-red-500 text-red-600 hover:text-white text-sm shadow font-bold transition" onclick="deleteStudent('${s.id}')">Delete</button>
+                    <button class="px-2 py-1 rounded bg-blue-500 text-white text-xs shadow font-bold" onclick="restoreStudent('${s.id}')">Restore</button>
+                    <button class="px-2 py-1 rounded bg-red-100 text-red-600 text-xs shadow font-bold" onclick="deleteStudent('${s.id}')">Delete</button>
                 `;
             }
 
-            tbody.innerHTML += `
-                <tr class="hover:bg-gray-50 transition border-b border-gray-100">
-                    <td class="p-4 text-center font-bold text-gray-500">${serialNumber++}</td>
-                    <td class="p-4">
-                        <div class="font-bold text-gray-800 text-base flex items-center gap-2">
-                            ${s.name} <span class="${badgeClass} px-2 py-0.5 rounded text-[10px] uppercase font-bold tracking-wider">${badgeText}</span>
+            htmlStr += `
+                <tr class="hover:bg-gray-50 border-b border-gray-100">
+                    <td class="p-2 md:p-3 text-center font-bold text-gray-500">${serialNumber++}</td>
+                    <td class="p-2 md:p-3">
+                        <div class="font-bold text-gray-800 text-sm flex items-center gap-1.5">
+                            ${s.name} <span class="${badgeClass} px-1.5 py-0.5 rounded text-[9px] uppercase font-bold tracking-wider">${s.type}</span>
                         </div>
-                        <div class="text-sm text-gray-500 mt-1"><i class="fas fa-phone-alt mr-1"></i>${s.phone}</div>
-                        <div class="text-xs text-gray-400 mt-0.5">Joined: ${s.joinDate} | Batch: ${s.batch}</div>
+                        <div class="text-xs text-gray-500 mt-0.5"><i class="fas fa-phone-alt mr-1"></i>${s.phone}</div>
+                        <div class="text-[10px] text-gray-400 mt-0.5">Joined: ${s.joinDate}</div>
                         ${cardDisplay}
                     </td>
-                    <td class="p-4">
-                        <div class="text-xs space-y-1 font-semibold">
-                            <p class="text-blue-600 flex justify-between w-32"><span>Adm:</span> <span>₹${f.paidAdm}</span></p>
-                            <p class="text-green-600 flex justify-between w-32"><span>Monthly:</span> <span>₹${f.paidMon}</span></p>
-                            <p class="text-purple-600 flex justify-between w-32 border-b border-gray-200 pb-1"><span>Exam:</span> <span>₹${f.paidExam}</span></p>
-                            <p class="text-gray-700 flex justify-between w-32 pt-1"><span>Total Paid:</span> <span>₹${f.totalPaid}</span></p>
+                    <td class="p-2 md:p-3">
+                        <div class="text-[11px] font-semibold">
+                            <span class="text-blue-600">A: ₹${f.paidAdm}</span> | 
+                            <span class="text-green-600">M: ₹${f.paidMon}</span><br>
+                            <span class="text-purple-600">E: ₹${f.paidExam} / Total: ₹${f.totalExamFee}</span>
                         </div>
                     </td>
-                    <td class="p-4 text-right">
-                        <div class="inline-block px-3 py-1 rounded-lg font-bold mb-3 ${dueClass}">
-                            ${f.due > 0 ? 'Due: ₹' + f.due : 'FULLY PAID'}
+                    <td class="p-2 md:p-3 text-right">
+                        <div class="inline-block px-2 py-0.5 rounded font-bold mb-2 text-xs ${dueClass}">
+                            ${f.due > 0 ? 'Due: ₹' + f.due : 'PAID'}
                         </div>
-                        <div class="flex justify-end gap-1">
+                        ${examBadge}
+                        <div class="flex justify-end gap-1 mt-1">
                             ${buttons}
                         </div>
                     </td>
                 </tr>`;
         });
+        tbody.innerHTML = htmlStr;
     }
 
-    // --- BULK WHATSAPP MESSAGING ---
+    // Professional Bulk WA 
     function sendBulkWA() {
         const dueStudents = currentFilteredList.filter(s => s.status === 'active' && getFinance(s).due > 0);
-        
-        if(dueStudents.length === 0) {
-            alert("No students with due fees in the current filtered list.");
-            return;
-        }
-
-        if(!confirm(`Ready to send Due Reminders to ${dueStudents.length} students?\n\nNOTE: Please ensure your browser allows Pop-ups for this site, otherwise tabs will be blocked.`)) return;
+        if(dueStudents.length === 0) { alert("No students with main dues in current list."); return; }
+        if(!confirm(`Send Reminders to ${dueStudents.length} students?\n\nEnsure Pop-ups are allowed.`)) return;
 
         let i = 0;
         const interval = setInterval(() => {
-            if(i >= dueStudents.length) {
-                clearInterval(interval);
-                alert("Bulk messaging process completed!");
-                return;
-            }
+            if(i >= dueStudents.length) { clearInterval(interval); alert("Done!"); return; }
             const s = dueStudents[i];
             const f = getFinance(s);
-            const msg = `⚠️ *FEE REMINDER*\n--------------------------------\n🎓 *TIKARKHANJI JNYCTSD*\n--------------------------------\n👤 Student: *${s.name}*\n📉 *Pending Due: ₹${f.due}*\n\nYour fees are overdue. Please clear them soon.\n🙏 Thank You`;
+            
+            // Original Professional Formatting
+            const msg = `⚠️ *FEE REMINDER*\n--------------------------------\n🎓 *TIKARKHANJI JNYCTSD*\n--------------------------------\n👤 Student: *${s.name}*\n📂 Batch: ${s.batch}\n\n📉 *Pending Due: ₹${f.due}*\n\nYour fees are overdue. Please clear them soon.\n--------------------------------\n🙏 Thank You`;
             
             window.open(`https://wa.me/${s.phone}?text=${encodeURIComponent(msg)}`, '_blank');
             i++;
-        }, 1500); // 1.5 seconds delay between tabs to prevent aggressive blocking
+        }, 1500); 
     }
 
-    // --- STUDENT PROFILE (DETAILED VIEW) ---
+    // --- STUDENT PROFILE ---
     function openProfile(id) {
         const s = students.find(x => x.id === id);
         if(!s) return;
@@ -821,88 +826,73 @@
         let payHistoryHtml = '';
         if(s.payments && s.payments.length > 0) {
             const sortedPayments = [...s.payments].sort((a,b) => new Date(b.date) - new Date(a.date));
-            sortedPayments.forEach((p, idx) => {
+            sortedPayments.forEach((p) => {
                 const dateStr = new Date(p.date).toLocaleDateString('en-IN', {day:'numeric', month:'short', year:'numeric'});
                 payHistoryHtml += `
-                    <tr class="border-b border-gray-100 last:border-0">
-                        <td class="p-3 text-sm text-gray-600">${dateStr}</td>
-                        <td class="p-3 text-sm font-semibold">${p.type}</td>
-                        <td class="p-3 text-sm text-green-600 font-bold text-right">₹${p.amount}</td>
+                    <tr class="border-b border-gray-100">
+                        <td class="p-2 text-xs text-gray-600">${dateStr}</td>
+                        <td class="p-2 text-xs font-semibold">${p.type}</td>
+                        <td class="p-2 text-xs text-green-600 font-bold text-right">₹${p.amount}</td>
                     </tr>
                 `;
             });
-        } else {
-            payHistoryHtml = `<tr><td colspan="3" class="p-4 text-center text-gray-400">No payments recorded yet.</td></tr>`;
         }
 
-        const profileHtml = `
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <!-- Info Card -->
-                <div class="bg-white p-6 rounded-2xl shadow-sm border-t-4 border-primary col-span-1">
-                    <div class="text-center mb-4">
-                        <div class="w-20 h-20 bg-blue-100 text-primary rounded-full flex items-center justify-center text-3xl font-bold mx-auto mb-3">
-                            ${s.name.charAt(0).toUpperCase()}
-                        </div>
-                        <h2 class="text-xl font-bold text-gray-800">${s.name}</h2>
-                        <span class="inline-block bg-gray-100 text-gray-600 px-3 py-1 rounded-full text-xs font-bold mt-2 uppercase">${s.type}</span>
+        document.getElementById('profileContent').innerHTML = `
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="bg-white p-4 rounded-xl shadow-sm border-t-4 border-primary col-span-1">
+                    <div class="text-center mb-3">
+                        <h2 class="text-lg font-bold text-gray-800">${s.name}</h2>
+                        <span class="inline-block bg-gray-100 text-gray-600 px-2 py-0.5 rounded text-[10px] font-bold uppercase">${s.type}</span>
                     </div>
-                    <div class="space-y-3 text-sm mt-6">
-                        <div class="flex justify-between border-b pb-2"><span class="text-gray-500">Phone</span><span class="font-bold">${s.phone}</span></div>
-                        <div class="flex justify-between border-b pb-2"><span class="text-gray-500">Batch</span><span class="font-bold">${s.batch}</span></div>
-                        <div class="flex justify-between border-b pb-2"><span class="text-gray-500">Join Date</span><span class="font-bold">${s.joinDate}</span></div>
-                        ${s.cardNumber ? `<div class="flex justify-between border-b pb-2"><span class="text-gray-500">Card No</span><span class="font-bold text-purple-600">${s.cardNumber}</span></div>` : ''}
+                    <div class="space-y-2 text-xs mt-4">
+                        <div class="flex justify-between border-b pb-1"><span class="text-gray-500">Phone</span><span class="font-bold">${s.phone}</span></div>
+                        <div class="flex justify-between border-b pb-1"><span class="text-gray-500">Batch</span><span class="font-bold">${s.batch}</span></div>
+                        <div class="flex justify-between border-b pb-1"><span class="text-gray-500">Join</span><span class="font-bold">${s.joinDate}</span></div>
+                        ${s.cardNumber ? `<div class="flex justify-between border-b pb-1"><span class="text-gray-500">Card No</span><span class="font-bold text-purple-600">${s.cardNumber}</span></div>` : ''}
                     </div>
-                    <button class="w-full mt-6 bg-green-500 hover:bg-green-600 text-white font-bold py-2 rounded-lg transition shadow" onclick="openPay('${s.id}')">
-                        <i class="fas fa-plus mr-2"></i> Receive Payment
-                    </button>
+                    <button class="w-full mt-4 bg-green-500 hover:bg-green-600 text-white font-bold py-2 rounded-lg text-sm shadow" onclick="openPay('${s.id}')">Receive Payment</button>
                 </div>
 
-                <!-- Finance Card & History -->
-                <div class="col-span-1 md:col-span-2 space-y-6">
-                    <div class="grid grid-cols-3 gap-4">
-                        <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 text-center">
-                            <p class="text-xs text-gray-500 font-bold uppercase">Total Course Fee</p>
-                            <h3 class="text-2xl font-bold text-gray-800 mt-1">₹${f.totalFees}</h3>
+                <div class="col-span-1 md:col-span-2 space-y-4">
+                    <div class="grid grid-cols-3 gap-2">
+                        <div class="bg-white p-3 rounded-lg border border-gray-100 text-center">
+                            <p class="text-[10px] text-gray-500 font-bold uppercase">Main Fee (Adm+Mon)</p>
+                            <h3 class="text-lg font-bold">₹${f.totalFees}</h3>
                         </div>
-                        <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 text-center">
-                            <p class="text-xs text-gray-500 font-bold uppercase">Total Paid</p>
-                            <h3 class="text-2xl font-bold text-green-600 mt-1">₹${f.totalPaid}</h3>
+                        <div class="bg-white p-3 rounded-lg border border-gray-100 text-center">
+                            <p class="text-[10px] text-gray-500 font-bold uppercase">Total Paid</p>
+                            <h3 class="text-lg font-bold text-green-600">₹${f.totalPaidMain}</h3>
                         </div>
-                        <div class="bg-white p-5 rounded-2xl shadow-sm border border-red-100 bg-red-50 text-center">
-                            <p class="text-xs text-red-500 font-bold uppercase">Current Due</p>
-                            <h3 class="text-2xl font-bold text-red-600 mt-1">₹${f.due}</h3>
+                        <div class="bg-red-50 p-3 rounded-lg border border-red-100 text-center">
+                            <p class="text-[10px] text-red-500 font-bold uppercase">Main Due</p>
+                            <h3 class="text-lg font-bold text-red-600">₹${f.due}</h3>
                         </div>
                     </div>
+                    
+                    <div class="bg-purple-50 p-3 rounded-lg border border-purple-100 flex justify-between items-center">
+                        <span class="text-xs font-bold text-purple-700">Exam Details (Separated)</span>
+                        <div class="text-xs text-purple-800 font-semibold">Fee: ₹${f.totalExamFee} | Paid: ₹${f.paidExam} | <span class="font-bold text-red-500">Due: ₹${f.examDue}</span></div>
+                    </div>
 
-                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-                        <h3 class="text-lg font-bold mb-4 text-gray-800">📜 Payment History</h3>
-                        <div class="overflow-y-auto max-h-64 pr-2">
+                    <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+                        <h3 class="text-sm font-bold mb-2">📜 History</h3>
+                        <div class="overflow-y-auto max-h-48 table-container">
                             <table class="w-full text-left">
-                                <thead class="bg-gray-50 sticky top-0">
-                                    <tr>
-                                        <th class="p-3 text-xs text-gray-500 font-bold">Date</th>
-                                        <th class="p-3 text-xs text-gray-500 font-bold">Type</th>
-                                        <th class="p-3 text-xs text-gray-500 font-bold text-right">Amount</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    ${payHistoryHtml}
-                                </tbody>
+                                <thead class="bg-gray-50"><tr><th class="p-2 text-[10px] font-bold">Date</th><th class="p-2 text-[10px] font-bold">Type</th><th class="p-2 text-[10px] font-bold text-right">Amt</th></tr></thead>
+                                <tbody>${payHistoryHtml}</tbody>
                             </table>
                         </div>
                     </div>
                 </div>
-            </div>
-        `;
-        
-        document.getElementById('profileContent').innerHTML = profileHtml;
+            </div>`;
         navigate('studentProfile');
     }
 
     // --- ACTIONS ---
-    function markDropout(id) { if(confirm("Confirm Drop-Out? Due will become 0.")) db.ref('students/' + id).update({ status: 'dropout' }); }
+    function markDropout(id) { if(confirm("Confirm Drop-Out?")) db.ref('students/' + id).update({ status: 'dropout' }); }
     function restoreStudent(id) { if(confirm("Restore to Active?")) db.ref('students/' + id).update({ status: 'active' }); }
-    function deleteStudent(id) { if(confirm("⚠️ DELETE PERMANENTLY? This cannot be undone.")) db.ref('students/' + id).remove(); }
+    function deleteStudent(id) { if(confirm("DELETE PERMANENTLY?")) db.ref('students/' + id).remove(); }
 
     function openEdit(id) {
         editStudentId = id;
@@ -918,13 +908,10 @@
 
         const editCardInput = document.getElementById('editCardNumber');
         if(s.type === 'senior') {
-            editCardInput.classList.remove('hidden');
-            editCardInput.value = s.cardNumber || '';
+            editCardInput.classList.remove('hidden'); editCardInput.value = s.cardNumber || '';
         } else {
-            editCardInput.classList.add('hidden');
-            editCardInput.value = '';
+            editCardInput.classList.add('hidden'); editCardInput.value = '';
         }
-
         document.getElementById('editModal').style.display = 'flex';
     }
 
@@ -941,13 +928,10 @@
             examFee: Number(document.getElementById('editExamFee').value),
             duration: Number(document.getElementById('editDuration').value)
         };
-
         if(s.type === 'senior') updatedData.cardNumber = document.getElementById('editCardNumber').value;
 
-        db.ref('students/' + editStudentId).update(updatedData)
-        .then(() => {
-            alert("Updated Successfully!");
-            document.getElementById('editModal').style.display = 'none';
+        db.ref('students/' + editStudentId).update(updatedData).then(() => {
+            alert("Updated!"); document.getElementById('editModal').style.display = 'none';
         });
     }
 
@@ -963,67 +947,57 @@
             document.getElementById('modal').style.display='none';
             document.getElementById('payAmount').value='';
             
+            // Original Professional Formatting
             const dateStr = new Date().toLocaleDateString('en-IN');
-            const receiptMsg = `🧾 *PAYMENT RECEIPT*\n--------------------------------\n🎓 *TIKARKHANJI JNYCTSD*\n--------------------------------\n👤 Name: *${s.name}*\n📂 Batch: ${s.batch}\n📅 Date: ${dateStr}\n\n💰 *Received: ₹${amt}*\n📌 Type: ${type}\n\n✅ *Status: Paid*\n--------------------------------\nThank you! 🙏`;
+            const receiptMsg = `🧾 *PAYMENT RECEIPT*\n--------------------------------\n🎓 *TIKARKHANJI JNYCTSD*\n--------------------------------\n👤 Name: *${s.name}*\n📂 Batch: ${s.batch}\n📅 Date: ${dateStr}\n\n💰 *Received: ₹${amt}*\n📌 Type: ${type}\n\n✅ *Status: Paid*\n--------------------------------\nThank you for your payment! 🙏`;
             window.open(`https://wa.me/${s.phone}?text=${encodeURIComponent(receiptMsg)}`, '_blank');
             
-            // If viewing profile, refresh it
-            if(document.getElementById('studentProfile').classList.contains('active')) {
-                setTimeout(() => openProfile(currentId), 500);
-            }
+            if(document.getElementById('studentProfile').classList.contains('active')) setTimeout(() => openProfile(currentId), 300);
         }
     }
 
     // --- EXPENSES ---
     document.getElementById('expForm').addEventListener('submit', (e) => {
         e.preventDefault();
-        const ex = {
+        db.ref('expenses').push({
             category: document.getElementById('expCat').value,
             amount: Number(document.getElementById('expAmount').value),
             note: document.getElementById('expNote').value,
             date: document.getElementById('expDate').value
-        };
-        db.ref('expenses').push(ex);
-        document.getElementById('expAmount').value = '';
-        document.getElementById('expNote').value = '';
-        alert('Expense Added');
+        });
+        document.getElementById('expAmount').value = ''; document.getElementById('expNote').value = '';
     });
-
-    function deleteExpense(id) { if(confirm("Delete expense?")) db.ref('expenses/' + id).remove(); }
-
+    function deleteExpense(id) { if(confirm("Delete?")) db.ref('expenses/' + id).remove(); }
     function renderExpenses() {
         const tbody = document.getElementById('expBody');
-        tbody.innerHTML = '';
+        let htmlStr = '';
         expenses.sort((a,b) => new Date(b.date) - new Date(a.date)).forEach(ex => {
-            tbody.innerHTML += `
-                <tr class="hover:bg-gray-50 transition border-b border-gray-100">
-                    <td class="p-3 text-sm">${ex.date}</td>
-                    <td class="p-3 text-sm"><b class="text-gray-800">${ex.category}</b><br><span class="text-xs text-gray-500">${ex.note}</span></td>
-                    <td class="p-3 text-sm text-red-500 font-bold text-right">- ₹${ex.amount}</td>
-                    <td class="p-3 text-sm text-center"><button class="text-red-400 hover:text-red-600 p-2" onclick="deleteExpense('${ex.id}')"><i class="fas fa-trash"></i></button></td>
+            htmlStr += `
+                <tr class="border-b border-gray-100">
+                    <td class="p-2 text-xs">${ex.date}</td>
+                    <td class="p-2 text-xs"><b class="text-gray-800">${ex.category}</b><br><span class="text-[10px] text-gray-500">${ex.note}</span></td>
+                    <td class="p-2 text-xs text-red-500 font-bold text-right">- ₹${ex.amount}</td>
+                    <td class="p-2 text-center"><button class="text-red-400 p-1" onclick="deleteExpense('${ex.id}')"><i class="fas fa-trash text-xs"></i></button></td>
                 </tr>`;
         });
+        tbody.innerHTML = htmlStr;
     }
 
     // --- NAVIGATION ---
     function navigate(id) {
         document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
         document.querySelectorAll('.nav-item').forEach(b => {
-            b.classList.remove('bg-blue-50', 'text-primary');
-            b.classList.add('text-gray-500');
+            b.classList.remove('bg-blue-50', 'text-primary'); b.classList.add('text-gray-500');
         });
         document.getElementById(id).classList.add('active');
-        
         const map = {'dashboard':'btn-dash', 'monthTracker':'btn-track', 'admission':'btn-adm', 'students':'btn-std', 'expenses':'btn-exp', 'studentProfile': 'btn-std'};
         if(map[id]) {
             const btn = document.getElementById(map[id]);
-            btn.classList.remove('text-gray-500');
-            btn.classList.add('bg-blue-50', 'text-primary');
+            btn.classList.remove('text-gray-500'); btn.classList.add('bg-blue-50', 'text-primary');
         }
         document.getElementById('main-content').scrollTop = 0;
     }
 
-    // Initialization
     document.getElementById('joinDate').valueAsDate = new Date();
     document.getElementById('expDate').valueAsDate = new Date();
     document.getElementById('editJoinDate').valueAsDate = new Date();
