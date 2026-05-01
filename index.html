@@ -49,9 +49,9 @@
         
         .table-container { -webkit-overflow-scrolling: touch; overscroll-behavior-x: contain; }
         
-        /* Better touch response on mobile */
-        button, a.action-btn { transition: transform 0.1s; }
-        button:active, a.action-btn:active { transform: scale(0.95); }
+        /* Better touch response on mobile & tablet */
+        button, a.action-btn { transition: transform 0.1s; cursor: pointer; }
+        button:active, a.action-btn:active { transform: scale(0.92); }
 
         @media (max-width: 768px) {
             .sidebar-mobile { position: fixed; bottom: 0; left: 0; width: 100%; height: 60px; flex-direction: row; justify-content: space-around; border-top: 1px solid #e5e7eb; background: white; z-index: 50; overflow-x: auto; padding: 0 5px; }
@@ -63,9 +63,9 @@
 
     <!-- LOGIN OVERLAY -->
     <div id="login-overlay" class="fixed inset-0 bg-white z-[9999] flex flex-col justify-center items-center">
-        <div class="bg-white p-6 rounded-2xl shadow-lg w-[90%] max-w-md text-center border border-gray-100">
-            <h2 class="text-xl font-bold text-primary mb-2">Tikarkhanji Jawaharlal Nehru YOUTH Computer Training Institute</h2>
-            <p class="text-gray-500 mb-6 font-medium">Admin Portal</p>
+        <div class="bg-white p-6 md:p-8 rounded-2xl shadow-lg w-[90%] max-w-md text-center border border-gray-100">
+            <h2 class="text-xl md:text-2xl font-bold text-primary mb-2">Tikarkhanji Jawaharlal Nehru YOUTH Computer Training Institute</h2>
+            <p class="text-gray-500 mb-6 font-medium text-sm md:text-base">Admin Portal</p>
             <button onclick="googleLogin()" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 px-6 rounded-xl transition flex items-center justify-center gap-3">
                 <i class="fab fa-google"></i> Login with Google
             </button>
@@ -128,7 +128,7 @@
         <div id="dashboard" class="section active max-w-7xl mx-auto">
             <h2 class="text-xl md:text-2xl font-bold mb-4 text-gray-800">📊 Business Overview</h2>
             
-            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 mb-6">
+            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 md:gap-4 mb-6">
                 <div class="bg-white p-4 rounded-xl shadow-sm border-l-4 border-blue-500">
                     <p class="text-[10px] md:text-xs font-bold text-gray-500 uppercase">Active Students</p>
                     <h3 class="text-xl md:text-2xl font-bold mt-1" id="d_active">0</h3>
@@ -239,7 +239,7 @@
                     
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <input type="number" id="phone" required class="w-full border border-gray-300 rounded-lg p-2.5 outline-none focus:border-primary text-sm" placeholder="Mobile Number">
-                        <input type="text" id="cardNumber" class="w-full border border-gray-300 rounded-lg p-2.5 outline-none focus:border-primary text-sm" placeholder="Card Number (Optional)">
+                        <input type="text" id="cardNumber" class="w-full border border-gray-300 rounded-lg p-2.5 outline-none focus:border-primary text-sm" placeholder="Card Number (Required for Both)">
                     </div>
                     
                     <div>
@@ -305,7 +305,7 @@
                                 <th class="p-3 font-bold w-12 text-center">Sl.</th>
                                 <th class="p-3 font-bold w-[35%]">Student Info</th>
                                 <th class="p-3 font-bold">Payments</th>
-                                <th class="p-3 font-bold text-right min-w-[130px]">Actions</th>
+                                <th class="p-3 font-bold text-right min-w-[150px]">Actions</th>
                             </tr>
                         </thead>
                         <tbody id="tbody" class="divide-y divide-gray-100 text-sm"></tbody>
@@ -674,10 +674,23 @@
         document.getElementById('tr_due').innerText = '₹' + trDue;
     }
 
-    // Individual WhatsApp
+    // Regular Monthly Tracker WhatsApp
     function sendSpecificReminder(phone, name, month) {
         const text = `⚠️ *MONTHLY FEE REMINDER*\n--------------------------------\n🎓 *TIKARKHANJI JNYCTSD*\n--------------------------------\n👤 Student: *${name}*\n📅 Month: *${month}*\n\nYour monthly fee is pending. Please clear it soon.\n--------------------------------\n🙏 Thank You`;
         window.open(`https://wa.me/${phone}?text=${encodeURIComponent(text)}`, '_blank');
+    }
+
+    // Detailed Status WhatsApp for Individual List
+    function sendDetailedStatusWA(id) {
+        const s = students.find(x => x.id === id);
+        if(!s) return;
+        const f = getFinance(s);
+        
+        const cardDisplay = s.cardNumber ? s.cardNumber : 'N/A';
+        
+        const msg = `📊 *FEE STATUS REPORT*\n--------------------------------\n🎓 *TIKARKHANJI JNYCTSD*\n--------------------------------\nDear *${s.name}*,\nHere is your current fee status summary:\n\n📂 *Batch:* ${s.batch}\n💳 *Card No:* ${cardDisplay}\n\n💰 *Total Paid:* ₹${f.totalPaidMain}\n📉 *Pending Due:* ₹${f.due}\n\n${f.due > 0 ? 'Kindly clear your pending due at your earliest convenience.\n' : 'You have no pending dues. Thank you!\n'}--------------------------------\n🙏 Best Regards,\n*Administration*`;
+        
+        window.open(`https://wa.me/${s.phone}?text=${encodeURIComponent(msg)}`, '_blank');
     }
 
     // --- NEW WHATSAPP QUEUE SYSTEM ---
@@ -746,7 +759,6 @@
         waCurrentIndex = 0;
     }
 
-
     // --- ADMISSION ---
     function setDefaults() {
         const type = document.getElementById('studentType').value;
@@ -771,7 +783,7 @@
         const name = document.getElementById('name').value;
         const batch = document.getElementById('batch').value;
         const phone = document.getElementById('phone').value;
-        const cardNo = document.getElementById('cardNumber').value || ''; // All students can have card number
+        const cardNo = document.getElementById('cardNumber').value || '';
 
         const s = {
             status: 'active', type: type, name: name, batch: batch, phone: phone, cardNumber: cardNo,
@@ -781,9 +793,8 @@
         };
         
         db.ref('students').push(s).then(() => {
-            // Send Professional Admission Message for ALL students
             const courseName = type === 'senior' ? 'Senior (Course Based)' : 'Junior (Class 9 & Below)';
-            const welcomeMsg = `🎉 *WELCOME TO TIKARKHANJI JNYCTSD* 🎉\n--------------------------------\nDear *${name}*,\n\nCongratulations and welcome to our institute! 🎓\nYour admission is successfully confirmed.\n\n📚 *Course Type:* ${courseName}\n📂 *Batch:* ${batch}\n💳 *Card No:* ${cardNo || 'N/A'}\n📅 *Join Date:* ${document.getElementById('joinDate').value}\n\nWe are committed to providing you with the best computer training and look forward to an excellent learning journey together.\n--------------------------------\nBest Regards,\n*Director, Tikarkhanji JNYCTSD*`;
+            const welcomeMsg = `🎉 *WELCOME TO TIKARKHANJI JNYCTSD* 🎉\n--------------------------------\nDear *${name}*,\n\nCongratulations and welcome to our institute! 🎓\nYour admission is successfully confirmed.\n\n📚 *Course Type:* ${courseName}\n📂 *Batch:* ${batch}\n💳 *Card No:* ${cardNo || 'N/A'}\n📅 *Join Date:* ${document.getElementById('joinDate').value}\n\nWe are committed to providing you with the best computer training and look forward to an excellent learning journey together.\n--------------------------------\n🙏 Best Regards,\n*Director, Tikarkhanji JNYCTSD*`;
             window.open(`https://wa.me/${phone}?text=${encodeURIComponent(welcomeMsg)}`, '_blank');
 
             e.target.reset(); setDefaults(); alert("Student Added Successfully!");
@@ -824,17 +835,17 @@
             const dueClass = f.due > 0 ? 'text-red-500 bg-red-50' : 'text-green-600 bg-green-50';
             const examBadge = f.examDue > 0 ? `<div class="text-[10px] text-purple-600 font-bold mt-1">Exam Due: ₹${f.examDue}</div>` : '';
 
-            // Added Call and WA buttons
+            // Enhanced Action Buttons Grid
             let buttons = !isDropout ? `
-                <a href="tel:${s.phone}" class="action-btn w-7 h-7 rounded bg-gray-600 text-white shadow flex justify-center items-center" title="Call"><i class="fas fa-phone-alt text-[10px]"></i></a>
-                <a href="https://wa.me/${s.phone}" target="_blank" class="action-btn w-7 h-7 rounded bg-green-500 text-white shadow flex justify-center items-center" title="WhatsApp"><i class="fab fa-whatsapp text-[12px]"></i></a>
-                <button class="action-btn w-7 h-7 rounded bg-blue-600 text-white shadow flex justify-center items-center" onclick="openPay('${s.id}')" title="Pay"><i class="fas fa-rupee-sign text-xs"></i></button>
-                <button class="action-btn w-7 h-7 rounded bg-blue-400 text-white shadow flex justify-center items-center" onclick="openProfile('${s.id}')" title="Profile"><i class="fas fa-eye text-xs"></i></button>
-                <button class="action-btn w-7 h-7 rounded bg-yellow-500 text-white shadow flex justify-center items-center" onclick="openEdit('${s.id}')" title="Edit"><i class="fas fa-pen text-xs"></i></button>
-                <button class="action-btn w-7 h-7 rounded bg-red-500 text-white shadow flex justify-center items-center" onclick="markDropout('${s.id}')" title="Dropout"><i class="fas fa-user-slash text-[10px]"></i></button>
+                <a href="tel:${s.phone}" class="action-btn w-8 h-8 rounded bg-gray-600 text-white shadow flex justify-center items-center" title="Call"><i class="fas fa-phone-alt text-xs"></i></a>
+                <button class="action-btn w-8 h-8 rounded bg-green-500 text-white shadow flex justify-center items-center" onclick="sendDetailedStatusWA('${s.id}')" title="WhatsApp Detailed Status"><i class="fab fa-whatsapp text-sm"></i></button>
+                <button class="action-btn w-8 h-8 rounded bg-blue-600 text-white shadow flex justify-center items-center" onclick="openPay('${s.id}')" title="Pay"><i class="fas fa-rupee-sign text-xs"></i></button>
+                <button class="action-btn w-8 h-8 rounded bg-blue-400 text-white shadow flex justify-center items-center" onclick="openProfile('${s.id}')" title="Profile"><i class="fas fa-eye text-xs"></i></button>
+                <button class="action-btn w-8 h-8 rounded bg-yellow-500 text-white shadow flex justify-center items-center" onclick="openEdit('${s.id}')" title="Edit"><i class="fas fa-pen text-xs"></i></button>
+                <button class="action-btn w-8 h-8 rounded bg-red-500 text-white shadow flex justify-center items-center" onclick="markDropout('${s.id}')" title="Dropout"><i class="fas fa-user-slash text-[10px]"></i></button>
             ` : `
-                <button class="px-2 py-1 rounded bg-blue-500 text-white text-xs shadow font-bold" onclick="restoreStudent('${s.id}')">Restore</button>
-                <button class="px-2 py-1 rounded bg-red-100 text-red-600 text-xs shadow font-bold" onclick="deleteStudent('${s.id}')">Delete</button>
+                <button class="px-3 py-2 rounded bg-blue-500 text-white text-sm shadow font-bold action-btn" onclick="restoreStudent('${s.id}')">Restore</button>
+                <button class="px-3 py-2 rounded bg-red-100 text-red-600 text-sm shadow font-bold action-btn" onclick="deleteStudent('${s.id}')">Delete</button>
             `;
 
             htmlStr += `<tr class="hover:bg-gray-50 border-b border-gray-100">
@@ -846,7 +857,7 @@
                     <div class="flex flex-col items-end w-full">
                         <div class="inline-block px-2 py-0.5 rounded font-bold mb-1 text-xs ${dueClass}">${f.due > 0 ? 'Due: ₹' + f.due : 'PAID'}</div>
                         ${examBadge}
-                        <div class="flex justify-end flex-wrap gap-1 mt-2 w-full max-w-[120px] ml-auto">${buttons}</div>
+                        <div class="flex justify-end flex-wrap gap-2 mt-2 w-full max-w-[140px] ml-auto">${buttons}</div>
                     </div>
                 </td></tr>`;
         });
@@ -874,7 +885,7 @@
                         <div class="flex justify-between border-b pb-1"><span class="text-gray-500">Join</span><span class="font-bold">${s.joinDate}</span></div>
                         ${s.cardNumber ? `<div class="flex justify-between border-b pb-1"><span class="text-gray-500">Card No</span><span class="font-bold text-purple-600">${s.cardNumber}</span></div>` : ''}
                     </div>
-                    <button class="w-full mt-4 bg-green-500 hover:bg-green-600 text-white font-bold py-2 rounded-lg text-sm shadow" onclick="openPay('${s.id}')">Receive Payment</button>
+                    <button class="w-full mt-4 bg-green-500 hover:bg-green-600 text-white font-bold py-2 rounded-lg text-sm shadow action-btn" onclick="openPay('${s.id}')">Receive Payment</button>
                 </div>
                 <div class="col-span-1 md:col-span-2 space-y-4">
                     <div class="grid grid-cols-3 gap-2">
@@ -897,7 +908,7 @@
         editStudentId = id; const s = students.find(x => x.id === id);
         ['editName','editBatch','editPhone','editJoinDate'].forEach(k => document.getElementById(k).value = s[k.replace('edit','')]);
         ['editAdmFee','editMonthlyFee','editExamFee','editDuration'].forEach(k => document.getElementById(k).value = s[k.replace('edit','')] || (k==='editDuration'?12:0));
-        document.getElementById('editCardNumber').value = s.cardNumber || ''; // Card number accessible to all
+        document.getElementById('editCardNumber').value = s.cardNumber || '';
         document.getElementById('editModal').style.display = 'flex';
     }
 
@@ -920,7 +931,6 @@
             db.ref('students/'+currentId+'/payments').set([...(s.payments||[]), { date: new Date().toISOString(), amount: amt, type: type }]);
             document.getElementById('modal').style.display='none'; document.getElementById('payAmount').value='';
             
-            // Professional Receipt Message with Card Number
             const dateStr = new Date().toLocaleDateString('en-IN');
             const receiptMsg = `🧾 *OFFICIAL PAYMENT RECEIPT*\n--------------------------------\n🎓 *TIKARKHANJI JNYCTSD*\n--------------------------------\nDear *${s.name}*,\nWe have successfully received your payment. Thank you!\n\n📂 *Batch:* ${s.batch}\n💳 *Card No:* ${s.cardNumber || 'N/A'}\n📅 *Date:* ${dateStr}\n\n💰 *Amount Received:* ₹${amt}\n📌 *Payment Type:* ${type}\n\n✅ *Status: SUCCESSFUL*\n--------------------------------\nFor any queries, please contact the administration.\n🙏 Best Regards`;
             
