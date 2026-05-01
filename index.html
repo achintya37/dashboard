@@ -43,12 +43,10 @@
         .section.active { display: block; animation: fadeIn 0.2s ease-out; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         
-        /* Custom Scrollbar for better performance */
         ::-webkit-scrollbar { width: 5px; height: 5px; }
         ::-webkit-scrollbar-track { background: #f1f1f1; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
         
-        /* Performance boost for tables on mobile */
         .table-container { -webkit-overflow-scrolling: touch; overscroll-behavior-x: contain; }
 
         @media (max-width: 768px) {
@@ -148,24 +146,50 @@
 
         <!-- TRACKER -->
         <div id="monthTracker" class="section max-w-7xl mx-auto">
-            <h2 class="text-xl md:text-2xl font-bold mb-4 text-gray-800">📅 Monthly Fee Status</h2>
+            <h2 class="text-xl md:text-2xl font-bold mb-4 text-gray-800">📅 Monthly Tracker Overview</h2>
+            
             <div class="bg-white p-4 md:p-6 rounded-xl shadow-sm">
-                <div class="flex flex-col md:flex-row md:items-center gap-3 mb-5">
-                    <label class="font-semibold text-gray-700 text-sm md:text-base">Select Month:</label>
-                    <input type="month" id="trackerMonth" class="border border-gray-300 rounded-lg p-2 outline-none focus:border-primary w-fit" onchange="loadTrackerData()">
+                
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-4">
+                    <div class="flex items-center gap-3">
+                        <label class="font-semibold text-gray-700 text-sm md:text-base">Select Month:</label>
+                        <input type="month" id="trackerMonth" class="border border-gray-300 rounded-lg p-2 outline-none focus:border-primary w-fit text-sm" onchange="loadTrackerData()">
+                    </div>
+                </div>
+
+                <!-- Tracker Summary Cards -->
+                <div class="grid grid-cols-3 gap-2 md:gap-4 mb-5">
+                    <div class="bg-blue-50 p-3 rounded-lg border border-blue-100 text-center">
+                        <p class="text-[9px] md:text-xs text-blue-600 font-bold uppercase">Total Applicable</p>
+                        <h3 class="text-base md:text-xl font-bold text-blue-800 mt-1" id="tr_total_std">0</h3>
+                    </div>
+                    <div class="bg-green-50 p-3 rounded-lg border border-green-100 text-center">
+                        <p class="text-[9px] md:text-xs text-green-600 font-bold uppercase">Paid (This Month)</p>
+                        <h3 class="text-base md:text-xl font-bold text-green-800 mt-1" id="tr_collected">₹0</h3>
+                    </div>
+                    <div class="bg-red-50 p-3 rounded-lg border border-red-100 text-center">
+                        <p class="text-[9px] md:text-xs text-red-600 font-bold uppercase">Due (This Month)</p>
+                        <h3 class="text-base md:text-xl font-bold text-red-800 mt-1" id="tr_due">₹0</h3>
+                    </div>
                 </div>
                 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Unpaid List -->
                     <div class="border border-gray-200 rounded-lg p-3 bg-gray-50 h-[500px] overflow-y-auto">
-                        <h3 class="font-bold text-red-500 border-b-2 border-red-200 pb-2 mb-2 sticky top-0 bg-gray-50 z-10 text-sm md:text-base">
-                            ❌ Unpaid (<span id="unpaidCount">0</span>)
-                        </h3>
+                        <div class="flex justify-between items-center border-b-2 border-red-200 pb-2 mb-3 sticky top-0 bg-gray-50 z-10">
+                            <h3 class="font-bold text-red-500 text-sm md:text-base">❌ Unpaid (<span id="unpaidCount">0</span>)</h3>
+                            <button onclick="sendTrackerBulkWA()" class="bg-green-500 hover:bg-green-600 text-white text-[10px] md:text-xs font-bold py-1.5 px-3 rounded shadow flex items-center gap-1.5 transition">
+                                <i class="fab fa-whatsapp"></i> Bulk Msg
+                            </button>
+                        </div>
                         <div id="unpaidList" class="flex flex-col gap-2"></div>
                     </div>
+
+                    <!-- Paid List -->
                     <div class="border border-gray-200 rounded-lg p-3 bg-gray-50 h-[500px] overflow-y-auto">
-                        <h3 class="font-bold text-green-500 border-b-2 border-green-200 pb-2 mb-2 sticky top-0 bg-gray-50 z-10 text-sm md:text-base">
-                            ✅ Paid (<span id="paidCount">0</span>)
-                        </h3>
+                        <div class="border-b-2 border-green-200 pb-2 mb-3 sticky top-0 bg-gray-50 z-10">
+                            <h3 class="font-bold text-green-500 text-sm md:text-base">✅ Paid (<span id="paidCount">0</span>)</h3>
+                        </div>
                         <div id="paidList" class="flex flex-col gap-2"></div>
                     </div>
                 </div>
@@ -235,7 +259,7 @@
             <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-3">
                 <h2 class="text-xl md:text-2xl font-bold text-gray-800">📋 Student Directory</h2>
                 <button onclick="sendBulkWA()" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-lg shadow text-sm flex items-center gap-2 w-full md:w-auto justify-center">
-                    <i class="fab fa-whatsapp"></i> Send Bulk Reminder
+                    <i class="fab fa-whatsapp"></i> Send Bulk Reminder (All Due)
                 </button>
             </div>
 
@@ -329,8 +353,7 @@
         </div>
     </div>
 
-    <!-- MODALS (No Backdrop blur for performance) -->
-    
+    <!-- MODALS -->
     <!-- Payment Modal -->
     <div id="modal" class="fixed inset-0 bg-black/60 z-[200] hidden justify-center items-center p-4">
         <div class="bg-white p-5 rounded-xl w-full max-w-sm shadow-xl">
@@ -419,6 +442,7 @@
     let editStudentId = null;
     let chartInstance = null;
     let currentFilteredList = []; 
+    let currentTrackerUnpaidList = []; // Array for Monthly Tracker Bulk WA
 
     // --- AUTH ---
     function googleLogin() {
@@ -490,7 +514,6 @@
         const totalExamFee = Number(s.examFee) || 0;
         const duration = Number(s.duration) || 12;
 
-        // Main Due (Without Exam)
         const totalFees = totalAdmFee + (monthlyFee * duration);
         const totalPaidMain = paidAdm + paidMon; 
         
@@ -498,21 +521,14 @@
         if (due < 0) due = 0; 
         if (s.status === 'dropout') due = 0;
 
-        // Exam Due Separated
         let examDue = totalExamFee - paidExam;
         if (examDue < 0) examDue = 0;
         if (s.status === 'dropout') examDue = 0;
 
         return { 
-            due, 
-            paidAdm, 
-            paidMon, 
-            paidExam, 
-            totalPaidMain, 
-            totalFees, 
-            examDue, 
-            totalExamFee,
-            grandTotalPaid: paidAdm + paidMon + paidExam
+            due, paidAdm, paidMon, paidExam, 
+            totalPaidMain, totalFees, examDue, 
+            totalExamFee, grandTotalPaid: paidAdm + paidMon + paidExam
         };
     }
 
@@ -549,10 +565,6 @@
         document.getElementById('d_due').innerText = '₹' + totalDue.toLocaleString();
         document.getElementById('d_exam_due').innerText = '₹' + totalExamDue.toLocaleString();
         document.getElementById('d_expense').innerText = '₹' + totalExp.toLocaleString();
-        
-        const profit = totalRev - totalExp;
-        const pEl = document.getElementById('d_profit');
-        if(pEl) pEl.innerText = '₹' + profit.toLocaleString();
 
         initChart(monthlyStats);
     }
@@ -560,33 +572,18 @@
     function initChart(dataArray) {
         const ctx = document.getElementById('revenueChart').getContext('2d');
         const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-        
         if(chartInstance) chartInstance.destroy();
-        
         chartInstance = new Chart(ctx, {
             type: 'bar',
             data: {
                 labels: monthNames,
-                datasets: [{
-                    label: 'Collection (₹)',
-                    data: dataArray,
-                    backgroundColor: '#3b82f6',
-                    borderRadius: 4,
-                }]
+                datasets: [{ label: 'Collection (₹)', data: dataArray, backgroundColor: '#3b82f6', borderRadius: 4 }]
             },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: { legend: { display: false } },
-                scales: {
-                    y: { beginAtZero: true },
-                    x: { grid: { display: false } }
-                }
-            }
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true }, x: { grid: { display: false } } } }
         });
     }
 
-    // --- TRACKER (Join Date Based) ---
+    // --- TRACKER (With Amounts & Bulk List) ---
     function loadTrackerData() {
         const mInput = document.getElementById('trackerMonth').value;
         if(!mInput) return;
@@ -595,7 +592,11 @@
         const unpaidList = document.getElementById('unpaidList');
         const paidList = document.getElementById('paidList');
         unpaidList.innerHTML = ''; paidList.innerHTML = '';
-        let uCount=0, pCount=0;
+        
+        let uCount = 0, pCount = 0;
+        let trTotalStd = 0, trCollected = 0, trDue = 0;
+        currentTrackerUnpaidList = []; // Reset bulk list
+
         const today = new Date();
 
         students.filter(s => s.status === 'active').forEach(s => {
@@ -603,8 +604,12 @@
             const joinDay = joinDateObj.getDate();
             const dueDateForMonth = new Date(year, month - 1, joinDay);
             
-            // Skip if the selected month is before they joined
+            // Student is not applicable if the selected month is before they joined
             if(new Date(year, month-1, 1) < new Date(joinDateObj.getFullYear(), joinDateObj.getMonth(), 1)) return;
+
+            // Mark as applicable
+            trTotalStd++;
+            const monthFeeAmt = Number(s.monthlyFee) || 0;
 
             const hasPaid = s.payments.some(p => {
                 const d = new Date(p.date);
@@ -612,36 +617,67 @@
             });
 
             const f = getFinance(s); 
-
             const div = document.createElement('div');
             div.className = 'flex justify-between items-center p-2.5 bg-white rounded border border-gray-100 shadow-sm';
 
             if(hasPaid) {
-                div.innerHTML = `<div><p class="font-bold text-gray-800 text-sm">${s.name}</p><p class="text-[10px] text-gray-500">${s.batch}</p></div><span class="bg-green-100 text-green-700 px-2 py-0.5 rounded text-[10px] font-bold">PAID</span>`;
+                trCollected += monthFeeAmt;
+                div.innerHTML = `<div><p class="font-bold text-gray-800 text-sm">${s.name}</p><p class="text-[10px] text-gray-500">${s.batch}</p></div><span class="bg-green-100 text-green-700 px-2 py-0.5 rounded text-[10px] font-bold">PAID (₹${monthFeeAmt})</span>`;
                 paidList.appendChild(div);
                 pCount++;
             } else {
-                // Check if current date has crossed their specific due date
                 if(today >= dueDateForMonth && f.due > 0) {
+                    trDue += monthFeeAmt;
                     const monthName = new Date(year, month-1).toLocaleString('default', { month: 'long' });
+                    
+                    // Add to Tracker Bulk List
+                    currentTrackerUnpaidList.push({ student: s, monthName: monthName });
+
                     div.innerHTML = `
                         <div><p class="font-bold text-gray-800 text-sm">${s.name}</p><p class="text-[10px] text-gray-500">${s.batch} | Due Date: ${joinDay}</p></div>
-                        <button class="w-8 h-8 rounded-full bg-green-500 text-white flex justify-center items-center hover:bg-green-600 transition shadow" onclick="sendSpecificReminder('${s.phone}','${s.name}','${monthName}')">
-                            <i class="fab fa-whatsapp"></i>
-                        </button>`;
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs font-bold text-red-500">₹${monthFeeAmt}</span>
+                            <button class="w-8 h-8 rounded-full bg-green-500 text-white flex justify-center items-center hover:bg-green-600 transition shadow" onclick="sendSpecificReminder('${s.phone}','${s.name}','${monthName}')">
+                                <i class="fab fa-whatsapp"></i>
+                            </button>
+                        </div>`;
                     unpaidList.appendChild(div);
                     uCount++;
                 }
             }
         });
+
         document.getElementById('unpaidCount').innerText = uCount;
         document.getElementById('paidCount').innerText = pCount;
+        document.getElementById('tr_total_std').innerText = trTotalStd;
+        document.getElementById('tr_collected').innerText = '₹' + trCollected;
+        document.getElementById('tr_due').innerText = '₹' + trDue;
     }
 
-    // Professional Strings (Exactly as before)
+    // Professional Indiviual Msg
     function sendSpecificReminder(phone, name, month) {
         const text = `⚠️ *MONTHLY FEE REMINDER*\n--------------------------------\n🎓 *TIKARKHANJI JNYCTSD*\n--------------------------------\n👤 Student: *${name}*\n📅 Month: *${month}*\n\nYour monthly fee is pending. Please clear it soon.\n--------------------------------\n🙏 Thank You`;
         window.open(`https://wa.me/${phone}?text=${encodeURIComponent(text)}`, '_blank');
+    }
+
+    // Bulk Msg for specifically the Monthly Tracker
+    function sendTrackerBulkWA() {
+        if(currentTrackerUnpaidList.length === 0) { 
+            alert("No unpaid students found for the selected month."); 
+            return; 
+        }
+        if(!confirm(`Send Reminders to ${currentTrackerUnpaidList.length} students for this month?\n\nEnsure Pop-ups are allowed.`)) return;
+
+        let i = 0;
+        const interval = setInterval(() => {
+            if(i >= currentTrackerUnpaidList.length) { clearInterval(interval); alert("Done sending monthly reminders!"); return; }
+            
+            const data = currentTrackerUnpaidList[i];
+            const text = `⚠️ *MONTHLY FEE REMINDER*\n--------------------------------\n🎓 *TIKARKHANJI JNYCTSD*\n--------------------------------\n👤 Student: *${data.student.name}*\n📅 Month: *${data.monthName}*\n\nYour monthly fee is pending. Please clear it soon.\n--------------------------------\n🙏 Thank You`;
+            
+            window.open(`https://wa.me/${data.student.phone}?text=${encodeURIComponent(text)}`, '_blank');
+            i++;
+        }, 1500); 
     }
 
     // --- ADMISSION ---
@@ -652,18 +688,11 @@
         const cardInput = document.getElementById('cardNumber');
 
         if(type === 'senior') {
-            cardInput.classList.remove('hidden');
-            adm.value = isOld ? 0 : 400;
-            document.getElementById('monthlyFee').value = 300;
-            document.getElementById('examFee').value = 500;
-            document.getElementById('duration').value = 12;
+            cardInput.classList.remove('hidden'); adm.value = isOld ? 0 : 400;
+            document.getElementById('monthlyFee').value = 300; document.getElementById('examFee').value = 500; document.getElementById('duration').value = 12;
         } else {
-            cardInput.classList.add('hidden');
-            cardInput.value = '';
-            adm.value = isOld ? 0 : 500;
-            document.getElementById('monthlyFee').value = 250;
-            document.getElementById('examFee').value = 0;
-            document.getElementById('duration').value = 12;
+            cardInput.classList.add('hidden'); cardInput.value = ''; adm.value = isOld ? 0 : 500;
+            document.getElementById('monthlyFee').value = 250; document.getElementById('examFee').value = 0; document.getElementById('duration').value = 12;
         }
         adm.disabled = isOld;
     }
@@ -679,18 +708,10 @@
         const cardNo = type === 'senior' ? document.getElementById('cardNumber').value : '';
 
         const s = {
-            status: 'active',
-            type: type,
-            name: name,
-            batch: batch,
-            phone: phone,
-            cardNumber: cardNo,
-            joinDate: document.getElementById('joinDate').value,
-            admFee: Number(document.getElementById('admFee').value),
-            monthlyFee: Number(document.getElementById('monthlyFee').value),
-            duration: Number(document.getElementById('duration').value),
-            examFee: Number(document.getElementById('examFee').value),
-            payments: []
+            status: 'active', type: type, name: name, batch: batch, phone: phone, cardNumber: cardNo,
+            joinDate: document.getElementById('joinDate').value, admFee: Number(document.getElementById('admFee').value),
+            monthlyFee: Number(document.getElementById('monthlyFee').value), duration: Number(document.getElementById('duration').value),
+            examFee: Number(document.getElementById('examFee').value), payments: []
         };
         
         db.ref('students').push(s).then(() => {
@@ -698,12 +719,8 @@
                 const welcomeMsg = `🎉 *WELCOME TO TIKARKHANJI JNYCTSD* 🎉\n--------------------------------\nDear *${name}*,\n\nWe are extremely delighted to welcome you to our center! 🎓\nYour admission as a Senior Student is confirmed.\n\n📚 *Batch:* ${batch}\n💳 *Card No:* ${cardNo || 'N/A'}\n\nWe look forward to an excellent learning journey together.\n--------------------------------\nBest Regards,\n*Admin, Tikarkhanji JNYCTSD*`;
                 window.open(`https://wa.me/${phone}?text=${encodeURIComponent(welcomeMsg)}`, '_blank');
             }
-
-            e.target.reset();
-            setDefaults();
-            alert("Student Added Successfully!");
-            document.getElementById('filterType').value = type;
-            navigate('students');
+            e.target.reset(); setDefaults(); alert("Student Added Successfully!");
+            document.getElementById('filterType').value = type; navigate('students');
         });
     });
 
@@ -714,13 +731,9 @@
         const filterType = document.getElementById('filterType').value;
         const filterStatus = document.getElementById('filterStatus').value;
         
-        tbody.innerHTML = '';
-
         let list = students.filter(s => {
             const matchSearch = s.name.toLowerCase().includes(search) || s.phone.includes(search);
-            const matchType = (filterType === 'all' && s.status !== 'dropout') || 
-                              (filterType === 'dropout' && s.status === 'dropout') ||
-                              (filterType === s.type && s.status !== 'dropout');
+            const matchType = (filterType === 'all' && s.status !== 'dropout') || (filterType === 'dropout' && s.status === 'dropout') || (filterType === s.type && s.status !== 'dropout');
             if(!matchSearch || !matchType) return false;
 
             const f = getFinance(s);
@@ -732,72 +745,39 @@
         list.sort((a, b) => new Date(a.joinDate) - new Date(b.joinDate));
         currentFilteredList = list; 
 
-        if(list.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="4" class="text-center p-6 text-gray-400">No data found.</td></tr>`;
-            return;
-        }
+        if(list.length === 0) { tbody.innerHTML = `<tr><td colspan="4" class="text-center p-6 text-gray-400">No data found.</td></tr>`; return; }
 
-        let serialNumber = 1;
-        let htmlStr = ''; // String building for performance
-
+        let serialNumber = 1; let htmlStr = '';
         list.forEach(s => {
             const f = getFinance(s);
             const isSenior = s.type === 'senior';
             const badgeClass = isSenior ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700';
             const cardDisplay = (isSenior && s.cardNumber) ? `<span class="mt-1 inline-block text-[10px] font-bold text-purple-600 bg-purple-50 px-1.5 py-0.5 rounded">💳 ${s.cardNumber}</span>` : '';
-            
             const isDropout = s.status === 'dropout';
             const dueClass = f.due > 0 ? 'text-red-500 bg-red-50' : 'text-green-600 bg-green-50';
             const examBadge = f.examDue > 0 ? `<div class="text-[10px] text-purple-600 font-bold mt-1">Exam Due: ₹${f.examDue}</div>` : '';
 
-            let buttons = '';
-            if(!isDropout) {
-                buttons = `
-                    <button class="w-7 h-7 rounded bg-green-500 text-white shadow" onclick="openPay('${s.id}')"><i class="fas fa-rupee-sign text-xs"></i></button>
-                    <button class="w-7 h-7 rounded bg-blue-500 text-white shadow" onclick="openProfile('${s.id}')"><i class="fas fa-eye text-xs"></i></button>
-                    <button class="w-7 h-7 rounded bg-yellow-500 text-white shadow" onclick="openEdit('${s.id}')"><i class="fas fa-pen text-xs"></i></button>
-                    <button class="w-7 h-7 rounded bg-gray-500 text-white shadow" onclick="markDropout('${s.id}')"><i class="fas fa-user-slash text-[10px]"></i></button>
-                `;
-            } else {
-                buttons = `
-                    <button class="px-2 py-1 rounded bg-blue-500 text-white text-xs shadow font-bold" onclick="restoreStudent('${s.id}')">Restore</button>
-                    <button class="px-2 py-1 rounded bg-red-100 text-red-600 text-xs shadow font-bold" onclick="deleteStudent('${s.id}')">Delete</button>
-                `;
-            }
+            let buttons = !isDropout ? `
+                <button class="w-7 h-7 rounded bg-green-500 text-white shadow" onclick="openPay('${s.id}')"><i class="fas fa-rupee-sign text-xs"></i></button>
+                <button class="w-7 h-7 rounded bg-blue-500 text-white shadow" onclick="openProfile('${s.id}')"><i class="fas fa-eye text-xs"></i></button>
+                <button class="w-7 h-7 rounded bg-yellow-500 text-white shadow" onclick="openEdit('${s.id}')"><i class="fas fa-pen text-xs"></i></button>
+                <button class="w-7 h-7 rounded bg-gray-500 text-white shadow" onclick="markDropout('${s.id}')"><i class="fas fa-user-slash text-[10px]"></i></button>
+            ` : `
+                <button class="px-2 py-1 rounded bg-blue-500 text-white text-xs shadow font-bold" onclick="restoreStudent('${s.id}')">Restore</button>
+                <button class="px-2 py-1 rounded bg-red-100 text-red-600 text-xs shadow font-bold" onclick="deleteStudent('${s.id}')">Delete</button>
+            `;
 
-            htmlStr += `
-                <tr class="hover:bg-gray-50 border-b border-gray-100">
-                    <td class="p-2 md:p-3 text-center font-bold text-gray-500">${serialNumber++}</td>
-                    <td class="p-2 md:p-3">
-                        <div class="font-bold text-gray-800 text-sm flex items-center gap-1.5">
-                            ${s.name} <span class="${badgeClass} px-1.5 py-0.5 rounded text-[9px] uppercase font-bold tracking-wider">${s.type}</span>
-                        </div>
-                        <div class="text-xs text-gray-500 mt-0.5"><i class="fas fa-phone-alt mr-1"></i>${s.phone}</div>
-                        <div class="text-[10px] text-gray-400 mt-0.5">Joined: ${s.joinDate}</div>
-                        ${cardDisplay}
-                    </td>
-                    <td class="p-2 md:p-3">
-                        <div class="text-[11px] font-semibold">
-                            <span class="text-blue-600">A: ₹${f.paidAdm}</span> | 
-                            <span class="text-green-600">M: ₹${f.paidMon}</span><br>
-                            <span class="text-purple-600">E: ₹${f.paidExam} / Total: ₹${f.totalExamFee}</span>
-                        </div>
-                    </td>
-                    <td class="p-2 md:p-3 text-right">
-                        <div class="inline-block px-2 py-0.5 rounded font-bold mb-2 text-xs ${dueClass}">
-                            ${f.due > 0 ? 'Due: ₹' + f.due : 'PAID'}
-                        </div>
-                        ${examBadge}
-                        <div class="flex justify-end gap-1 mt-1">
-                            ${buttons}
-                        </div>
-                    </td>
-                </tr>`;
+            htmlStr += `<tr class="hover:bg-gray-50 border-b border-gray-100">
+                <td class="p-2 md:p-3 text-center font-bold text-gray-500">${serialNumber++}</td>
+                <td class="p-2 md:p-3"><div class="font-bold text-gray-800 text-sm flex items-center gap-1.5">${s.name} <span class="${badgeClass} px-1.5 py-0.5 rounded text-[9px] uppercase font-bold tracking-wider">${s.type}</span></div>
+                <div class="text-xs text-gray-500 mt-0.5"><i class="fas fa-phone-alt mr-1"></i>${s.phone}</div><div class="text-[10px] text-gray-400 mt-0.5">Joined: ${s.joinDate}</div>${cardDisplay}</td>
+                <td class="p-2 md:p-3"><div class="text-[11px] font-semibold"><span class="text-blue-600">A: ₹${f.paidAdm}</span> | <span class="text-green-600">M: ₹${f.paidMon}</span><br><span class="text-purple-600">E: ₹${f.paidExam} / Total: ₹${f.totalExamFee}</span></div></td>
+                <td class="p-2 md:p-3 text-right"><div class="inline-block px-2 py-0.5 rounded font-bold mb-2 text-xs ${dueClass}">${f.due > 0 ? 'Due: ₹' + f.due : 'PAID'}</div>${examBadge}<div class="flex justify-end gap-1 mt-1">${buttons}</div></td></tr>`;
         });
         tbody.innerHTML = htmlStr;
     }
 
-    // Professional Bulk WA 
+    // General Bulk Msg for all students with main due
     function sendBulkWA() {
         const dueStudents = currentFilteredList.filter(s => s.status === 'active' && getFinance(s).due > 0);
         if(dueStudents.length === 0) { alert("No students with main dues in current list."); return; }
@@ -806,12 +786,8 @@
         let i = 0;
         const interval = setInterval(() => {
             if(i >= dueStudents.length) { clearInterval(interval); alert("Done!"); return; }
-            const s = dueStudents[i];
-            const f = getFinance(s);
-            
-            // Original Professional Formatting
+            const s = dueStudents[i]; const f = getFinance(s);
             const msg = `⚠️ *FEE REMINDER*\n--------------------------------\n🎓 *TIKARKHANJI JNYCTSD*\n--------------------------------\n👤 Student: *${s.name}*\n📂 Batch: ${s.batch}\n\n📉 *Pending Due: ₹${f.due}*\n\nYour fees are overdue. Please clear them soon.\n--------------------------------\n🙏 Thank You`;
-            
             window.open(`https://wa.me/${s.phone}?text=${encodeURIComponent(msg)}`, '_blank');
             i++;
         }, 1500); 
@@ -819,32 +795,18 @@
 
     // --- STUDENT PROFILE ---
     function openProfile(id) {
-        const s = students.find(x => x.id === id);
-        if(!s) return;
-        const f = getFinance(s);
-
+        const s = students.find(x => x.id === id); if(!s) return; const f = getFinance(s);
         let payHistoryHtml = '';
         if(s.payments && s.payments.length > 0) {
-            const sortedPayments = [...s.payments].sort((a,b) => new Date(b.date) - new Date(a.date));
-            sortedPayments.forEach((p) => {
+            [...s.payments].sort((a,b) => new Date(b.date) - new Date(a.date)).forEach((p) => {
                 const dateStr = new Date(p.date).toLocaleDateString('en-IN', {day:'numeric', month:'short', year:'numeric'});
-                payHistoryHtml += `
-                    <tr class="border-b border-gray-100">
-                        <td class="p-2 text-xs text-gray-600">${dateStr}</td>
-                        <td class="p-2 text-xs font-semibold">${p.type}</td>
-                        <td class="p-2 text-xs text-green-600 font-bold text-right">₹${p.amount}</td>
-                    </tr>
-                `;
+                payHistoryHtml += `<tr class="border-b border-gray-100"><td class="p-2 text-xs text-gray-600">${dateStr}</td><td class="p-2 text-xs font-semibold">${p.type}</td><td class="p-2 text-xs text-green-600 font-bold text-right">₹${p.amount}</td></tr>`;
             });
         }
-
         document.getElementById('profileContent').innerHTML = `
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div class="bg-white p-4 rounded-xl shadow-sm border-t-4 border-primary col-span-1">
-                    <div class="text-center mb-3">
-                        <h2 class="text-lg font-bold text-gray-800">${s.name}</h2>
-                        <span class="inline-block bg-gray-100 text-gray-600 px-2 py-0.5 rounded text-[10px] font-bold uppercase">${s.type}</span>
-                    </div>
+                    <div class="text-center mb-3"><h2 class="text-lg font-bold text-gray-800">${s.name}</h2><span class="inline-block bg-gray-100 text-gray-600 px-2 py-0.5 rounded text-[10px] font-bold uppercase">${s.type}</span></div>
                     <div class="space-y-2 text-xs mt-4">
                         <div class="flex justify-between border-b pb-1"><span class="text-gray-500">Phone</span><span class="font-bold">${s.phone}</span></div>
                         <div class="flex justify-between border-b pb-1"><span class="text-gray-500">Batch</span><span class="font-bold">${s.batch}</span></div>
@@ -853,39 +815,15 @@
                     </div>
                     <button class="w-full mt-4 bg-green-500 hover:bg-green-600 text-white font-bold py-2 rounded-lg text-sm shadow" onclick="openPay('${s.id}')">Receive Payment</button>
                 </div>
-
                 <div class="col-span-1 md:col-span-2 space-y-4">
                     <div class="grid grid-cols-3 gap-2">
-                        <div class="bg-white p-3 rounded-lg border border-gray-100 text-center">
-                            <p class="text-[10px] text-gray-500 font-bold uppercase">Main Fee (Adm+Mon)</p>
-                            <h3 class="text-lg font-bold">₹${f.totalFees}</h3>
-                        </div>
-                        <div class="bg-white p-3 rounded-lg border border-gray-100 text-center">
-                            <p class="text-[10px] text-gray-500 font-bold uppercase">Total Paid</p>
-                            <h3 class="text-lg font-bold text-green-600">₹${f.totalPaidMain}</h3>
-                        </div>
-                        <div class="bg-red-50 p-3 rounded-lg border border-red-100 text-center">
-                            <p class="text-[10px] text-red-500 font-bold uppercase">Main Due</p>
-                            <h3 class="text-lg font-bold text-red-600">₹${f.due}</h3>
-                        </div>
+                        <div class="bg-white p-3 rounded-lg border border-gray-100 text-center"><p class="text-[10px] text-gray-500 font-bold uppercase">Main Fee (Adm+Mon)</p><h3 class="text-lg font-bold">₹${f.totalFees}</h3></div>
+                        <div class="bg-white p-3 rounded-lg border border-gray-100 text-center"><p class="text-[10px] text-gray-500 font-bold uppercase">Total Paid</p><h3 class="text-lg font-bold text-green-600">₹${f.totalPaidMain}</h3></div>
+                        <div class="bg-red-50 p-3 rounded-lg border border-red-100 text-center"><p class="text-[10px] text-red-500 font-bold uppercase">Main Due</p><h3 class="text-lg font-bold text-red-600">₹${f.due}</h3></div>
                     </div>
-                    
-                    <div class="bg-purple-50 p-3 rounded-lg border border-purple-100 flex justify-between items-center">
-                        <span class="text-xs font-bold text-purple-700">Exam Details (Separated)</span>
-                        <div class="text-xs text-purple-800 font-semibold">Fee: ₹${f.totalExamFee} | Paid: ₹${f.paidExam} | <span class="font-bold text-red-500">Due: ₹${f.examDue}</span></div>
-                    </div>
-
-                    <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
-                        <h3 class="text-sm font-bold mb-2">📜 History</h3>
-                        <div class="overflow-y-auto max-h-48 table-container">
-                            <table class="w-full text-left">
-                                <thead class="bg-gray-50"><tr><th class="p-2 text-[10px] font-bold">Date</th><th class="p-2 text-[10px] font-bold">Type</th><th class="p-2 text-[10px] font-bold text-right">Amt</th></tr></thead>
-                                <tbody>${payHistoryHtml}</tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>`;
+                    <div class="bg-purple-50 p-3 rounded-lg border border-purple-100 flex justify-between items-center"><span class="text-xs font-bold text-purple-700">Exam Details (Separated)</span><div class="text-xs text-purple-800 font-semibold">Fee: ₹${f.totalExamFee} | Paid: ₹${f.paidExam} | <span class="font-bold text-red-500">Due: ₹${f.examDue}</span></div></div>
+                    <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100"><h3 class="text-sm font-bold mb-2">📜 History</h3><div class="overflow-y-auto max-h-48 table-container"><table class="w-full text-left"><thead class="bg-gray-50"><tr><th class="p-2 text-[10px] font-bold">Date</th><th class="p-2 text-[10px] font-bold">Type</th><th class="p-2 text-[10px] font-bold text-right">Amt</th></tr></thead><tbody>${payHistoryHtml}</tbody></table></div></div>
+                </div></div>`;
         navigate('studentProfile');
     }
 
@@ -895,63 +833,33 @@
     function deleteStudent(id) { if(confirm("DELETE PERMANENTLY?")) db.ref('students/' + id).remove(); }
 
     function openEdit(id) {
-        editStudentId = id;
-        const s = students.find(x => x.id === id);
-        document.getElementById('editName').value = s.name;
-        document.getElementById('editBatch').value = s.batch;
-        document.getElementById('editPhone').value = s.phone;
-        document.getElementById('editJoinDate').value = s.joinDate;
-        document.getElementById('editAdmFee').value = s.admFee || 0;
-        document.getElementById('editMonthlyFee').value = s.monthlyFee || 0;
-        document.getElementById('editExamFee').value = s.examFee || 0;
-        document.getElementById('editDuration').value = s.duration || 12;
-
-        const editCardInput = document.getElementById('editCardNumber');
-        if(s.type === 'senior') {
-            editCardInput.classList.remove('hidden'); editCardInput.value = s.cardNumber || '';
-        } else {
-            editCardInput.classList.add('hidden'); editCardInput.value = '';
-        }
+        editStudentId = id; const s = students.find(x => x.id === id);
+        ['editName','editBatch','editPhone','editJoinDate'].forEach(k => document.getElementById(k).value = s[k.replace('edit','')]);
+        ['editAdmFee','editMonthlyFee','editExamFee','editDuration'].forEach(k => document.getElementById(k).value = s[k.replace('edit','')] || (k==='editDuration'?12:0));
+        const cInp = document.getElementById('editCardNumber'); if(s.type === 'senior') { cInp.classList.remove('hidden'); cInp.value = s.cardNumber || ''; } else { cInp.classList.add('hidden'); cInp.value = ''; }
         document.getElementById('editModal').style.display = 'flex';
     }
 
     function submitEdit() {
-        if(!editStudentId) return;
-        const s = students.find(x => x.id === editStudentId);
-        const updatedData = {
-            name: document.getElementById('editName').value,
-            batch: document.getElementById('editBatch').value,
-            phone: document.getElementById('editPhone').value,
-            joinDate: document.getElementById('editJoinDate').value,
-            admFee: Number(document.getElementById('editAdmFee').value),
-            monthlyFee: Number(document.getElementById('editMonthlyFee').value),
-            examFee: Number(document.getElementById('editExamFee').value),
-            duration: Number(document.getElementById('editDuration').value)
+        if(!editStudentId) return; const s = students.find(x => x.id === editStudentId);
+        const data = {
+            name: document.getElementById('editName').value, batch: document.getElementById('editBatch').value, phone: document.getElementById('editPhone').value, joinDate: document.getElementById('editJoinDate').value,
+            admFee: Number(document.getElementById('editAdmFee').value), monthlyFee: Number(document.getElementById('editMonthlyFee').value), examFee: Number(document.getElementById('editExamFee').value), duration: Number(document.getElementById('editDuration').value)
         };
-        if(s.type === 'senior') updatedData.cardNumber = document.getElementById('editCardNumber').value;
-
-        db.ref('students/' + editStudentId).update(updatedData).then(() => {
-            alert("Updated!"); document.getElementById('editModal').style.display = 'none';
-        });
+        if(s.type === 'senior') data.cardNumber = document.getElementById('editCardNumber').value;
+        db.ref('students/' + editStudentId).update(data).then(() => { alert("Updated!"); document.getElementById('editModal').style.display = 'none'; });
     }
 
     // --- PAYMENTS ---
     function openPay(id) { currentId = id; document.getElementById('modal').style.display='flex'; }
     function submitPay() {
-        const amt = Number(document.getElementById('payAmount').value);
-        const type = document.getElementById('payType').value;
+        const amt = Number(document.getElementById('payAmount').value); const type = document.getElementById('payType').value;
         if(amt>0 && currentId) {
             const s = students.find(x=>x.id===currentId);
-            const newPay = { date: new Date().toISOString(), amount: amt, type: type };
-            db.ref('students/'+currentId+'/payments').set([...(s.payments||[]), newPay]);
-            document.getElementById('modal').style.display='none';
-            document.getElementById('payAmount').value='';
-            
-            // Original Professional Formatting
-            const dateStr = new Date().toLocaleDateString('en-IN');
-            const receiptMsg = `🧾 *PAYMENT RECEIPT*\n--------------------------------\n🎓 *TIKARKHANJI JNYCTSD*\n--------------------------------\n👤 Name: *${s.name}*\n📂 Batch: ${s.batch}\n📅 Date: ${dateStr}\n\n💰 *Received: ₹${amt}*\n📌 Type: ${type}\n\n✅ *Status: Paid*\n--------------------------------\nThank you for your payment! 🙏`;
-            window.open(`https://wa.me/${s.phone}?text=${encodeURIComponent(receiptMsg)}`, '_blank');
-            
+            db.ref('students/'+currentId+'/payments').set([...(s.payments||[]), { date: new Date().toISOString(), amount: amt, type: type }]);
+            document.getElementById('modal').style.display='none'; document.getElementById('payAmount').value='';
+            const msg = `🧾 *PAYMENT RECEIPT*\n--------------------------------\n🎓 *TIKARKHANJI JNYCTSD*\n--------------------------------\n👤 Name: *${s.name}*\n📂 Batch: ${s.batch}\n📅 Date: ${new Date().toLocaleDateString('en-IN')}\n\n💰 *Received: ₹${amt}*\n📌 Type: ${type}\n\n✅ *Status: Paid*\n--------------------------------\nThank you for your payment! 🙏`;
+            window.open(`https://wa.me/${s.phone}?text=${encodeURIComponent(msg)}`, '_blank');
             if(document.getElementById('studentProfile').classList.contains('active')) setTimeout(() => openProfile(currentId), 300);
         }
     }
@@ -959,42 +867,24 @@
     // --- EXPENSES ---
     document.getElementById('expForm').addEventListener('submit', (e) => {
         e.preventDefault();
-        db.ref('expenses').push({
-            category: document.getElementById('expCat').value,
-            amount: Number(document.getElementById('expAmount').value),
-            note: document.getElementById('expNote').value,
-            date: document.getElementById('expDate').value
-        });
+        db.ref('expenses').push({ category: document.getElementById('expCat').value, amount: Number(document.getElementById('expAmount').value), note: document.getElementById('expNote').value, date: document.getElementById('expDate').value });
         document.getElementById('expAmount').value = ''; document.getElementById('expNote').value = '';
     });
     function deleteExpense(id) { if(confirm("Delete?")) db.ref('expenses/' + id).remove(); }
     function renderExpenses() {
-        const tbody = document.getElementById('expBody');
-        let htmlStr = '';
+        const tbody = document.getElementById('expBody'); let htmlStr = '';
         expenses.sort((a,b) => new Date(b.date) - new Date(a.date)).forEach(ex => {
-            htmlStr += `
-                <tr class="border-b border-gray-100">
-                    <td class="p-2 text-xs">${ex.date}</td>
-                    <td class="p-2 text-xs"><b class="text-gray-800">${ex.category}</b><br><span class="text-[10px] text-gray-500">${ex.note}</span></td>
-                    <td class="p-2 text-xs text-red-500 font-bold text-right">- ₹${ex.amount}</td>
-                    <td class="p-2 text-center"><button class="text-red-400 p-1" onclick="deleteExpense('${ex.id}')"><i class="fas fa-trash text-xs"></i></button></td>
-                </tr>`;
-        });
-        tbody.innerHTML = htmlStr;
+            htmlStr += `<tr class="border-b border-gray-100"><td class="p-2 text-xs">${ex.date}</td><td class="p-2 text-xs"><b class="text-gray-800">${ex.category}</b><br><span class="text-[10px] text-gray-500">${ex.note}</span></td><td class="p-2 text-xs text-red-500 font-bold text-right">- ₹${ex.amount}</td><td class="p-2 text-center"><button class="text-red-400 p-1" onclick="deleteExpense('${ex.id}')"><i class="fas fa-trash text-xs"></i></button></td></tr>`;
+        }); tbody.innerHTML = htmlStr;
     }
 
     // --- NAVIGATION ---
     function navigate(id) {
         document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-        document.querySelectorAll('.nav-item').forEach(b => {
-            b.classList.remove('bg-blue-50', 'text-primary'); b.classList.add('text-gray-500');
-        });
+        document.querySelectorAll('.nav-item').forEach(b => { b.classList.remove('bg-blue-50', 'text-primary'); b.classList.add('text-gray-500'); });
         document.getElementById(id).classList.add('active');
         const map = {'dashboard':'btn-dash', 'monthTracker':'btn-track', 'admission':'btn-adm', 'students':'btn-std', 'expenses':'btn-exp', 'studentProfile': 'btn-std'};
-        if(map[id]) {
-            const btn = document.getElementById(map[id]);
-            btn.classList.remove('text-gray-500'); btn.classList.add('bg-blue-50', 'text-primary');
-        }
+        if(map[id]) { const btn = document.getElementById(map[id]); btn.classList.remove('text-gray-500'); btn.classList.add('bg-blue-50', 'text-primary'); }
         document.getElementById('main-content').scrollTop = 0;
     }
 
