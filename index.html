@@ -48,6 +48,10 @@
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
         
         .table-container { -webkit-overflow-scrolling: touch; overscroll-behavior-x: contain; }
+        
+        /* Better touch response on mobile */
+        button, a.action-btn { transition: transform 0.1s; }
+        button:active, a.action-btn:active { transform: scale(0.95); }
 
         @media (max-width: 768px) {
             .sidebar-mobile { position: fixed; bottom: 0; left: 0; width: 100%; height: 60px; flex-direction: row; justify-content: space-around; border-top: 1px solid #e5e7eb; background: white; z-index: 50; overflow-x: auto; padding: 0 5px; }
@@ -70,7 +74,7 @@
         </div>
     </div>
 
-    <!-- BULK WHATSAPP QUEUE PANEL (NEW) -->
+    <!-- BULK WHATSAPP QUEUE PANEL -->
     <div id="waQueuePanel" class="fixed bottom-20 md:bottom-10 right-4 bg-white border-2 border-green-500 p-4 md:p-5 rounded-xl shadow-2xl z-[1000] hidden w-[90%] max-w-sm">
         <div class="flex justify-between items-center border-b border-gray-100 pb-2 mb-3">
             <h4 class="font-bold text-green-600"><i class="fab fa-whatsapp"></i> Bulk Message Queue</h4>
@@ -168,7 +172,6 @@
                 <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-4">
                     <div class="flex items-center gap-3">
                         <label class="font-semibold text-gray-700 text-sm md:text-base">Select Date:</label>
-                        <!-- CHANGED to TYPE="DATE" based on requirement -->
                         <input type="date" id="trackerDate" class="border border-gray-300 rounded-lg p-2 outline-none focus:border-primary w-fit text-sm" onchange="loadTrackerData()">
                     </div>
                 </div>
@@ -190,7 +193,7 @@
                 </div>
                 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <!-- Unpaid List (Height Increased) -->
+                    <!-- Unpaid List -->
                     <div class="border border-gray-200 rounded-lg p-3 bg-gray-50 h-[65vh] min-h-[400px] overflow-y-auto">
                         <div class="flex justify-between items-center border-b-2 border-red-200 pb-2 mb-3 sticky top-0 bg-gray-50 z-10">
                             <h3 class="font-bold text-red-500 text-sm md:text-base">❌ Unpaid (<span id="unpaidCount">0</span>)</h3>
@@ -201,7 +204,7 @@
                         <div id="unpaidList" class="flex flex-col gap-2"></div>
                     </div>
 
-                    <!-- Paid List (Height Increased) -->
+                    <!-- Paid List -->
                     <div class="border border-gray-200 rounded-lg p-3 bg-gray-50 h-[65vh] min-h-[400px] overflow-y-auto">
                         <div class="border-b-2 border-green-200 pb-2 mb-3 sticky top-0 bg-gray-50 z-10">
                             <h3 class="font-bold text-green-500 text-sm md:text-base">✅ Paid (<span id="paidCount">0</span>)</h3>
@@ -236,7 +239,7 @@
                     
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <input type="number" id="phone" required class="w-full border border-gray-300 rounded-lg p-2.5 outline-none focus:border-primary text-sm" placeholder="Mobile Number">
-                        <input type="text" id="cardNumber" class="w-full border border-gray-300 rounded-lg p-2.5 outline-none focus:border-primary text-sm hidden" placeholder="Card Number (For Senior)">
+                        <input type="text" id="cardNumber" class="w-full border border-gray-300 rounded-lg p-2.5 outline-none focus:border-primary text-sm" placeholder="Card Number (Optional)">
                     </div>
                     
                     <div>
@@ -296,13 +299,13 @@
                 </div>
 
                 <div class="overflow-x-auto table-container">
-                    <table class="w-full text-left border-collapse min-w-[700px]">
+                    <table class="w-full text-left border-collapse min-w-[750px]">
                         <thead>
                             <tr class="bg-gray-50 text-gray-600 text-xs md:text-sm border-b border-gray-200">
                                 <th class="p-3 font-bold w-12 text-center">Sl.</th>
-                                <th class="p-3 font-bold">Details</th>
+                                <th class="p-3 font-bold w-[35%]">Student Info</th>
                                 <th class="p-3 font-bold">Payments</th>
-                                <th class="p-3 font-bold text-right">Action</th>
+                                <th class="p-3 font-bold text-right min-w-[130px]">Actions</th>
                             </tr>
                         </thead>
                         <tbody id="tbody" class="divide-y divide-gray-100 text-sm"></tbody>
@@ -398,7 +401,7 @@
                 <input type="text" id="editName" class="w-full border border-gray-300 rounded-lg p-2 outline-none focus:border-warning text-sm" placeholder="Full Name">
                 <input type="text" id="editBatch" class="w-full border border-gray-300 rounded-lg p-2 outline-none focus:border-warning text-sm" placeholder="Batch Name">
                 <input type="number" id="editPhone" class="w-full border border-gray-300 rounded-lg p-2 outline-none focus:border-warning text-sm" placeholder="Phone Number">
-                <input type="text" id="editCardNumber" class="w-full border border-gray-300 rounded-lg p-2 outline-none focus:border-warning text-sm hidden" placeholder="Card Number (For Senior)">
+                <input type="text" id="editCardNumber" class="w-full border border-gray-300 rounded-lg p-2 outline-none focus:border-warning text-sm" placeholder="Card Number">
                 
                 <div>
                     <label class="text-xs font-bold text-gray-500">Join Date</label>
@@ -517,7 +520,7 @@
         });
     }
 
-    // --- CORE FINANCE LOGIC (Exam Fee Separated) ---
+    // --- CORE FINANCE LOGIC ---
     function getFinance(s) {
         let paidAdm = 0, paidMon = 0, paidExam = 0;
         
@@ -602,14 +605,14 @@
         });
     }
 
-    // --- TRACKER (With Specific Date & Join Date Logic) ---
+    // --- TRACKER ---
     function loadTrackerData() {
         const dateInput = document.getElementById('trackerDate').value;
         if(!dateInput) return;
         
         const targetDateObj = new Date(dateInput);
         const year = targetDateObj.getFullYear();
-        const month = targetDateObj.getMonth() + 1; // 1-12
+        const month = targetDateObj.getMonth() + 1; 
         const targetDay = targetDateObj.getDate();
 
         const unpaidList = document.getElementById('unpaidList');
@@ -624,13 +627,11 @@
             const joinDateObj = new Date(s.joinDate);
             const joinDay = joinDateObj.getDate();
             
-            // Skip if the targeted month/year is BEFORE they joined
             if(new Date(year, month-1, 1) < new Date(joinDateObj.getFullYear(), joinDateObj.getMonth(), 1)) return;
 
             trTotalStd++;
             const monthFeeAmt = Number(s.monthlyFee) || 0;
 
-            // Did they pay for this month & year?
             const hasPaid = s.payments.some(p => {
                 const d = new Date(p.date);
                 return d.getFullYear() == year && (d.getMonth()+1) == month && p.type === 'Monthly Fee';
@@ -646,20 +647,17 @@
                 paidList.appendChild(div);
                 pCount++;
             } else {
-                // Determine if they are officially due Based on Selected Date vs Join Date
-                // If selected targetDay is >= their joinDay, AND they have an overall due balance > 0
                 if(targetDay >= joinDay && f.due > 0) {
                     trDue += monthFeeAmt;
                     const monthName = targetDateObj.toLocaleString('default', { month: 'long' });
                     
-                    // Add to Tracker Bulk List
                     currentTrackerUnpaidList.push({ student: s, monthName: monthName });
 
                     div.innerHTML = `
                         <div><p class="font-bold text-gray-800 text-sm">${s.name}</p><p class="text-[10px] text-gray-500">${s.batch} | Due Date: ${joinDay}</p></div>
                         <div class="flex items-center gap-2">
                             <span class="text-xs font-bold text-red-500">₹${monthFeeAmt}</span>
-                            <button class="w-8 h-8 rounded-full bg-green-500 text-white flex justify-center items-center hover:bg-green-600 transition shadow" onclick="sendSpecificReminder('${s.phone}','${s.name}','${monthName}')">
+                            <button class="action-btn w-8 h-8 rounded-full bg-green-500 text-white flex justify-center items-center shadow" onclick="sendSpecificReminder('${s.phone}','${s.name}','${monthName}')">
                                 <i class="fab fa-whatsapp"></i>
                             </button>
                         </div>`;
@@ -710,11 +708,8 @@
             return;
         }
 
-        // Initialize Queue
         waQueue = listToProcess;
         waCurrentIndex = 0;
-        
-        // Show Panel
         document.getElementById('waQueuePanel').classList.remove('hidden');
         updateWaQueueUI();
     }
@@ -757,13 +752,12 @@
         const type = document.getElementById('studentType').value;
         const isOld = document.getElementById('isOldStudent').checked;
         const adm = document.getElementById('admFee');
-        const cardInput = document.getElementById('cardNumber');
 
         if(type === 'senior') {
-            cardInput.classList.remove('hidden'); adm.value = isOld ? 0 : 400;
+            adm.value = isOld ? 0 : 400;
             document.getElementById('monthlyFee').value = 300; document.getElementById('examFee').value = 500; document.getElementById('duration').value = 12;
         } else {
-            cardInput.classList.add('hidden'); cardInput.value = ''; adm.value = isOld ? 0 : 500;
+            adm.value = isOld ? 0 : 500;
             document.getElementById('monthlyFee').value = 250; document.getElementById('examFee').value = 0; document.getElementById('duration').value = 12;
         }
         adm.disabled = isOld;
@@ -777,7 +771,7 @@
         const name = document.getElementById('name').value;
         const batch = document.getElementById('batch').value;
         const phone = document.getElementById('phone').value;
-        const cardNo = type === 'senior' ? document.getElementById('cardNumber').value : '';
+        const cardNo = document.getElementById('cardNumber').value || ''; // All students can have card number
 
         const s = {
             status: 'active', type: type, name: name, batch: batch, phone: phone, cardNumber: cardNo,
@@ -787,10 +781,11 @@
         };
         
         db.ref('students').push(s).then(() => {
-            if(type === 'senior') {
-                const welcomeMsg = `🎉 *WELCOME TO TIKARKHANJI JNYCTSD* 🎉\n--------------------------------\nDear *${name}*,\n\nWe are extremely delighted to welcome you to our center! 🎓\nYour admission as a Senior Student is confirmed.\n\n📚 *Batch:* ${batch}\n💳 *Card No:* ${cardNo || 'N/A'}\n\nWe look forward to an excellent learning journey together.\n--------------------------------\nBest Regards,\n*Admin, Tikarkhanji JNYCTSD*`;
-                window.open(`https://wa.me/${phone}?text=${encodeURIComponent(welcomeMsg)}`, '_blank');
-            }
+            // Send Professional Admission Message for ALL students
+            const courseName = type === 'senior' ? 'Senior (Course Based)' : 'Junior (Class 9 & Below)';
+            const welcomeMsg = `🎉 *WELCOME TO TIKARKHANJI JNYCTSD* 🎉\n--------------------------------\nDear *${name}*,\n\nCongratulations and welcome to our institute! 🎓\nYour admission is successfully confirmed.\n\n📚 *Course Type:* ${courseName}\n📂 *Batch:* ${batch}\n💳 *Card No:* ${cardNo || 'N/A'}\n📅 *Join Date:* ${document.getElementById('joinDate').value}\n\nWe are committed to providing you with the best computer training and look forward to an excellent learning journey together.\n--------------------------------\nBest Regards,\n*Director, Tikarkhanji JNYCTSD*`;
+            window.open(`https://wa.me/${phone}?text=${encodeURIComponent(welcomeMsg)}`, '_blank');
+
             e.target.reset(); setDefaults(); alert("Student Added Successfully!");
             document.getElementById('filterType').value = type; navigate('students');
         });
@@ -824,16 +819,19 @@
             const f = getFinance(s);
             const isSenior = s.type === 'senior';
             const badgeClass = isSenior ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700';
-            const cardDisplay = (isSenior && s.cardNumber) ? `<span class="mt-1 inline-block text-[10px] font-bold text-purple-600 bg-purple-50 px-1.5 py-0.5 rounded">💳 ${s.cardNumber}</span>` : '';
+            const cardDisplay = s.cardNumber ? `<span class="mt-1 inline-block text-[10px] font-bold text-purple-600 bg-purple-50 px-1.5 py-0.5 rounded">💳 ${s.cardNumber}</span>` : '';
             const isDropout = s.status === 'dropout';
             const dueClass = f.due > 0 ? 'text-red-500 bg-red-50' : 'text-green-600 bg-green-50';
             const examBadge = f.examDue > 0 ? `<div class="text-[10px] text-purple-600 font-bold mt-1">Exam Due: ₹${f.examDue}</div>` : '';
 
+            // Added Call and WA buttons
             let buttons = !isDropout ? `
-                <button class="w-7 h-7 rounded bg-green-500 text-white shadow" onclick="openPay('${s.id}')"><i class="fas fa-rupee-sign text-xs"></i></button>
-                <button class="w-7 h-7 rounded bg-blue-500 text-white shadow" onclick="openProfile('${s.id}')"><i class="fas fa-eye text-xs"></i></button>
-                <button class="w-7 h-7 rounded bg-yellow-500 text-white shadow" onclick="openEdit('${s.id}')"><i class="fas fa-pen text-xs"></i></button>
-                <button class="w-7 h-7 rounded bg-gray-500 text-white shadow" onclick="markDropout('${s.id}')"><i class="fas fa-user-slash text-[10px]"></i></button>
+                <a href="tel:${s.phone}" class="action-btn w-7 h-7 rounded bg-gray-600 text-white shadow flex justify-center items-center" title="Call"><i class="fas fa-phone-alt text-[10px]"></i></a>
+                <a href="https://wa.me/${s.phone}" target="_blank" class="action-btn w-7 h-7 rounded bg-green-500 text-white shadow flex justify-center items-center" title="WhatsApp"><i class="fab fa-whatsapp text-[12px]"></i></a>
+                <button class="action-btn w-7 h-7 rounded bg-blue-600 text-white shadow flex justify-center items-center" onclick="openPay('${s.id}')" title="Pay"><i class="fas fa-rupee-sign text-xs"></i></button>
+                <button class="action-btn w-7 h-7 rounded bg-blue-400 text-white shadow flex justify-center items-center" onclick="openProfile('${s.id}')" title="Profile"><i class="fas fa-eye text-xs"></i></button>
+                <button class="action-btn w-7 h-7 rounded bg-yellow-500 text-white shadow flex justify-center items-center" onclick="openEdit('${s.id}')" title="Edit"><i class="fas fa-pen text-xs"></i></button>
+                <button class="action-btn w-7 h-7 rounded bg-red-500 text-white shadow flex justify-center items-center" onclick="markDropout('${s.id}')" title="Dropout"><i class="fas fa-user-slash text-[10px]"></i></button>
             ` : `
                 <button class="px-2 py-1 rounded bg-blue-500 text-white text-xs shadow font-bold" onclick="restoreStudent('${s.id}')">Restore</button>
                 <button class="px-2 py-1 rounded bg-red-100 text-red-600 text-xs shadow font-bold" onclick="deleteStudent('${s.id}')">Delete</button>
@@ -844,7 +842,13 @@
                 <td class="p-2 md:p-3"><div class="font-bold text-gray-800 text-sm flex items-center gap-1.5">${s.name} <span class="${badgeClass} px-1.5 py-0.5 rounded text-[9px] uppercase font-bold tracking-wider">${s.type}</span></div>
                 <div class="text-xs text-gray-500 mt-0.5"><i class="fas fa-phone-alt mr-1"></i>${s.phone}</div><div class="text-[10px] text-gray-400 mt-0.5">Joined: ${s.joinDate}</div>${cardDisplay}</td>
                 <td class="p-2 md:p-3"><div class="text-[11px] font-semibold"><span class="text-blue-600">A: ₹${f.paidAdm}</span> | <span class="text-green-600">M: ₹${f.paidMon}</span><br><span class="text-purple-600">E: ₹${f.paidExam} / Total: ₹${f.totalExamFee}</span></div></td>
-                <td class="p-2 md:p-3 text-right"><div class="inline-block px-2 py-0.5 rounded font-bold mb-2 text-xs ${dueClass}">${f.due > 0 ? 'Due: ₹' + f.due : 'PAID'}</div>${examBadge}<div class="flex justify-end gap-1 mt-1">${buttons}</div></td></tr>`;
+                <td class="p-2 md:p-3">
+                    <div class="flex flex-col items-end w-full">
+                        <div class="inline-block px-2 py-0.5 rounded font-bold mb-1 text-xs ${dueClass}">${f.due > 0 ? 'Due: ₹' + f.due : 'PAID'}</div>
+                        ${examBadge}
+                        <div class="flex justify-end flex-wrap gap-1 mt-2 w-full max-w-[120px] ml-auto">${buttons}</div>
+                    </div>
+                </td></tr>`;
         });
         tbody.innerHTML = htmlStr;
     }
@@ -893,7 +897,7 @@
         editStudentId = id; const s = students.find(x => x.id === id);
         ['editName','editBatch','editPhone','editJoinDate'].forEach(k => document.getElementById(k).value = s[k.replace('edit','')]);
         ['editAdmFee','editMonthlyFee','editExamFee','editDuration'].forEach(k => document.getElementById(k).value = s[k.replace('edit','')] || (k==='editDuration'?12:0));
-        const cInp = document.getElementById('editCardNumber'); if(s.type === 'senior') { cInp.classList.remove('hidden'); cInp.value = s.cardNumber || ''; } else { cInp.classList.add('hidden'); cInp.value = ''; }
+        document.getElementById('editCardNumber').value = s.cardNumber || ''; // Card number accessible to all
         document.getElementById('editModal').style.display = 'flex';
     }
 
@@ -901,9 +905,9 @@
         if(!editStudentId) return; const s = students.find(x => x.id === editStudentId);
         const data = {
             name: document.getElementById('editName').value, batch: document.getElementById('editBatch').value, phone: document.getElementById('editPhone').value, joinDate: document.getElementById('editJoinDate').value,
-            admFee: Number(document.getElementById('editAdmFee').value), monthlyFee: Number(document.getElementById('editMonthlyFee').value), examFee: Number(document.getElementById('editExamFee').value), duration: Number(document.getElementById('editDuration').value)
+            admFee: Number(document.getElementById('editAdmFee').value), monthlyFee: Number(document.getElementById('editMonthlyFee').value), examFee: Number(document.getElementById('editExamFee').value), duration: Number(document.getElementById('editDuration').value),
+            cardNumber: document.getElementById('editCardNumber').value || ''
         };
-        if(s.type === 'senior') data.cardNumber = document.getElementById('editCardNumber').value;
         db.ref('students/' + editStudentId).update(data).then(() => { alert("Updated!"); document.getElementById('editModal').style.display = 'none'; });
     }
 
@@ -915,8 +919,12 @@
             const s = students.find(x=>x.id===currentId);
             db.ref('students/'+currentId+'/payments').set([...(s.payments||[]), { date: new Date().toISOString(), amount: amt, type: type }]);
             document.getElementById('modal').style.display='none'; document.getElementById('payAmount').value='';
-            const msg = `🧾 *PAYMENT RECEIPT*\n--------------------------------\n🎓 *TIKARKHANJI JNYCTSD*\n--------------------------------\n👤 Name: *${s.name}*\n📂 Batch: ${s.batch}\n📅 Date: ${new Date().toLocaleDateString('en-IN')}\n\n💰 *Received: ₹${amt}*\n📌 Type: ${type}\n\n✅ *Status: Paid*\n--------------------------------\nThank you for your payment! 🙏`;
-            window.open(`https://wa.me/${s.phone}?text=${encodeURIComponent(msg)}`, '_blank');
+            
+            // Professional Receipt Message with Card Number
+            const dateStr = new Date().toLocaleDateString('en-IN');
+            const receiptMsg = `🧾 *OFFICIAL PAYMENT RECEIPT*\n--------------------------------\n🎓 *TIKARKHANJI JNYCTSD*\n--------------------------------\nDear *${s.name}*,\nWe have successfully received your payment. Thank you!\n\n📂 *Batch:* ${s.batch}\n💳 *Card No:* ${s.cardNumber || 'N/A'}\n📅 *Date:* ${dateStr}\n\n💰 *Amount Received:* ₹${amt}\n📌 *Payment Type:* ${type}\n\n✅ *Status: SUCCESSFUL*\n--------------------------------\nFor any queries, please contact the administration.\n🙏 Best Regards`;
+            
+            window.open(`https://wa.me/${s.phone}?text=${encodeURIComponent(receiptMsg)}`, '_blank');
             if(document.getElementById('studentProfile').classList.contains('active')) setTimeout(() => openProfile(currentId), 300);
         }
     }
@@ -931,7 +939,7 @@
     function renderExpenses() {
         const tbody = document.getElementById('expBody'); let htmlStr = '';
         expenses.sort((a,b) => new Date(b.date) - new Date(a.date)).forEach(ex => {
-            htmlStr += `<tr class="border-b border-gray-100"><td class="p-2 text-xs">${ex.date}</td><td class="p-2 text-xs"><b class="text-gray-800">${ex.category}</b><br><span class="text-[10px] text-gray-500">${ex.note}</span></td><td class="p-2 text-xs text-red-500 font-bold text-right">- ₹${ex.amount}</td><td class="p-2 text-center"><button class="text-red-400 p-1" onclick="deleteExpense('${ex.id}')"><i class="fas fa-trash text-xs"></i></button></td></tr>`;
+            htmlStr += `<tr class="border-b border-gray-100"><td class="p-2 text-xs">${ex.date}</td><td class="p-2 text-xs"><b class="text-gray-800">${ex.category}</b><br><span class="text-[10px] text-gray-500">${ex.note}</span></td><td class="p-2 text-xs text-red-500 font-bold text-right">- ₹${ex.amount}</td><td class="p-2 text-center"><button class="text-red-400 p-1 action-btn" onclick="deleteExpense('${ex.id}')"><i class="fas fa-trash text-xs"></i></button></td></tr>`;
         }); tbody.innerHTML = htmlStr;
     }
 
