@@ -55,7 +55,7 @@
         }
     </style>
 </head>
-<body class="flex h-screen text-gray-800">
+<body class="flex h-screen text-gray-800 relative">
 
     <!-- LOGIN OVERLAY -->
     <div id="login-overlay" class="fixed inset-0 bg-white z-[9999] flex flex-col justify-center items-center">
@@ -67,6 +67,21 @@
             </button>
             <div id="loader" class="hidden mt-4 text-gray-500 text-sm"><i class="fas fa-spinner fa-spin mr-2"></i>Connecting...</div>
             <p id="login-status" class="mt-4 text-red-500 text-sm"></p>
+        </div>
+    </div>
+
+    <!-- BULK WHATSAPP QUEUE PANEL (NEW) -->
+    <div id="waQueuePanel" class="fixed bottom-20 md:bottom-10 right-4 bg-white border-2 border-green-500 p-4 md:p-5 rounded-xl shadow-2xl z-[1000] hidden w-[90%] max-w-sm">
+        <div class="flex justify-between items-center border-b border-gray-100 pb-2 mb-3">
+            <h4 class="font-bold text-green-600"><i class="fab fa-whatsapp"></i> Bulk Message Queue</h4>
+            <button onclick="cancelWAQueue()" class="text-gray-400 hover:text-red-500"><i class="fas fa-times"></i></button>
+        </div>
+        <p class="text-sm text-gray-600 mb-4" id="waQueueStatus">Sending 1 of 10...</p>
+        <div class="flex gap-2">
+            <button id="waNextBtn" onclick="sendNextWA()" class="flex-1 bg-green-500 hover:bg-green-600 text-white py-2 rounded-lg text-sm font-bold shadow transition">
+                Send Message <i class="fas fa-paper-plane ml-1"></i>
+            </button>
+            <button onclick="cancelWAQueue()" class="bg-gray-100 hover:bg-red-50 text-gray-600 hover:text-red-600 px-4 py-2 rounded-lg text-sm font-bold transition">Cancel</button>
         </div>
     </div>
 
@@ -152,8 +167,9 @@
                 
                 <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-4">
                     <div class="flex items-center gap-3">
-                        <label class="font-semibold text-gray-700 text-sm md:text-base">Select Month:</label>
-                        <input type="month" id="trackerMonth" class="border border-gray-300 rounded-lg p-2 outline-none focus:border-primary w-fit text-sm" onchange="loadTrackerData()">
+                        <label class="font-semibold text-gray-700 text-sm md:text-base">Select Date:</label>
+                        <!-- CHANGED to TYPE="DATE" based on requirement -->
+                        <input type="date" id="trackerDate" class="border border-gray-300 rounded-lg p-2 outline-none focus:border-primary w-fit text-sm" onchange="loadTrackerData()">
                     </div>
                 </div>
 
@@ -174,19 +190,19 @@
                 </div>
                 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <!-- Unpaid List -->
-                    <div class="border border-gray-200 rounded-lg p-3 bg-gray-50 h-[500px] overflow-y-auto">
+                    <!-- Unpaid List (Height Increased) -->
+                    <div class="border border-gray-200 rounded-lg p-3 bg-gray-50 h-[65vh] min-h-[400px] overflow-y-auto">
                         <div class="flex justify-between items-center border-b-2 border-red-200 pb-2 mb-3 sticky top-0 bg-gray-50 z-10">
                             <h3 class="font-bold text-red-500 text-sm md:text-base">❌ Unpaid (<span id="unpaidCount">0</span>)</h3>
-                            <button onclick="sendTrackerBulkWA()" class="bg-green-500 hover:bg-green-600 text-white text-[10px] md:text-xs font-bold py-1.5 px-3 rounded shadow flex items-center gap-1.5 transition">
+                            <button onclick="startBulkWA('tracker')" class="bg-green-500 hover:bg-green-600 text-white text-[10px] md:text-xs font-bold py-1.5 px-3 rounded shadow flex items-center gap-1.5 transition">
                                 <i class="fab fa-whatsapp"></i> Bulk Msg
                             </button>
                         </div>
                         <div id="unpaidList" class="flex flex-col gap-2"></div>
                     </div>
 
-                    <!-- Paid List -->
-                    <div class="border border-gray-200 rounded-lg p-3 bg-gray-50 h-[500px] overflow-y-auto">
+                    <!-- Paid List (Height Increased) -->
+                    <div class="border border-gray-200 rounded-lg p-3 bg-gray-50 h-[65vh] min-h-[400px] overflow-y-auto">
                         <div class="border-b-2 border-green-200 pb-2 mb-3 sticky top-0 bg-gray-50 z-10">
                             <h3 class="font-bold text-green-500 text-sm md:text-base">✅ Paid (<span id="paidCount">0</span>)</h3>
                         </div>
@@ -258,7 +274,7 @@
         <div id="students" class="section max-w-7xl mx-auto">
             <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-3">
                 <h2 class="text-xl md:text-2xl font-bold text-gray-800">📋 Student Directory</h2>
-                <button onclick="sendBulkWA()" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-lg shadow text-sm flex items-center gap-2 w-full md:w-auto justify-center">
+                <button onclick="startBulkWA('all')" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-lg shadow text-sm flex items-center gap-2 w-full md:w-auto justify-center">
                     <i class="fab fa-whatsapp"></i> Send Bulk Reminder (All Due)
                 </button>
             </div>
@@ -442,7 +458,11 @@
     let editStudentId = null;
     let chartInstance = null;
     let currentFilteredList = []; 
-    let currentTrackerUnpaidList = []; // Array for Monthly Tracker Bulk WA
+    let currentTrackerUnpaidList = []; 
+    
+    // WhatsApp Queue State
+    let waQueue = [];
+    let waCurrentIndex = 0;
 
     // --- AUTH ---
     function googleLogin() {
@@ -483,9 +503,8 @@
             });
             updateDashboard();
             renderTable();
-            if(!document.getElementById('trackerMonth').value) {
-                const now = new Date();
-                document.getElementById('trackerMonth').value = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+            if(!document.getElementById('trackerDate').value) {
+                document.getElementById('trackerDate').valueAsDate = new Date();
             }
             loadTrackerData();
         });
@@ -583,11 +602,15 @@
         });
     }
 
-    // --- TRACKER (With Amounts & Bulk List) ---
+    // --- TRACKER (With Specific Date & Join Date Logic) ---
     function loadTrackerData() {
-        const mInput = document.getElementById('trackerMonth').value;
-        if(!mInput) return;
-        const [year, month] = mInput.split('-');
+        const dateInput = document.getElementById('trackerDate').value;
+        if(!dateInput) return;
+        
+        const targetDateObj = new Date(dateInput);
+        const year = targetDateObj.getFullYear();
+        const month = targetDateObj.getMonth() + 1; // 1-12
+        const targetDay = targetDateObj.getDate();
 
         const unpaidList = document.getElementById('unpaidList');
         const paidList = document.getElementById('paidList');
@@ -595,22 +618,19 @@
         
         let uCount = 0, pCount = 0;
         let trTotalStd = 0, trCollected = 0, trDue = 0;
-        currentTrackerUnpaidList = []; // Reset bulk list
-
-        const today = new Date();
+        currentTrackerUnpaidList = []; 
 
         students.filter(s => s.status === 'active').forEach(s => {
             const joinDateObj = new Date(s.joinDate);
             const joinDay = joinDateObj.getDate();
-            const dueDateForMonth = new Date(year, month - 1, joinDay);
             
-            // Student is not applicable if the selected month is before they joined
+            // Skip if the targeted month/year is BEFORE they joined
             if(new Date(year, month-1, 1) < new Date(joinDateObj.getFullYear(), joinDateObj.getMonth(), 1)) return;
 
-            // Mark as applicable
             trTotalStd++;
             const monthFeeAmt = Number(s.monthlyFee) || 0;
 
+            // Did they pay for this month & year?
             const hasPaid = s.payments.some(p => {
                 const d = new Date(p.date);
                 return d.getFullYear() == year && (d.getMonth()+1) == month && p.type === 'Monthly Fee';
@@ -626,9 +646,11 @@
                 paidList.appendChild(div);
                 pCount++;
             } else {
-                if(today >= dueDateForMonth && f.due > 0) {
+                // Determine if they are officially due Based on Selected Date vs Join Date
+                // If selected targetDay is >= their joinDay, AND they have an overall due balance > 0
+                if(targetDay >= joinDay && f.due > 0) {
                     trDue += monthFeeAmt;
-                    const monthName = new Date(year, month-1).toLocaleString('default', { month: 'long' });
+                    const monthName = targetDateObj.toLocaleString('default', { month: 'long' });
                     
                     // Add to Tracker Bulk List
                     currentTrackerUnpaidList.push({ student: s, monthName: monthName });
@@ -654,31 +676,81 @@
         document.getElementById('tr_due').innerText = '₹' + trDue;
     }
 
-    // Professional Indiviual Msg
+    // Individual WhatsApp
     function sendSpecificReminder(phone, name, month) {
         const text = `⚠️ *MONTHLY FEE REMINDER*\n--------------------------------\n🎓 *TIKARKHANJI JNYCTSD*\n--------------------------------\n👤 Student: *${name}*\n📅 Month: *${month}*\n\nYour monthly fee is pending. Please clear it soon.\n--------------------------------\n🙏 Thank You`;
         window.open(`https://wa.me/${phone}?text=${encodeURIComponent(text)}`, '_blank');
     }
 
-    // Bulk Msg for specifically the Monthly Tracker
-    function sendTrackerBulkWA() {
-        if(currentTrackerUnpaidList.length === 0) { 
-            alert("No unpaid students found for the selected month."); 
-            return; 
+    // --- NEW WHATSAPP QUEUE SYSTEM ---
+    function startBulkWA(type) {
+        let listToProcess = [];
+        
+        if (type === 'all') {
+            const dueStudents = currentFilteredList.filter(s => s.status === 'active' && getFinance(s).due > 0);
+            listToProcess = dueStudents.map(s => {
+                return {
+                    phone: s.phone,
+                    name: s.name,
+                    msg: `⚠️ *FEE REMINDER*\n--------------------------------\n🎓 *TIKARKHANJI JNYCTSD*\n--------------------------------\n👤 Student: *${s.name}*\n📂 Batch: ${s.batch}\n\n📉 *Pending Due: ₹${getFinance(s).due}*\n\nYour fees are overdue. Please clear them soon.\n--------------------------------\n🙏 Thank You`
+                };
+            });
+        } else if (type === 'tracker') {
+            listToProcess = currentTrackerUnpaidList.map(data => {
+                return {
+                    phone: data.student.phone,
+                    name: data.student.name,
+                    msg: `⚠️ *MONTHLY FEE REMINDER*\n--------------------------------\n🎓 *TIKARKHANJI JNYCTSD*\n--------------------------------\n👤 Student: *${data.student.name}*\n📅 Month: *${data.monthName}*\n\nYour monthly fee is pending. Please clear it soon.\n--------------------------------\n🙏 Thank You`
+                };
+            });
         }
-        if(!confirm(`Send Reminders to ${currentTrackerUnpaidList.length} students for this month?\n\nEnsure Pop-ups are allowed.`)) return;
 
-        let i = 0;
-        const interval = setInterval(() => {
-            if(i >= currentTrackerUnpaidList.length) { clearInterval(interval); alert("Done sending monthly reminders!"); return; }
-            
-            const data = currentTrackerUnpaidList[i];
-            const text = `⚠️ *MONTHLY FEE REMINDER*\n--------------------------------\n🎓 *TIKARKHANJI JNYCTSD*\n--------------------------------\n👤 Student: *${data.student.name}*\n📅 Month: *${data.monthName}*\n\nYour monthly fee is pending. Please clear it soon.\n--------------------------------\n🙏 Thank You`;
-            
-            window.open(`https://wa.me/${data.student.phone}?text=${encodeURIComponent(text)}`, '_blank');
-            i++;
-        }, 1500); 
+        if(listToProcess.length === 0) {
+            alert("No students found to send messages.");
+            return;
+        }
+
+        // Initialize Queue
+        waQueue = listToProcess;
+        waCurrentIndex = 0;
+        
+        // Show Panel
+        document.getElementById('waQueuePanel').classList.remove('hidden');
+        updateWaQueueUI();
     }
+
+    function updateWaQueueUI() {
+        if(waCurrentIndex >= waQueue.length) {
+            document.getElementById('waQueueStatus').innerHTML = "<b class='text-green-600'>✅ All messages sent!</b>";
+            document.getElementById('waNextBtn').classList.add('hidden');
+            setTimeout(cancelWAQueue, 3000);
+            return;
+        }
+        
+        const currentData = waQueue[waCurrentIndex];
+        document.getElementById('waQueueStatus').innerHTML = `
+            Sending <b>${waCurrentIndex + 1}</b> of <b>${waQueue.length}</b><br>
+            <span class="text-xs text-gray-500 mt-1 inline-block">Next: <b>${currentData.name}</b></span>
+        `;
+        document.getElementById('waNextBtn').classList.remove('hidden');
+    }
+
+    function sendNextWA() {
+        if(waCurrentIndex >= waQueue.length) return;
+        
+        const item = waQueue[waCurrentIndex];
+        window.open(`https://wa.me/${item.phone}?text=${encodeURIComponent(item.msg)}`, '_blank');
+        
+        waCurrentIndex++;
+        updateWaQueueUI();
+    }
+
+    function cancelWAQueue() {
+        document.getElementById('waQueuePanel').classList.add('hidden');
+        waQueue = [];
+        waCurrentIndex = 0;
+    }
+
 
     // --- ADMISSION ---
     function setDefaults() {
@@ -777,21 +849,6 @@
         tbody.innerHTML = htmlStr;
     }
 
-    // General Bulk Msg for all students with main due
-    function sendBulkWA() {
-        const dueStudents = currentFilteredList.filter(s => s.status === 'active' && getFinance(s).due > 0);
-        if(dueStudents.length === 0) { alert("No students with main dues in current list."); return; }
-        if(!confirm(`Send Reminders to ${dueStudents.length} students?\n\nEnsure Pop-ups are allowed.`)) return;
-
-        let i = 0;
-        const interval = setInterval(() => {
-            if(i >= dueStudents.length) { clearInterval(interval); alert("Done!"); return; }
-            const s = dueStudents[i]; const f = getFinance(s);
-            const msg = `⚠️ *FEE REMINDER*\n--------------------------------\n🎓 *TIKARKHANJI JNYCTSD*\n--------------------------------\n👤 Student: *${s.name}*\n📂 Batch: ${s.batch}\n\n📉 *Pending Due: ₹${f.due}*\n\nYour fees are overdue. Please clear them soon.\n--------------------------------\n🙏 Thank You`;
-            window.open(`https://wa.me/${s.phone}?text=${encodeURIComponent(msg)}`, '_blank');
-            i++;
-        }, 1500); 
-    }
 
     // --- STUDENT PROFILE ---
     function openProfile(id) {
