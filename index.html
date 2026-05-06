@@ -5,11 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Tikarkhanji Jawaharlal Nehru Youth Computer Training Institute</title>
     
-    <!-- Fonts & Icons -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -29,10 +27,8 @@
         }
     </script>
 
-    <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-    <!-- Firebase -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
@@ -61,7 +57,6 @@
 </head>
 <body class="flex h-screen text-gray-800 relative">
 
-    <!-- LOGIN OVERLAY -->
     <div id="login-overlay" class="fixed inset-0 bg-white z-[9999] flex flex-col justify-center items-center">
         <div class="bg-white p-6 md:p-8 rounded-2xl shadow-lg w-[90%] max-w-md text-center border border-gray-100">
             <h2 class="text-xl md:text-2xl font-bold text-primary mb-2">Tikarkhanji Jawaharlal Nehru YOUTH Computer Training Institute</h2>
@@ -74,7 +69,6 @@
         </div>
     </div>
 
-    <!-- BULK WHATSAPP QUEUE PANEL -->
     <div id="waQueuePanel" class="fixed bottom-20 md:bottom-10 right-4 bg-white border-2 border-green-500 p-4 md:p-5 rounded-xl shadow-2xl z-[1000] hidden w-[90%] max-w-sm">
         <div class="flex justify-between items-center border-b border-gray-100 pb-2 mb-3">
             <h4 class="font-bold text-green-600"><i class="fab fa-whatsapp"></i> Bulk Message Queue</h4>
@@ -89,7 +83,6 @@
         </div>
     </div>
 
-    <!-- SIDEBAR -->
     <div id="sidebar" class="hidden md:flex flex-col w-64 bg-white shadow-md z-40 border-r border-gray-200 sidebar-mobile">
         <div class="hidden md:block p-5 border-b border-gray-100 mb-2">
             <h1 class="text-lg font-extrabold text-primary leading-tight">JNYCTSD</h1>
@@ -121,10 +114,8 @@
         </div>
     </div>
 
-    <!-- MAIN CONTENT -->
     <div id="main-content" class="flex-1 overflow-y-auto p-4 md:p-8 main-content hidden">
         
-        <!-- DASHBOARD -->
         <div id="dashboard" class="section active max-w-7xl mx-auto">
             <h2 class="text-xl md:text-2xl font-bold mb-4 text-gray-800">📊 Business Overview</h2>
             
@@ -163,7 +154,6 @@
             </div>
         </div>
 
-        <!-- TRACKER -->
         <div id="monthTracker" class="section max-w-7xl mx-auto">
             <h2 class="text-xl md:text-2xl font-bold mb-4 text-gray-800">📅 Monthly Tracker Overview</h2>
             
@@ -176,7 +166,6 @@
                     </div>
                 </div>
 
-                <!-- Tracker Summary Cards -->
                 <div class="grid grid-cols-3 gap-2 md:gap-4 mb-5">
                     <div class="bg-blue-50 p-3 rounded-lg border border-blue-100 text-center">
                         <p class="text-[9px] md:text-xs text-blue-600 font-bold uppercase">Total Applicable</p>
@@ -193,7 +182,6 @@
                 </div>
                 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <!-- Unpaid List -->
                     <div class="border border-gray-200 rounded-lg p-3 bg-gray-50 h-[65vh] min-h-[400px] overflow-y-auto">
                         <div class="flex justify-between items-center border-b-2 border-red-200 pb-2 mb-3 sticky top-0 bg-gray-50 z-10">
                             <h3 class="font-bold text-red-500 text-sm md:text-base">❌ Unpaid (<span id="unpaidCount">0</span>)</h3>
@@ -204,7 +192,6 @@
                         <div id="unpaidList" class="flex flex-col gap-2"></div>
                     </div>
 
-                    <!-- Paid List -->
                     <div class="border border-gray-200 rounded-lg p-3 bg-gray-50 h-[65vh] min-h-[400px] overflow-y-auto">
                         <div class="border-b-2 border-green-200 pb-2 mb-3 sticky top-0 bg-gray-50 z-10">
                             <h3 class="font-bold text-green-500 text-sm md:text-base">✅ Paid (<span id="paidCount">0</span>)</h3>
@@ -215,7 +202,6 @@
             </div>
         </div>
 
-        <!-- ADMISSION -->
         <div id="admission" class="section max-w-3xl mx-auto">
             <h2 class="text-xl md:text-2xl font-bold mb-4 text-gray-800">👤 New Admission</h2>
             <div class="bg-white p-4 md:p-6 rounded-xl shadow-sm">
@@ -273,7 +259,6 @@
             </div>
         </div>
 
-        <!-- STUDENTS LIST -->
         <div id="students" class="section max-w-7xl mx-auto">
             <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-3">
                 <h2 class="text-xl md:text-2xl font-bold text-gray-800">📋 Student Directory</h2>
@@ -314,7 +299,6 @@
             </div>
         </div>
 
-        <!-- STUDENT PROFILE -->
         <div id="studentProfile" class="section max-w-5xl mx-auto">
             <button onclick="navigate('students')" class="mb-4 text-gray-500 hover:text-primary font-semibold flex items-center gap-2 text-sm">
                 <i class="fas fa-arrow-left"></i> Back
@@ -322,7 +306,6 @@
             <div id="profileContent"></div>
         </div>
 
-        <!-- EXPENSES -->
         <div id="expenses" class="section max-w-5xl mx-auto">
             <h2 class="text-xl md:text-2xl font-bold mb-4 text-gray-800">💸 Expense Manager</h2>
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
@@ -372,8 +355,6 @@
         </div>
     </div>
 
-    <!-- MODALS -->
-    <!-- Payment Modal -->
     <div id="modal" class="fixed inset-0 bg-black/60 z-[200] hidden justify-center items-center p-4">
         <div class="bg-white p-5 rounded-xl w-full max-w-sm shadow-xl">
             <h3 class="text-lg font-bold mb-4 text-gray-800">💰 Receive Payment</h3>
@@ -393,7 +374,6 @@
         </div>
     </div>
 
-    <!-- Edit Student Modal -->
     <div id="editModal" class="fixed inset-0 bg-black/60 z-[200] hidden justify-center items-center p-4">
         <div class="bg-white p-5 rounded-xl w-full max-w-lg shadow-xl max-h-[90vh] overflow-y-auto">
             <h3 class="text-lg font-bold mb-3 text-gray-800">✏️ Edit Student Info</h3>
@@ -499,6 +479,7 @@
     function loadData() {
         db.ref('students').on('value', (snapshot) => {
             const data = snapshot.val();
+            // Firebase naturally orders by keys (which are chronological push IDs)
             students = data ? Object.keys(data).map(key => ({ id: key, ...data[key] })) : [];
             students.forEach(s => {
                 if (!s.payments) s.payments = [];
@@ -680,7 +661,7 @@
         window.open(`https://wa.me/${phone}?text=${encodeURIComponent(text)}`, '_blank');
     }
 
-    // Detailed Status WhatsApp for Individual List
+    // Detailed Status WhatsApp for Individual List (EXAM FEE EXCLUDED FROM CALCULATION REPORT)
     function sendDetailedStatusWA(id) {
         const s = students.find(x => x.id === id);
         if(!s) return;
@@ -688,7 +669,7 @@
         
         const cardDisplay = s.cardNumber ? s.cardNumber : 'N/A';
         
-        const msg = `📊 *FEE STATUS REPORT*\n--------------------------------\n🎓 *TIKARKHANJI JNYCTSD*\n--------------------------------\nDear *${s.name}*,\nHere is your current fee status summary:\n\n📂 *Batch:* ${s.batch}\n💳 *Card No:* ${cardDisplay}\n\n💰 *Total Paid:* ₹${f.totalPaidMain}\n📉 *Pending Due:* ₹${f.due}\n\n${f.due > 0 ? 'Kindly clear your pending due at your earliest convenience.\n' : 'You have no pending dues. Thank you!\n'}--------------------------------\n🙏 Best Regards,\n*Administration*`;
+        const msg = `📊 *FEE STATUS REPORT*\n--------------------------------\n🎓 *TIKARKHANJI JNYCTSD*\n--------------------------------\nDear *${s.name}*,\nHere is your current fee status summary:\n\n📂 *Batch:* ${s.batch}\n💳 *Card No:* ${cardDisplay}\n\n💰 *Total Course Fee:* ₹${f.totalFees}\n✅ *Total Paid:* ₹${f.totalPaidMain}\n📉 *Pending Due:* ₹${f.due}\n\n${f.due > 0 ? 'Kindly clear your pending due at your earliest convenience.\n' : 'You have no pending dues. Thank you!\n'}--------------------------------\n🙏 Best Regards,\n*Administration*`;
         
         window.open(`https://wa.me/${s.phone}?text=${encodeURIComponent(msg)}`, '_blank');
     }
@@ -820,7 +801,8 @@
             return true;
         });
 
-        list.sort((a, b) => new Date(a.joinDate) - new Date(b.joinDate));
+        // Lexical sort of Firebase push ID ensures exact insertion order (oldest first, newest last)
+        list.sort((a, b) => a.id.localeCompare(b.id));
         currentFilteredList = list; 
 
         if(list.length === 0) { tbody.innerHTML = `<tr><td colspan="4" class="text-center p-6 text-gray-400">No data found.</td></tr>`; return; }
@@ -906,9 +888,18 @@
 
     function openEdit(id) {
         editStudentId = id; const s = students.find(x => x.id === id);
-        ['editName','editBatch','editPhone','editJoinDate'].forEach(k => document.getElementById(k).value = s[k.replace('edit','')]);
-        ['editAdmFee','editMonthlyFee','editExamFee','editDuration'].forEach(k => document.getElementById(k).value = s[k.replace('edit','')] || (k==='editDuration'?12:0));
+        
+        // Correct Field Mapping for Edit Bug Fix
+        document.getElementById('editName').value = s.name || '';
+        document.getElementById('editBatch').value = s.batch || '';
+        document.getElementById('editPhone').value = s.phone || '';
+        document.getElementById('editJoinDate').value = s.joinDate || '';
+        document.getElementById('editAdmFee').value = s.admFee !== undefined ? s.admFee : 0;
+        document.getElementById('editMonthlyFee').value = s.monthlyFee !== undefined ? s.monthlyFee : 0;
+        document.getElementById('editExamFee').value = s.examFee !== undefined ? s.examFee : 0;
+        document.getElementById('editDuration').value = s.duration !== undefined ? s.duration : 12;
         document.getElementById('editCardNumber').value = s.cardNumber || '';
+
         document.getElementById('editModal').style.display = 'flex';
     }
 
